@@ -31,6 +31,11 @@ function getICfg()
   return cfg
 end
 
+function ExtUtils.sleep(s)
+  local ntime = os.time() + s
+  repeat until os.time() > ntime
+end
+
 function ExtUtils.getID()
   return ExtUtils.manifest[ "name" ] .. "/" .. ExtUtils.manifest[ "key" ] .. "/" ..
          ExtUtils.manifest[ "version_name" ]
