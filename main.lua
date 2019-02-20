@@ -8,20 +8,21 @@ local utils = require "ExtUtils"
 
 function GetExtGConfigFields()
   return {
-    ["Service-URL"] = "http://localhost:3000"
+    [ "Service-URL" ] = "The authentication service base URL.",
+    [ "Auth-Protocol" ] = "Authentication protocol, such as saml or oidc."
   }
 end
 
 function GetExtConfigFields()
   return {
-    message = "The message displayed before login."
+    [ "non-sso-users" ] = "Those users who will not be using SSO."
   }
 end
 
 function GetExtConfigHooks()
   return {
-    ["auth-pre-sso"] = "auth",
-    ["auth-check-sso"] = "auth"
+    [ "auth-pre-sso" ] = "auth",
+    [ "auth-check-sso" ] = "auth"
   }
 end
 
@@ -51,10 +52,10 @@ local function getData( url )
   -- https://curl.haxx.se/docs/caextract.html
   -- c:setopt_cainfo( Perforce.GetArchDirFileName( "cacert.pem" ) )
   c:setopt_useragent( utils.getID() )
-  -- c:setopt( curl.OPT_SSL_VERIFYPEER, true );
-  -- c:setopt( curl.OPT_SSL_VERIFYHOST, true );
+  -- c:setopt( curl.OPT_SSL_VERIFYPEER, true )
+  -- c:setopt( curl.OPT_SSL_VERIFYHOST, true )
   local ok, err = c:perform()
-  local code = c:getinfo(curl.INFO_RESPONSE_CODE)
+  local code = c:getinfo( curl.INFO_RESPONSE_CODE )
   c:close()
   if code == 200 then
     return curlResponseFmt( url, ok, ok and cjson.decode( rsp ) or err )
@@ -65,10 +66,10 @@ end
 function AuthPreSSO()
   utils.init()
   local user = Perforce.GetTrigVar( "user" )
-  if user == "super" then
+  if utils.isSkipUser( user ) then
     return true, "unused", "http://example.com", true
   end
-  local url = utils.gCfgData[ "Service-URL" ] .. "/oidc/login"
+  local url = utils.loginUrl()
   return true, "unused", url, false
 end
 
@@ -79,7 +80,7 @@ function AuthCheckSSO()
   local safe_email = easy:escape( email )
   local retries = 0
   repeat
-    local ok, url, sdata = getData( utils.gCfgData[ "Service-URL" ] .. "/oidc/data/" .. safe_email )
+    local ok, url, sdata = getData( utils.dataUrl() .. safe_email )
     if ok then
       return email == sdata[ "email" ]
     end
