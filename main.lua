@@ -1,5 +1,7 @@
 --[[
   Authentication extensions for OpenID Connect
+
+  Copyright 2019 Perforce Software
 ]]--
 local cjson = require "cjson"
 local curl = require "cURL.safe"

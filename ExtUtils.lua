@@ -1,3 +1,6 @@
+--[[
+  Copyright 2019 Perforce Software
+]]--
 local ExtUtils = {}
 local cjson = require "cjson"
 
