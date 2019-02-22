@@ -1,5 +1,5 @@
 --[[
-  Authentication extensions for OpenID Connect
+  Authentication extensions for OpenID Connect and SAML 2.0
 
   Copyright 2019 Perforce Software
 ]]--
