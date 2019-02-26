@@ -54,8 +54,9 @@ local function getData( url )
   -- https://curl.haxx.se/docs/caextract.html
   -- c:setopt_cainfo( Perforce.GetArchDirFileName( "cacert.pem" ) )
   c:setopt_useragent( utils.getID() )
-  -- c:setopt( curl.OPT_SSL_VERIFYPEER, true )
-  -- c:setopt( curl.OPT_SSL_VERIFYHOST, true )
+  -- verification can be set to true only if the certs are not self-signed
+  c:setopt( curl.OPT_SSL_VERIFYPEER, false )
+  c:setopt( curl.OPT_SSL_VERIFYHOST, false )
   local ok, err = c:perform()
   local code = c:getinfo( curl.INFO_RESPONSE_CODE )
   c:close()
@@ -80,15 +81,10 @@ function AuthCheckSSO()
   local email = Perforce.GetTrigVar( "email" )
   local easy = curl.easy()
   local safe_email = easy:escape( email )
-  local retries = 0
-  repeat
-    local ok, url, sdata = getData( utils.dataUrl() .. safe_email )
-    if ok then
-      return email == sdata[ "email" ]
-    end
-    -- retry the request for up to a minute (20 * 3 = 60)
-    retries = retries + 1
-    utils.sleep( 3 )
-  until retries > 20
+  -- use a long-poll request that will eventually timeout
+  local ok, url, sdata = getData( utils.dataUrl() .. safe_email )
+  if ok then
+    return email == sdata[ "email" ]
+  end
   return false
 end
