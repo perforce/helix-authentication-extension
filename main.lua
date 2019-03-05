@@ -94,14 +94,14 @@ end
 
 function AuthPreSSO()
   utils.init()
+  local user = Perforce.GetTrigVar( "user" )
+  if utils.isSkipUser( user ) then
+    return true, "unused", "http://example.com", true
+  end
   local url = utils.loginUrl()
   local ssoArgs = Perforce.GetTrigVar( "ssoArgs" )
   if utils.isLegacy( ssoArgs ) then
     return true, url
-  end
-  local user = Perforce.GetTrigVar( "user" )
-  if utils.isSkipUser( user ) then
-    return true, "unused", "http://example.com", true
   end
   return true, "unused", url, false
 end
@@ -110,21 +110,25 @@ function AuthCheckSSO()
   utils.init()
   local ssoArgs = Perforce.GetTrigVar( "ssoArgs" )
   local email = Perforce.GetTrigVar( "email" )
-  if utils.isLegacy( ssoArgs ) then
-    local password = Perforce.GetTrigVar( "token" )
-    local response = utils.getResponse( password )
-    if response then
-      -- send SAML response to auth service for validation
-      local ok, url, sdata = validateResponse( utils.validateUrl(), response )
-      if ok then
-        return email == sdata[ "email" ]
-      end
+  -- If a password/token has been provided, then perhaps this is the legacy
+  -- support scenario, and the token is the SAML response coming from the
+  -- desktop agent or Swarm. In that case, try to extract the response and send
+  -- it to the service for validation. If that works, we're done, otherwise fall
+  -- back to the normal behavior.
+  local password = Perforce.GetTrigVar( "token" )
+  local response = utils.getResponse( password )
+  if response then
+    -- send SAML response to auth service for validation
+    local ok, url, sdata = validateResponse( utils.validateUrl(), response )
+    if ok then
+      return email == sdata[ "email" ]
     end
-    return false
   end
+  -- Commence so-called normal behavior, in which we request the authenticated
+  -- user data using a long-poll on the auth service. The service request will
+  -- time out if the user does not authenticate with the IdP in a timely manner.
   local easy = curl.easy()
   local safe_email = easy:escape( email )
-  -- use a long-poll request that will eventually timeout
   local ok, url, sdata = getData( utils.dataUrl() .. safe_email )
   if ok then
     return email == sdata[ "email" ]
