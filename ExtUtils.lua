@@ -34,7 +34,7 @@ function getICfg()
   return cfg
 end
 
-function ExtUtils.splitLines( str )
+function ExtUtils.splitWords( str )
   lines = {}
   for s in str:gmatch( "%S+" ) do
       table.insert( lines, s )
@@ -63,14 +63,34 @@ function ExtUtils.dataUrl()
   return base .. "/" .. method .. "/data/"
 end
 
+function ExtUtils.validateUrl()
+  local base = ExtUtils.gCfgData[ "Service-URL" ]
+  return base .. "/saml/validate"
+end
+
 function ExtUtils.isSkipUser( user )
-  local items = ExtUtils.splitLines( ExtUtils.iCfgData[ "non-sso-users" ] )
-  for _, v in pairs(items) do
+  local items = ExtUtils.splitWords( ExtUtils.iCfgData[ "non-sso-users" ] )
+  for _, v in pairs( items ) do
     if v == user then
       return true
     end
   end
   return false
+end
+
+function ExtUtils.isLegacy( ssoArgs )
+  return string.find( ssoArgs, "--idpUrl" )
+end
+
+-- Extract SAML response from the given string (presumably from the desktop
+-- agent), returning just the base64-encoded response value.
+function ExtUtils.getResponse( str )
+  for line in string.gmatch(str, "[^\r\n]+") do
+    if string.sub( line, 1, 14 ) == "saml-response:" then
+      return trim( string.sub( line, 15, #line ) )
+    end
+  end
+  return nil
 end
 
 ExtUtils.manifest = {}

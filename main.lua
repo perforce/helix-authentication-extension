@@ -66,19 +66,62 @@ local function getData( url )
   return false, code, err
 end
 
+local function validateResponse( url, response )
+  local easy = curl.easy()
+  local encoded_response = easy:escape( response )
+  local c = curl.easy{
+    url        = url,
+    post       = true,
+    httpheader = {
+      "Content-Type: application/x-www-form-urlencoded",
+    },
+    postfields = "SAMLResponse=" .. encoded_response,
+  }
+  c:setopt_useragent( utils.getID() )
+  local rsp = ""
+  c:setopt( curl.OPT_WRITEFUNCTION, function( chunk ) rsp = rsp .. chunk end )
+  -- verification can be set to true only if the certs are not self-signed
+  c:setopt( curl.OPT_SSL_VERIFYPEER, false )
+  c:setopt( curl.OPT_SSL_VERIFYHOST, false )
+  local ok, err = c:perform()
+  local code = c:getinfo( curl.INFO_RESPONSE_CODE )
+  c:close()
+  if code == 200 then
+    return curlResponseFmt( url, ok, ok and cjson.decode( rsp ) or err )
+  end
+  return false, code, err
+end
+
 function AuthPreSSO()
   utils.init()
+  local url = utils.loginUrl()
+  local ssoArgs = Perforce.GetTrigVar( "ssoArgs" )
+  if utils.isLegacy( ssoArgs ) then
+    return true, url
+  end
   local user = Perforce.GetTrigVar( "user" )
   if utils.isSkipUser( user ) then
     return true, "unused", "http://example.com", true
   end
-  local url = utils.loginUrl()
   return true, "unused", url, false
 end
 
 function AuthCheckSSO()
   utils.init()
+  local ssoArgs = Perforce.GetTrigVar( "ssoArgs" )
   local email = Perforce.GetTrigVar( "email" )
+  if utils.isLegacy( ssoArgs ) then
+    local password = Perforce.GetTrigVar( "token" )
+    local response = utils.getResponse( password )
+    if response then
+      -- send SAML response to auth service for validation
+      local ok, url, sdata = validateResponse( utils.validateUrl(), response )
+      if ok then
+        return email == sdata[ "email" ]
+      end
+    end
+    return false
+  end
   local easy = curl.easy()
   local safe_email = easy:escape( email )
   -- use a long-poll request that will eventually timeout
