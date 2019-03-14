@@ -108,7 +108,6 @@ end
 
 function AuthCheckSSO()
   utils.init()
-  local ssoArgs = Perforce.GetTrigVar( "ssoArgs" )
   local email = Perforce.GetTrigVar( "email" )
   -- If a password/token has been provided, then perhaps this is the legacy
   -- support scenario, and the token is the SAML response coming from the
