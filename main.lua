@@ -17,7 +17,9 @@ end
 
 function GetExtConfigFields()
   return {
-    [ "non-sso-users" ] = "Those users who will not be using SSO."
+    [ "non-sso-users" ] = "Those users who will not be using SSO.",
+    [ "user-identifier" ] = "Trigger variable used as unique user identifier.",
+    [ "name-identifier" ] = "Field within IdP response containing unique user identifer."
   }
 end
 
@@ -109,16 +111,16 @@ function AuthPreSSO()
   -- Get a request id from the service, save it in requestId; do this every time
   -- for every user, in case the same user logs in from multiple systems. We
   -- will use this request identifier to get the status of the user later.
-  local email = Perforce.GetTrigVar( "email" )
+  local userid = utils.userIdentifier()
   local easy = curl.easy()
-  local safe_email = easy:escape( email )
-  local ok, url, sdata = getData( utils.requestUrl() .. safe_email )
+  local safe_id = easy:escape( userid )
+  local ok, url, sdata = getData( utils.requestUrl() .. safe_id )
   if ok then
     requestId = sdata[ "request" ]
   else
     return false
   end
-  local url = utils.loginUrl()
+  local url = utils.loginUrl() .. requestId
   local ssoArgs = Perforce.GetTrigVar( "ssoArgs" )
   if utils.isLegacy( ssoArgs ) then
     return true, url
@@ -128,7 +130,7 @@ end
 
 function AuthCheckSSO()
   utils.init()
-  local email = Perforce.GetTrigVar( "email" )
+  local userid = utils.userIdentifier()
   -- If a password/token has been provided, then perhaps this is the legacy
   -- support scenario, and the token is the SAML response coming from the
   -- desktop agent or Swarm. In that case, try to extract the response and send
@@ -140,7 +142,7 @@ function AuthCheckSSO()
     -- send SAML response to auth service for validation
     local ok, url, sdata = validateResponse( utils.validateUrl(), response )
     if ok then
-      return email == sdata[ "email" ]
+      return userid == utils.nameIdentifier( sdata )
     end
   end
   -- Commence so-called normal behavior, in which we request the authenticated
@@ -148,7 +150,7 @@ function AuthCheckSSO()
   -- time out if the user does not authenticate with the IdP in a timely manner.
   local ok, url, sdata = getData( utils.statusUrl() .. requestId )
   if ok then
-    return email == sdata[ "email" ]
+    return userid == utils.nameIdentifier( sdata )
   end
   return false
 end

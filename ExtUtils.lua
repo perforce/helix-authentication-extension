@@ -54,7 +54,7 @@ end
 function ExtUtils.loginUrl()
   local base = ExtUtils.gCfgData[ "Service-URL" ]
   local method = ExtUtils.gCfgData[ "Auth-Protocol" ]
-  return base .. "/" .. method .. "/login"
+  return base .. "/" .. method .. "/login/"
 end
 
 function ExtUtils.requestUrl()
@@ -95,6 +95,26 @@ function ExtUtils.getResponse( str )
     end
   end
   return nil
+end
+
+function ExtUtils.userIdentifier()
+  local field = ExtUtils.iCfgData[ "user-identifier" ]
+  local userid = Perforce.GetTrigVar( field:lower() )
+  if userid then
+    return userid
+  end
+  -- default to the email so we match the default for name-identifier
+  return Perforce.GetTrigVar( "email" )
+end
+
+function ExtUtils.nameIdentifier( profile )
+  local field = ExtUtils.iCfgData[ "name-identifier" ]
+  local nameid = profile[ field ]
+  if nameid then
+    return nameid
+  end
+  -- default to email which is likely to work most of the time
+  return profile[ "email" ]
 end
 
 ExtUtils.manifest = {}
