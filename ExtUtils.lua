@@ -57,10 +57,14 @@ function ExtUtils.loginUrl()
   return base .. "/" .. method .. "/login"
 end
 
-function ExtUtils.dataUrl()
+function ExtUtils.requestUrl()
   local base = ExtUtils.gCfgData[ "Service-URL" ]
-  local method = ExtUtils.gCfgData[ "Auth-Protocol" ]
-  return base .. "/" .. method .. "/data/"
+  return base .. "/requests/new/"
+end
+
+function ExtUtils.statusUrl()
+  local base = ExtUtils.gCfgData[ "Service-URL" ]
+  return base .. "/requests/status/"
 end
 
 function ExtUtils.validateUrl()

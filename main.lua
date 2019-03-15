@@ -39,7 +39,7 @@ local function curlResponseFmt( url, ok, data )
   return true, url, data
 end
 
--- Connect to a auth service and convert the JSON response to a table.
+-- Connect to auth service and convert the JSON response to a table.
 local function getData( url )
   --[[
     Lua-cURLv3: https://github.com/Lua-cURL/Lua-cURLv3
@@ -92,11 +92,31 @@ local function validateResponse( url, response )
   return false, code, err
 end
 
+--[[
+  An Extension once loaded, has its runtime persist for the life of the
+  RhExtension instance. This means that if you have some variable declared
+  outside of your callbacks, that it will be around next time a callback
+  is invoked.
+]]--
+local requestId = nil
+
 function AuthPreSSO()
   utils.init()
   local user = Perforce.GetTrigVar( "user" )
   if utils.isSkipUser( user ) then
     return true, "unused", "http://example.com", true
+  end
+  -- Get a request id from the service, save it in requestId; do this every time
+  -- for every user, in case the same user logs in from multiple systems. We
+  -- will use this request identifier to get the status of the user later.
+  local email = Perforce.GetTrigVar( "email" )
+  local easy = curl.easy()
+  local safe_email = easy:escape( email )
+  local ok, url, sdata = getData( utils.requestUrl() .. safe_email )
+  if ok then
+    requestId = sdata[ "request" ]
+  else
+    return false
   end
   local url = utils.loginUrl()
   local ssoArgs = Perforce.GetTrigVar( "ssoArgs" )
@@ -126,9 +146,7 @@ function AuthCheckSSO()
   -- Commence so-called normal behavior, in which we request the authenticated
   -- user data using a long-poll on the auth service. The service request will
   -- time out if the user does not authenticate with the IdP in a timely manner.
-  local easy = curl.easy()
-  local safe_email = easy:escape( email )
-  local ok, url, sdata = getData( utils.dataUrl() .. safe_email )
+  local ok, url, sdata = getData( utils.statusUrl() .. requestId )
   if ok then
     return email == sdata[ "email" ]
   end
