@@ -82,10 +82,6 @@ function ExtUtils.isSkipUser( user )
   return false
 end
 
-function ExtUtils.isLegacy( ssoArgs )
-  return string.find( ssoArgs, "--idpUrl" )
-end
-
 -- Extract SAML response from the given string (presumably from the desktop
 -- agent), returning just the base64-encoded response value.
 function ExtUtils.getResponse( str )

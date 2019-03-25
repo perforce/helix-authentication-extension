@@ -121,8 +121,14 @@ function AuthPreSSO()
     return false
   end
   local url = utils.loginUrl() .. requestId
+  -- for now, use old behavior for Swarm clients
+  local clientprog = Perforce.GetTrigVar( "clientprog" )
+  if string.find( clientprog, "SWARM" ) then
+    return true, url
+  end
+  -- if old SAML integration setting is present, use old behavior
   local ssoArgs = Perforce.GetTrigVar( "ssoArgs" )
-  if utils.isLegacy( ssoArgs ) then
+  if string.find( ssoArgs, "--idpUrl" ) then
     return true, url
   end
   return true, "unused", url, false

@@ -10,7 +10,7 @@
   "namespace": "Auth",
   "version": "1.0",
   "version_name": "1.0 beta",
-  "description": "Login extensions for authentication integration.",
+  "description": "SSO auth integration",
   "compatible_products": [
     "p4d"
   ],
