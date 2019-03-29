@@ -142,8 +142,9 @@ function AuthCheckSSO()
   -- desktop agent or Swarm. In that case, try to extract the response and send
   -- it to the service for validation. If that works, we're done, otherwise fall
   -- back to the normal behavior.
-  local password = Perforce.GetTrigVar( "token" )
-  local response = utils.getResponse( password )
+  local token = Perforce.GetTrigVar( "token" )
+  -- Perforce.log( { ["AuthCheckSSO:token"] = string.sub( token, 1, 80 ) } )
+  local response = utils.getResponse( token )
   if response then
     -- send SAML response to auth service for validation
     local ok, url, sdata = validateResponse( utils.validateUrl(), response )
