@@ -121,9 +121,10 @@ function AuthPreSSO()
     return false
   end
   local url = utils.loginUrl() .. requestId
-  -- for now, use old behavior for Swarm clients
+  -- For now, use the old behavior for P4PHP/Swarm clients; N.B. when Swarm is
+  -- logging the user into Perforce, the clientprog is P4PHP instead of SWARM.
   local clientprog = Perforce.GetTrigVar( "clientprog" )
-  if string.find( clientprog, "SWARM" ) then
+  if string.find( clientprog, "P4PHP" ) then
     return true, url
   end
   -- if old SAML integration setting is present, use old behavior
@@ -137,19 +138,23 @@ end
 function AuthCheckSSO()
   utils.init()
   local userid = utils.userIdentifier()
-  -- If a password/token has been provided, then perhaps this is the legacy
-  -- support scenario, and the token is the SAML response coming from the
-  -- desktop agent or Swarm. In that case, try to extract the response and send
-  -- it to the service for validation. If that works, we're done, otherwise fall
-  -- back to the normal behavior.
+  -- When using the invoke-URL feature, the client never passes anything back,
+  -- so in that case, the "token" in AuthCheckSSO is set to the username.
+  local user = Perforce.GetTrigVar( "user" )
   local token = Perforce.GetTrigVar( "token" )
-  -- Perforce.log( { ["AuthCheckSSO:token"] = string.sub( token, 1, 80 ) } )
-  local response = utils.getResponse( token )
-  if response then
-    -- send SAML response to auth service for validation
-    local ok, url, sdata = validateResponse( utils.validateUrl(), response )
-    if ok then
-      return userid == utils.nameIdentifier( sdata )
+  if user ~= token then
+    -- If a password/token has been provided, then perhaps this is the legacy
+    -- support scenario, and the token is the SAML response coming from the
+    -- desktop agent or Swarm. In that case, try to extract the response and
+    -- send it to the service for validation. If that works, we're done,
+    -- otherwise fall back to the normal behavior.
+    local response = utils.getResponse( token )
+    if response then
+      -- send SAML response to auth service for validation
+      local ok, url, sdata = validateResponse( utils.validateUrl(), response )
+      if ok then
+        return userid == utils.nameIdentifier( sdata )
+      end
     end
   end
   -- Commence so-called normal behavior, in which we request the authenticated
