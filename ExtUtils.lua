@@ -12,13 +12,17 @@ function getManifest()
   return m
 end
 
+local function rawpairs( t )
+  return next, t, nil
+end
+
 function trim( s )
    return ( s:gsub( "^%s*(.-)%s*$", "%1" ) )
 end
 
 function getGCfg()
   local cfg = {}
-  for k, v in pairs( Perforce.GetGConfigData() ) do
+  for k, v in pairs( Perforce.GetGlobalConfigData() ) do
     cfg[ k ] = trim( v )
   end
   return cfg
@@ -26,10 +30,23 @@ end
 
 function getICfg()
   local cfg = {}
-  for k, v in pairs( Perforce.GetIConfigData() ) do
+  for k, v in pairs( Perforce.GetInstanceConfigData() ) do
     if string.len( v ) > 0 then
       cfg[ k ] = trim( v )
     end
+  end
+  -- massage the excluded groups into easier to evaluate data
+  cfg[ "ngroups" ] = 0
+  if cfg[ "non-sso-groups" ] ~= nil then
+    local groups = {}
+    local n = 0
+    -- Create a table of groups whose members we target.
+    for g in string.gmatch( cfg[ "non-sso-groups" ], "%S+" ) do
+      groups[ g ] = 1
+      n = n + 1
+    end
+    cfg[  "groups" ] = groups
+    cfg[ "ngroups" ] = n
   end
   return cfg
 end
@@ -82,6 +99,61 @@ function ExtUtils.isSkipUser( user )
   return false
 end
 
+function isUserInGroups( user, groups )
+  -- copied from login_motd example code...
+  local e = Perforce.Error.new()
+  local cu = Perforce.ClientUser.new()
+  -- This function automatically logs the P4USER specified in the
+  -- Extension's global config into the server running the Extension.
+  -- Note that this doesn't help configure an SSL/Unicode server.
+  local ca = Perforce.GetAutoClientApi()
+
+  ca:SetProtocol( "tag", "" )
+  ca:SetProg( "P4-Lua" )
+
+  ca:Init( e )
+
+  if e:Test() then
+    ca:Final()
+    return true, e:Fmt()
+  end
+
+  ca:SetVersion( ExtUtils.getID() )
+
+  local gs = {}
+
+  -- Override the ClientUser::OutputStat function to record the
+  -- list of groups.  This API mirrors the C++ P4API:
+  -- https://www.perforce.com/perforce/doc.current/manuals/p4api/
+
+  cu.OutputStat = function( self, dict )
+    gs[ dict[ "group" ] ] = 1
+  end
+
+  ca:SetVar( ca:Null(), "-u" )
+  ca:SetVar( ca:Null(), "-i" )
+  ca:SetVar( ca:Null(), user )
+  ca:Run( "groups", cu );
+  ca:Final()
+
+  for k, v in rawpairs( groups ) do
+    if gs[ k ] ~= nil then
+      return false, true
+    end
+  end
+
+  return false, false
+end
+
+function ExtUtils.isUserInSkipGroup( user )
+  local groups = ExtUtils.iCfgData[ "groups" ]
+  local ngroups = ExtUtils.iCfgData[ "ngroups" ]
+  if ngroups > 0 then
+    return isUserInGroups( user, groups )
+  end
+  return false, false
+end
+
 -- Extract SAML response from the given string (presumably from the desktop
 -- agent), returning just the base64-encoded response value.
 function ExtUtils.getResponse( str )
@@ -95,12 +167,12 @@ end
 
 function ExtUtils.userIdentifier()
   local field = ExtUtils.iCfgData[ "user-identifier" ]
-  local userid = Perforce.GetTrigVar( field:lower() )
+  local userid = Perforce.GetVar( field:lower() )
   if userid then
     return userid
   end
   -- default to the email so we match the default for name-identifier
-  return Perforce.GetTrigVar( "email" )
+  return Perforce.GetVar( "email" )
 end
 
 function ExtUtils.nameIdentifier( profile )

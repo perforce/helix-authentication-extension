@@ -8,22 +8,23 @@ local curl = require "cURL.safe"
 package.path = Perforce.GetArchDirFileName( "?.lua" )
 local utils = require "ExtUtils"
 
-function GetExtGConfigFields()
+function GlobalConfigFields()
   return {
     [ "Service-URL" ] = "The authentication service base URL.",
     [ "Auth-Protocol" ] = "Authentication protocol, such as saml or oidc."
   }
 end
 
-function GetExtConfigFields()
+function InstanceConfigFields()
   return {
     [ "non-sso-users" ] = "Those users who will not be using SSO.",
+    [ "non-sso-groups" ] = "Those groups whose members will not be using SSO.",
     [ "user-identifier" ] = "Trigger variable used as unique user identifier.",
     [ "name-identifier" ] = "Field within IdP response containing unique user identifer."
   }
 end
 
-function GetExtConfigHooks()
+function InstanceConfigEvents()
   return {
     [ "auth-pre-sso" ] = "auth",
     [ "auth-check-sso" ] = "auth"
@@ -104,8 +105,18 @@ local requestId = nil
 
 function AuthPreSSO()
   utils.init()
-  local user = Perforce.GetTrigVar( "user" )
+  local user = Perforce.GetVar( "user" )
+  -- skip any individually named users
   if utils.isSkipUser( user ) then
+    return true, "unused", "http://example.com", true
+  end
+  -- skip any users belonging to a specific group
+  local err, inGroup = utils.isUserInSkipGroup( user )
+  if err then
+    Perforce.SetClientMsg( utils.msgHeader() .. err )
+    return false, "error"
+  end
+  if inGroup then
     return true, "unused", "http://example.com", true
   end
   -- Get a request id from the service, save it in requestId; do this every time
@@ -123,12 +134,12 @@ function AuthPreSSO()
   local url = utils.loginUrl() .. requestId
   -- For now, use the old behavior for P4PHP/Swarm clients; N.B. when Swarm is
   -- logging the user into Perforce, the clientprog is P4PHP instead of SWARM.
-  local clientprog = Perforce.GetTrigVar( "clientprog" )
+  local clientprog = Perforce.GetVar( "clientprog" )
   if string.find( clientprog, "P4PHP" ) then
     return true, url
   end
   -- if old SAML integration setting is present, use old behavior
-  local ssoArgs = Perforce.GetTrigVar( "ssoArgs" )
+  local ssoArgs = Perforce.GetVar( "ssoArgs" )
   if string.find( ssoArgs, "--idpUrl" ) then
     return true, url
   end
@@ -140,8 +151,8 @@ function AuthCheckSSO()
   local userid = utils.userIdentifier()
   -- When using the invoke-URL feature, the client never passes anything back,
   -- so in that case, the "token" in AuthCheckSSO is set to the username.
-  local user = Perforce.GetTrigVar( "user" )
-  local token = Perforce.GetTrigVar( "token" )
+  local user = Perforce.GetVar( "user" )
+  local token = Perforce.GetVar( "token" )
   if user ~= token then
     -- If a password/token has been provided, then perhaps this is the legacy
     -- support scenario, and the token is the SAML response coming from the

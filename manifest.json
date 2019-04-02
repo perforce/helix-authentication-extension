@@ -1,6 +1,6 @@
 {
   "manifest_version": 1,
-  "api_version": 1,
+  "api_version": 20191,
   "script_runtime": {
     "language": "Lua",
     "version": "5.3"
