@@ -31,6 +31,18 @@ function InstanceConfigEvents()
   }
 end
 
+-- Set the SSL related options on the curl instance.
+local function curlSecureOptions( c )
+  c:setopt_useragent( utils.getID() )
+  c:setopt( curl.OPT_USE_SSL, true )
+  c:setopt( curl.OPT_SSLCERT, Perforce.GetArchDirFileName( "client.crt" ) )
+  c:setopt( curl.OPT_SSLKEY, Perforce.GetArchDirFileName( "client.key" ) )
+  -- verification can be set to true only if the certs are not self-signed
+  c:setopt_cainfo( Perforce.GetArchDirFileName( "cacert.pem" ) )
+  c:setopt( curl.OPT_SSL_VERIFYPEER, false )
+  c:setopt( curl.OPT_SSL_VERIFYHOST, false )
+end
+
 local function curlResponseFmt( url, ok, data )
   local msg = "Error getting data from auth service (" .. url .. "):  "
   if not ok then
@@ -48,18 +60,14 @@ local function getData( url )
     Lua-cURLv3: https://github.com/Lua-cURL/Lua-cURLv3
     See the API docs for lcurl (http://lua-curl.github.io/lcurl/modules/lcurl.html)
     as that describes much more of the functionality than the Lua-cURLv3 API docs.
+    See https://github.com/Lua-cURL/Lua-cURLv3/src/lcopteasy.h for all options.
   ]]--
   local c = curl.easy()
   local rsp = ""
   c:setopt( curl.OPT_URL, url )
   -- Store all the data in memory in the 'rsp' variable.
   c:setopt( curl.OPT_WRITEFUNCTION, function( chunk ) rsp = rsp .. chunk end )
-  -- https://curl.haxx.se/docs/caextract.html
-  -- c:setopt_cainfo( Perforce.GetArchDirFileName( "cacert.pem" ) )
-  c:setopt_useragent( utils.getID() )
-  -- verification can be set to true only if the certs are not self-signed
-  c:setopt( curl.OPT_SSL_VERIFYPEER, false )
-  c:setopt( curl.OPT_SSL_VERIFYHOST, false )
+  curlSecureOptions( c )
   local ok, err = c:perform()
   local code = c:getinfo( curl.INFO_RESPONSE_CODE )
   c:close()
@@ -83,9 +91,7 @@ local function validateResponse( url, response )
   c:setopt_useragent( utils.getID() )
   local rsp = ""
   c:setopt( curl.OPT_WRITEFUNCTION, function( chunk ) rsp = rsp .. chunk end )
-  -- verification can be set to true only if the certs are not self-signed
-  c:setopt( curl.OPT_SSL_VERIFYPEER, false )
-  c:setopt( curl.OPT_SSL_VERIFYHOST, false )
+  curlSecureOptions( c )
   local ok, err = c:perform()
   local code = c:getinfo( curl.INFO_RESPONSE_CODE )
   c:close()
