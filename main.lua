@@ -10,17 +10,23 @@ local utils = require "ExtUtils"
 
 function GlobalConfigFields()
   return {
-    [ "Service-URL" ] = "The authentication service base URL.",
-    [ "Auth-Protocol" ] = "Authentication protocol, such as saml or oidc."
+    -- The leading ellipsis is used to indicate values that have not been
+    -- changed from their default (documentation) values, since it is a wildcard
+    -- in Perforce and cannot be used for anything else.
+    [ "Service-URL" ] = "... The authentication service base URL.",
+    [ "Auth-Protocol" ] = "... Authentication protocol, such as saml or oidc."
   }
 end
 
 function InstanceConfigFields()
   return {
-    [ "non-sso-users" ] = "Those users who will not be using SSO.",
-    [ "non-sso-groups" ] = "Those groups whose members will not be using SSO.",
-    [ "user-identifier" ] = "Trigger variable used as unique user identifier.",
-    [ "name-identifier" ] = "Field within IdP response containing unique user identifer."
+    -- The leading ellipsis is used to indicate values that have not been
+    -- changed from their default (documentation) values, since it is a wildcard
+    -- in Perforce and cannot be used for anything else.
+    [ "non-sso-users" ] = "... Those users who will not be using SSO.",
+    [ "non-sso-groups" ] = "... Those groups whose members will not be using SSO.",
+    [ "user-identifier" ] = "... Trigger variable used as unique user identifier.",
+    [ "name-identifier" ] = "... Field within IdP response containing unique user identifer."
   }
 end
 

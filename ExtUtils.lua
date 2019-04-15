@@ -17,7 +17,7 @@ local function rawpairs( t )
 end
 
 function trim( s )
-   return ( s:gsub( "^%s*(.-)%s*$", "%1" ) )
+  return s:gsub( "^%s*(.-)%s*$", "%1" )
 end
 
 function getGCfg()
@@ -25,28 +25,34 @@ function getGCfg()
   for k, v in pairs( Perforce.GetGlobalConfigData() ) do
     cfg[ k ] = trim( v )
   end
+  -- assert certain settings at least appear to be valid
+  assert( string.match( cfg[ "Service-URL" ], "^http" ), "Service-URL must start with 'http'" )
+  if string.match( cfg[ "Auth-Protocol" ], " " ) ~= nil then
+    error( "Auth-Protocol must not contain spaces" )
+  end
   return cfg
 end
 
 function getICfg()
   local cfg = {}
   for k, v in pairs( Perforce.GetInstanceConfigData() ) do
-    if string.len( v ) > 0 then
-      cfg[ k ] = trim( v )
-    end
+    cfg[ k ] = trim( v )
   end
   -- massage the excluded groups into easier to evaluate data
   cfg[ "ngroups" ] = 0
   if cfg[ "non-sso-groups" ] ~= nil then
-    local groups = {}
-    local n = 0
-    -- Create a table of groups whose members we target.
-    for g in string.gmatch( cfg[ "non-sso-groups" ], "%S+" ) do
-      groups[ g ] = 1
-      n = n + 1
+    -- only set ngroups if we have an explicitly defined set of groups
+    if string.match( cfg[ "non-sso-groups" ], "^%.%.%." ) == nil then
+      local groups = {}
+      local n = 0
+      -- Create a table of groups whose members we target.
+      for g in string.gmatch( cfg[ "non-sso-groups" ], "%S+" ) do
+        groups[ g ] = 1
+        n = n + 1
+      end
+      cfg[  "groups" ] = groups
+      cfg[ "ngroups" ] = n
     end
-    cfg[  "groups" ] = groups
-    cfg[ "ngroups" ] = n
   end
   return cfg
 end
@@ -54,7 +60,7 @@ end
 function ExtUtils.splitWords( str )
   lines = {}
   for s in str:gmatch( "%S+" ) do
-      table.insert( lines, s )
+    table.insert( lines, s )
   end
   return lines
 end
@@ -90,10 +96,13 @@ function ExtUtils.validateUrl()
 end
 
 function ExtUtils.isSkipUser( user )
-  local items = ExtUtils.splitWords( ExtUtils.iCfgData[ "non-sso-users" ] )
-  for _, v in pairs( items ) do
-    if v == user then
-      return true
+  local users = ExtUtils.iCfgData[ "non-sso-users" ]
+  if string.match( users, "^%.%.%." ) == nil then
+    local items = ExtUtils.splitWords( users )
+    for _, v in pairs( items ) do
+      if v == user then
+        return true
+      end
     end
   end
   return false
@@ -146,9 +155,9 @@ function isUserInGroups( user, groups )
 end
 
 function ExtUtils.isUserInSkipGroup( user )
-  local groups = ExtUtils.iCfgData[ "groups" ]
   local ngroups = ExtUtils.iCfgData[ "ngroups" ]
   if ngroups > 0 then
+    local groups = ExtUtils.iCfgData[ "groups" ]
     return isUserInGroups( user, groups )
   end
   return false, false
