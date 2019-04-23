@@ -74,6 +74,13 @@ function ExtUtils.msgHeader()
   return ExtUtils.getID() .. ":  "
 end
 
+function ExtUtils.debug( data )
+  local log_enabled = ExtUtils.iCfgData[ "enable-logging" ]
+  if log_enabled == "true" then
+    Perforce.log( data )
+  end
+end
+
 function ExtUtils.loginUrl()
   local base = ExtUtils.gCfgData[ "Service-URL" ]
   local method = ExtUtils.gCfgData[ "Auth-Protocol" ]

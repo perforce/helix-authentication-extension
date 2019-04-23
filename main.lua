@@ -26,7 +26,8 @@ function InstanceConfigFields()
     [ "non-sso-users" ] = "... Those users who will not be using SSO.",
     [ "non-sso-groups" ] = "... Those groups whose members will not be using SSO.",
     [ "user-identifier" ] = "... Trigger variable used as unique user identifier.",
-    [ "name-identifier" ] = "... Field within IdP response containing unique user identifer."
+    [ "name-identifier" ] = "... Field within IdP response containing unique user identifer.",
+    [ "enable-logging" ] = "... Extension will write debug messages to a log if 'true'."
   }
 end
 
@@ -120,6 +121,7 @@ function AuthPreSSO()
   local user = Perforce.GetVar( "user" )
   -- skip any individually named users
   if utils.isSkipUser( user ) then
+    utils.debug( { [ "AuthPreSSO" ] = "skipping user " .. user } )
     return true, "unused", "http://example.com", true
   end
   -- skip any users belonging to a specific group
@@ -129,6 +131,7 @@ function AuthPreSSO()
     return false, "error"
   end
   if inGroup then
+    utils.debug( { [ "AuthPreSSO" ] = "group-based skipping user " .. user } )
     return true, "unused", "http://example.com", true
   end
   -- Get a request id from the service, save it in requestId; do this every time
@@ -141,6 +144,7 @@ function AuthPreSSO()
   if ok then
     requestId = sdata[ "request" ]
   else
+    utils.debug( { [ "AuthPreSSO" ] = "failed to get request identifier" } )
     return false
   end
   local url = utils.loginUrl() .. requestId
@@ -148,13 +152,16 @@ function AuthPreSSO()
   -- logging the user into Perforce, the clientprog is P4PHP instead of SWARM.
   local clientprog = Perforce.GetVar( "clientprog" )
   if string.find( clientprog, "P4PHP" ) then
+    utils.debug( { [ "AuthPreSSO" ] = "legacy mode for P4PHP client" } )
     return true, url
   end
   -- if old SAML integration setting is present, use old behavior
   local ssoArgs = Perforce.GetVar( "ssoArgs" )
   if string.find( ssoArgs, "--idpUrl" ) then
+    utils.debug( { [ "AuthPreSSO" ] = "legacy mode for desktop agent" } )
     return true, url
   end
+  utils.debug( { [ "AuthPreSSO" ] = "invoking URL " .. url } )
   return true, "unused", url, false
 end
 
@@ -165,7 +172,9 @@ function AuthCheckSSO()
   -- so in that case, the "token" in AuthCheckSSO is set to the username.
   local user = Perforce.GetVar( "user" )
   local token = Perforce.GetVar( "token" )
+  utils.debug( { [ "AuthCheckSSO" ] = "checking user " .. user } )
   if user ~= token then
+    utils.debug( { [ "AuthCheckSSO" ] = "legacy mode login for user " .. user } )
     -- If a password/token has been provided, then perhaps this is the legacy
     -- support scenario, and the token is the SAML response coming from the
     -- desktop agent or Swarm. In that case, try to extract the response and
@@ -176,8 +185,10 @@ function AuthCheckSSO()
       -- send SAML response to auth service for validation
       local ok, url, sdata = validateResponse( utils.validateUrl(), response )
       if ok then
+        utils.debug( { [ "AuthCheckSSO" ] = "legacy mode user data", [ "sdata" ] = sdata } )
         return userid == utils.nameIdentifier( sdata )
       end
+      utils.debug( { [ "AuthCheckSSO" ] = "legacy mode validation failed for user " .. user } )
     end
   end
   -- Commence so-called normal behavior, in which we request the authenticated
@@ -185,7 +196,9 @@ function AuthCheckSSO()
   -- time out if the user does not authenticate with the IdP in a timely manner.
   local ok, url, sdata = getData( utils.statusUrl() .. requestId )
   if ok then
+    utils.debug( { [ "AuthCheckSSO" ] = "received user data", [ "sdata" ] = sdata } )
     return userid == utils.nameIdentifier( sdata )
   end
+  utils.debug( { [ "AuthCheckSSO" ] = "auth validation failed for user " .. user } )
   return false
 end
