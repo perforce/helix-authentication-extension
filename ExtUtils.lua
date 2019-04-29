@@ -5,7 +5,7 @@ local ExtUtils = {}
 local cjson = require "cjson"
 
 function getManifest()
-  local fn = Perforce.GetArchDirFileName( "manifest.json" )
+  local fn = Helix.Core.Server.GetArchDirFileName( "manifest.json" )
   local fh = assert( io.open( fn, "r" ) )
   local m = cjson.decode( fh:read( "*all" ) )
   fh:close()
@@ -22,7 +22,7 @@ end
 
 function getGCfg()
   local cfg = {}
-  for k, v in pairs( Perforce.GetGlobalConfigData() ) do
+  for k, v in pairs( Helix.Core.Server.GetGlobalConfigData() ) do
     cfg[ k ] = trim( v )
   end
   -- assert certain settings at least appear to be valid
@@ -35,7 +35,7 @@ end
 
 function getICfg()
   local cfg = {}
-  for k, v in pairs( Perforce.GetInstanceConfigData() ) do
+  for k, v in pairs( Helix.Core.Server.GetInstanceConfigData() ) do
     cfg[ k ] = trim( v )
   end
   -- massage the excluded groups into easier to evaluate data
@@ -77,7 +77,7 @@ end
 function ExtUtils.debug( data )
   local log_enabled = ExtUtils.iCfgData[ "enable-logging" ]
   if log_enabled == "true" then
-    Perforce.log( data )
+    Helix.Core.Server.log( data )
   end
 end
 
@@ -117,12 +117,12 @@ end
 
 function isUserInGroups( user, groups )
   -- copied from login_motd example code...
-  local e = Perforce.Error.new()
-  local cu = Perforce.ClientUser.new()
+  local e = Helix.Core.P4API.Error.new()
+  local cu = Helix.Core.P4API.ClientUser.new()
   -- This function automatically logs the P4USER specified in the
   -- Extension's global config into the server running the Extension.
   -- Note that this doesn't help configure an SSL/Unicode server.
-  local ca = Perforce.GetAutoClientApi()
+  local ca = Helix.Core.Server.GetAutoClientApi()
 
   ca:SetProtocol( "tag", "" )
   ca:SetProg( "P4-Lua" )
@@ -183,12 +183,12 @@ end
 
 function ExtUtils.userIdentifier()
   local field = ExtUtils.iCfgData[ "user-identifier" ]
-  local userid = Perforce.GetVar( field:lower() )
+  local userid = Helix.Core.Server.GetVar( field:lower() )
   if userid then
     return userid
   end
   -- default to the email so we match the default for name-identifier
-  return Perforce.GetVar( "email" )
+  return Helix.Core.Server.GetVar( "email" )
 end
 
 function ExtUtils.nameIdentifier( profile )

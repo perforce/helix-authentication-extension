@@ -5,7 +5,7 @@
 ]]--
 local cjson = require "cjson"
 local curl = require "cURL.safe"
-package.path = Perforce.GetArchDirFileName( "?.lua" )
+package.path = Helix.Core.Server.GetArchDirFileName( "?.lua" )
 local utils = require "ExtUtils"
 
 function GlobalConfigFields()
@@ -42,10 +42,10 @@ end
 local function curlSecureOptions( c )
   c:setopt_useragent( utils.getID() )
   c:setopt( curl.OPT_USE_SSL, true )
-  c:setopt( curl.OPT_SSLCERT, Perforce.GetArchDirFileName( "client.crt" ) )
-  c:setopt( curl.OPT_SSLKEY, Perforce.GetArchDirFileName( "client.key" ) )
+  c:setopt( curl.OPT_SSLCERT, Helix.Core.Server.GetArchDirFileName( "client.crt" ) )
+  c:setopt( curl.OPT_SSLKEY, Helix.Core.Server.GetArchDirFileName( "client.key" ) )
   -- verification can be set to true only if the certs are not self-signed
-  c:setopt_cainfo( Perforce.GetArchDirFileName( "cacert.pem" ) )
+  c:setopt_cainfo( Helix.Core.Server.GetArchDirFileName( "cacert.pem" ) )
   c:setopt( curl.OPT_SSL_VERIFYPEER, false )
   c:setopt( curl.OPT_SSL_VERIFYHOST, false )
 end
@@ -118,7 +118,7 @@ local requestId = nil
 
 function AuthPreSSO()
   utils.init()
-  local user = Perforce.GetVar( "user" )
+  local user = Helix.Core.Server.GetVar( "user" )
   -- skip any individually named users
   if utils.isSkipUser( user ) then
     utils.debug( { [ "AuthPreSSO" ] = "skipping user " .. user } )
@@ -127,7 +127,7 @@ function AuthPreSSO()
   -- skip any users belonging to a specific group
   local err, inGroup = utils.isUserInSkipGroup( user )
   if err then
-    Perforce.SetClientMsg( utils.msgHeader() .. err )
+    Helix.Core.Server.SetClientMsg( utils.msgHeader() .. err )
     return false, "error"
   end
   if inGroup then
@@ -150,13 +150,13 @@ function AuthPreSSO()
   local url = utils.loginUrl() .. requestId
   -- For now, use the old behavior for P4PHP/Swarm clients; N.B. when Swarm is
   -- logging the user into Perforce, the clientprog is P4PHP instead of SWARM.
-  local clientprog = Perforce.GetVar( "clientprog" )
+  local clientprog = Helix.Core.Server.GetVar( "clientprog" )
   if string.find( clientprog, "P4PHP" ) then
     utils.debug( { [ "AuthPreSSO" ] = "legacy mode for P4PHP client" } )
     return true, url
   end
   -- if old SAML integration setting is present, use old behavior
-  local ssoArgs = Perforce.GetVar( "ssoArgs" )
+  local ssoArgs = Helix.Core.Server.GetVar( "ssoArgs" )
   if string.find( ssoArgs, "--idpUrl" ) then
     utils.debug( { [ "AuthPreSSO" ] = "legacy mode for desktop agent" } )
     return true, url
@@ -170,8 +170,8 @@ function AuthCheckSSO()
   local userid = utils.userIdentifier()
   -- When using the invoke-URL feature, the client never passes anything back,
   -- so in that case, the "token" in AuthCheckSSO is set to the username.
-  local user = Perforce.GetVar( "user" )
-  local token = Perforce.GetVar( "token" )
+  local user = Helix.Core.Server.GetVar( "user" )
+  local token = Helix.Core.Server.GetVar( "token" )
   utils.debug( { [ "AuthCheckSSO" ] = "checking user " .. user } )
   if user ~= token then
     utils.debug( { [ "AuthCheckSSO" ] = "legacy mode login for user " .. user } )
