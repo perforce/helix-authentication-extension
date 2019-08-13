@@ -151,6 +151,9 @@ function AuthPreSSO()
   -- For now, use the old behavior for P4PHP/Swarm clients; N.B. when Swarm is
   -- logging the user into Perforce, the clientprog is P4PHP instead of SWARM.
   local clientprog = Helix.Core.Server.GetVar( "clientprog" )
+  -- utils.debug( { [ "clientprog" ] = clientprog } )
+  -- local clientversion = Helix.Core.Server.GetVar( "clientversion" )
+  -- utils.debug( { [ "clientversion" ] = clientversion } )
   if string.find( clientprog, "P4PHP" ) then
     utils.debug( { [ "AuthPreSSO" ] = "legacy mode for P4PHP client" } )
     return true, url
