@@ -45,7 +45,7 @@ local function curlSecureOptions( c )
   c:setopt( curl.OPT_SSLCERT, Helix.Core.Server.GetArchDirFileName( "client.crt" ) )
   c:setopt( curl.OPT_SSLKEY, Helix.Core.Server.GetArchDirFileName( "client.key" ) )
   -- verification can be set to true only if the certs are not self-signed
-  c:setopt_cainfo( Helix.Core.Server.GetArchDirFileName( "cacert.pem" ) )
+  c:setopt_cainfo( Helix.Core.Server.GetArchDirFileName( "ca.crt" ) )
   c:setopt( curl.OPT_SSL_VERIFYPEER, false )
   c:setopt( curl.OPT_SSL_VERIFYHOST, false )
 end
@@ -67,7 +67,7 @@ local function getData( url )
     Lua-cURLv3: https://github.com/Lua-cURL/Lua-cURLv3
     See the API docs for lcurl (http://lua-curl.github.io/lcurl/modules/lcurl.html)
     as that describes much more of the functionality than the Lua-cURLv3 API docs.
-    See https://github.com/Lua-cURL/Lua-cURLv3/src/lcopteasy.h for all options.
+    See https://github.com/Lua-cURL/Lua-cURLv3/blob/master/src/lcopteasy.h for all options.
   ]]--
   local c = curl.easy()
   local rsp = ""
