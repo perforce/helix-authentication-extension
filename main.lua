@@ -199,8 +199,14 @@ function AuthCheckSSO()
   -- time out if the user does not authenticate with the IdP in a timely manner.
   local ok, url, sdata = getData( utils.statusUrl() .. requestId )
   if ok then
-    utils.debug( { [ "AuthCheckSSO" ] = "received user data", [ "sdata" ] = sdata } )
-    return userid == utils.nameIdentifier( sdata )
+    local nameid = utils.nameIdentifier( sdata )
+    utils.debug( {
+      [ "AuthCheckSSO" ] = "received user data",
+      [ "sdata" ] = sdata,
+      [ "userid" ] = userid,
+      [ "nameid" ] = nameid
+    } )
+    return userid == nameid
   end
   utils.debug( { [ "AuthCheckSSO" ] = "auth validation failed for user " .. user } )
   return false
