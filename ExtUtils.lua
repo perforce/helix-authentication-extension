@@ -27,9 +27,6 @@ function getGCfg()
   end
   -- assert certain settings at least appear to be valid
   assert( string.match( cfg[ "Service-URL" ], "^http" ), "Service-URL must start with 'http'" )
-  if string.match( cfg[ "Auth-Protocol" ], " " ) ~= nil then
-    error( "Auth-Protocol must not contain spaces" )
-  end
   return cfg
 end
 
@@ -81,10 +78,16 @@ function ExtUtils.debug( data )
   end
 end
 
-function ExtUtils.loginUrl()
-  local base = ExtUtils.gCfgData[ "Service-URL" ]
-  local method = ExtUtils.gCfgData[ "Auth-Protocol" ]
-  return base .. "/" .. method .. "/login/"
+function ExtUtils.loginUrl( sdata )
+  -- if auth protocol is defined, use that to assemble a login URL
+  local protocol = ExtUtils.gCfgData[ "Auth-Protocol" ]
+  if string.match( protocol, "^%.%.%." ) == nil then
+    local base = sdata[ "baseUrl" ]
+    local request = sdata[ "request" ]
+    return base .. "/" .. protocol .. "/login/" .. request
+  end
+  -- otherwise use what the authentication service returned
+  return sdata[ "loginUrl" ]
 end
 
 function ExtUtils.requestUrl()

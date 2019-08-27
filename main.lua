@@ -147,7 +147,7 @@ function AuthPreSSO()
     utils.debug( { [ "AuthPreSSO" ] = "failed to get request identifier" } )
     return false
   end
-  local url = utils.loginUrl() .. requestId
+  local url = utils.loginUrl( sdata )
   -- For now, use the old behavior for P4PHP/Swarm clients; N.B. when Swarm is
   -- logging the user into Perforce, the clientprog is P4PHP instead of SWARM.
   local clientprog = Helix.Core.Server.GetVar( "clientprog" )
