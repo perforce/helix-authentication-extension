@@ -208,6 +208,10 @@ function AuthCheckSSO()
     } )
     return userid == nameid
   end
-  utils.debug( { [ "AuthCheckSSO" ] = "auth validation failed for user " .. user } )
+  utils.debug( {
+    [ "AuthCheckSSO" ] = "auth validation failed for user " .. user,
+    [ "code" ] = url,
+    [ "error" ] = sdata
+  } )
   return false
 end
