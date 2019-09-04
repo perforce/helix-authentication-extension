@@ -211,7 +211,7 @@ function AuthCheckSSO()
   utils.debug( {
     [ "AuthCheckSSO" ] = "auth validation failed for user " .. user,
     [ "code" ] = url,
-    [ "error" ] = sdata
+    [ "error" ] = tostring( sdata )
   } )
   return false
 end
