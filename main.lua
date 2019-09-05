@@ -14,7 +14,7 @@ function GlobalConfigFields()
     -- changed from their default (documentation) values, since it is a wildcard
     -- in Perforce and cannot be used for anything else.
     [ "Service-URL" ] = "... The authentication service base URL.",
-    [ "Auth-Protocol" ] = "... Authentication protocol, such as saml or oidc."
+    [ "Auth-Protocol" ] = "... Authentication protocol, such as 'saml' or 'oidc'."
   }
 end
 
