@@ -2,15 +2,15 @@
 
 This Helix Server extension facilitates Single-Sign-On (SSO) authentication,
 directing end users to the Helix Authentication Service to authenticate using an
-identity provider that supports the either the OpenID Connect or SAML 2.0
+identity provider that supports either the OpenID Connect or SAML 2.0
 authentication protocols.
 
 ## Overview
 
 The Helix Authentication Extension is installed on the Helix Server, and hooks
-into the authentication "triggers" in the server. Whenever a user initiates an
+into the authentication "triggers" in the server. Whenever a user attempts to
 authentication with the server, they will be directed to the Helix
-Authentication Service using their default web browser, which in turns redirects
+Authentication Service via their default web browser, which in turns redirects
 the user to the configured identity provider (IdP). Once the user has
 successfully authenticated with the IdP, a ticket will be issued by the Helix
 Server, at which point the user can interact with Helix Server.
@@ -22,7 +22,7 @@ The extension requires a Helix Server version that supports extensions. This is
 
 ## Documentation
 
-See the corresponding product documentation for details.
+See the product documentation in the [docs](./docs) directory.
 
 ## Development
 
