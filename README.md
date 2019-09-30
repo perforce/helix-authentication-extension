@@ -9,50 +9,62 @@ authentication protocols.
 
 The Helix Authentication Extension is installed on the Helix Server, and hooks
 into the authentication "triggers" in the server. Whenever a user attempts to
-authentication with the server, they will be directed to the Helix
-Authentication Service via their default web browser, which in turns redirects
-the user to the configured identity provider (IdP). Once the user has
-successfully authenticated with the IdP, a ticket will be issued by the Helix
-Server, at which point the user can interact with Helix Server.
+authenticate with the server, they will be directed to the Helix Authentication
+Service via their default web browser, which in turn redirects the user to the
+configured identity provider (IdP). Once the user has successfully authenticated
+with the IdP, a ticket will be issued by the Helix Server, at which point the
+user can interact with Helix Server.
 
 ## Requirements
 
 The extension requires a Helix Server version that supports extensions. This is
-2019.1 or later for Linux systems. Windows support is still pending.
+2019.1 or later for Linux systems. Windows support for extensions is still
+pending. When tested with a pre-release version of the server on Windows, the
+extension worked as expected.
+
+### Perforce Clients
+
+The authentication extension has been tested with the following clients:
+
+* P4 2019.1
+    + Earlier versions will also work, but the user will have to copy the URL
+      displayed in the console and paste it into the browser location bar.
+* P4V 2019.2
+* P4VS 2019.2 Update 2
+* P4EXP 2019.2
 
 ## Documentation
 
-See the product documentation in the [docs](./docs) directory.
+See the product documentation in the [docs](./docs) directory. The documentation
+includes instructions for packaging and installing the extension.
+
+## Known Issues
+
+Users authenticating with the Helix Server will likely need to use one of the
+supported clients to authenticate. Once a valid P4 ticket has been acquired,
+then clients other than those listed above should function normally. In
+particular, the clients need to handle the `invokeURL` feature added in the
+2019.1 P4API. This includes the P4API-derived clients (P4Python, P4Ruby, etc)
+which at this time do not yet support this feature.
+
+## How to Get Help
+
+Configuring the extension, the authentication service, and the identity provider
+is a non-trivial task. Some expertise in a security systems is helpful. In the
+event that you need assistance with configuring these systems, please contact
+[Perforce Support](https://www.perforce.com/support/request-support).
 
 ## Development
 
 ### Installing the Extension
 
-To install the authentication integration extension, use `node` like so:
+Alongside this README file there exists a JavaScript file named `hook.js` that
+is able to package and install the extension. However, it has several
+dependencies and is configured using environment variables. It is intended
+primarily for developers testing against a non-production Helix Server. See the
+comments at the top of that file for additional information.
 
-```shell
-$ node hook.js
-```
-
-### Using SAML
-
-For SAML, the extension must be installed slightly differently:
-
-```shell
-$ PROTOCOL=saml node hook.js
-```
-
-You will almost certainly have to change the `name-identifier` setting to
-`nameID` as well, since typical SAML identity providers do not include an
-`email` property. To configure the extension run the command below:
-
-```shell
-$ p4 extension --configure Auth::loginhook --name loginhook-all
-```
-
-### Tips and Tricks
-
-#### Controlling URL open
+### Controlling URL open
 
 By setting `P4USEBROWSER` to `false` you can prevent the browser from opening
 when you invoke `p4 login`. Not all that useful, but good to know.
