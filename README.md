@@ -47,6 +47,30 @@ particular, the clients need to handle the `invokeURL` feature added in the
 2019.1 P4API. This includes the P4API-derived clients (P4Python, P4Ruby, etc)
 which at this time do not yet support this feature.
 
+### P4Eclipse
+
+When using P4Eclipse, you must authenticate using one of the clients listed
+above under the **Requirements** section. Then, when setting up the initial P4
+connection in Eclipse, you are prompted for a user and password. Only put in the
+username and leave the password field blank. The client will then use the
+existing connection.
+
+### P4SL
+
+When using P4SL, you must authenticate using one of the clients listed above
+under the **Requirements** section. Then, when setting up the initial P4
+connection in Eclipse, you are prompted for a user and password. Only put in the
+username and leave the password field blank. The client will then use the
+existing connection.
+
+### IntelliJ
+
+When logging in to Perforce using IntelliJ, it will prompt for a password but
+also open the browser to the identity provider. Once you have authenticated with
+the IdP and acquired a P4 ticket, IntelliJ will still be waiting for a password.
+Submit that login request and let it fail, after which IntelliJ will operate
+normally.
+
 ## How to Get Help
 
 Configuring the extension, the authentication service, and the identity provider
