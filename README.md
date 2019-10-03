@@ -51,15 +51,15 @@ which at this time do not yet support this feature.
 
 When using P4Eclipse, you must authenticate using one of the clients listed
 above under the **Requirements** section. Then, when setting up the initial P4
-connection in Eclipse, you are prompted for a user and password. Only put in the
-username and leave the password field blank. The client will then use the
+connection in P4Eclipse, you are prompted for a user and password. Only put in
+the username and leave the password field blank. The client will then use the
 existing connection.
 
 ### P4SL
 
 When using P4SL, you must authenticate using one of the clients listed above
 under the **Requirements** section. Then, when setting up the initial P4
-connection in Eclipse, you are prompted for a user and password. Only put in the
+connection in P4SL, you are prompted for a user and password. Only put in the
 username and leave the password field blank. The client will then use the
 existing connection.
 
