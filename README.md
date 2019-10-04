@@ -40,6 +40,10 @@ includes instructions for packaging and installing the extension.
 
 ## Known Issues
 
+Perforce cannot guarantee and has not exhaustively tested the compatibility of
+3rd Party Plugins with the Helix Authentication Service. It is up to each 3rd
+party plugin owner to make his/her plugin compatible.
+
 Users authenticating with the Helix Server will likely need to use one of the
 supported clients to authenticate. Once a valid P4 ticket has been acquired,
 then clients other than those listed above should function normally. In
@@ -63,7 +67,7 @@ connection in P4SL, you are prompted for a user and password. Only put in the
 username and leave the password field blank. The client will then use the
 existing connection.
 
-### IntelliJ
+### IntelliJ (3rd Party Plugin)
 
 When logging in to Perforce using IntelliJ, it will prompt for a password but
 also open the browser to the identity provider. Once you have authenticated with
