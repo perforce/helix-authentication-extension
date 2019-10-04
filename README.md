@@ -94,5 +94,5 @@ comments at the top of that file for additional information.
 
 ### Controlling URL open
 
-By setting `P4USEBROWSER` to `false` you can prevent the browser from opening
-when you invoke `p4 login`. Not all that useful, but good to know.
+Setting `P4USEBROWSER` to `false` prevents the browser from opening when you
+invoke `p4 login`.
