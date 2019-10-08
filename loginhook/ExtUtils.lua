@@ -27,6 +27,8 @@ function getGCfg()
   end
   -- assert certain settings at least appear to be valid
   assert( string.match( cfg[ "Service-URL" ], "^http" ), "Service-URL must start with 'http'" )
+  -- remove any trailing slash from the URL
+  cfg[ "Service-URL" ] = (cfg[ "Service-URL" ]:gsub("^(.-)/?$", "%1"))
   return cfg
 end
 
