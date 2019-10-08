@@ -1,0 +1,29 @@
+version: '3.7'
+
+#
+# Container names have a domain-like naming scheme to facilitate dnsmasq usage.
+# By ending in .doc, which is not a valid TLD, we can easily configure dnsmasq
+# to resolve these names to the docker machine. This allows the containers to
+# use the same names to refer to each other as the host does when resolving the
+# container names.
+#
+
+services:
+  p4d.doc:
+    build:
+      context: .
+      dockerfile: containers/p4d/Dockerfile
+      args:
+        BASE_PATH: "containers/p4d"
+        # binding to the container IP address causes p4d to exit 255
+        P4PORT: "0.0.0.0:1666"
+        APT_URL: "http://package.perforce.com/apt/ubuntu"
+        PUB_KEY: "http://package.perforce.com/perforce.pubkey"
+    networks:
+      - authen
+    ports:
+      - "1666:1666"
+
+networks:
+  authen:
+    name: auth-service

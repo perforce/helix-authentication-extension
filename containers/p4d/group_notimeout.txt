@@ -1,0 +1,4 @@
+Group:	nopasswd
+Timeout:	unlimited
+Users:
+	super
