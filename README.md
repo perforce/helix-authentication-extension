@@ -32,6 +32,8 @@ The authentication extension has been tested with the following clients:
 * P4V 2019.2
 * P4VS 2019.2 Update 2
 * P4EXP 2019.2
+* P4Eclipse 2019.1
+* P4SL 2019.1
 
 ## Documentation
 
