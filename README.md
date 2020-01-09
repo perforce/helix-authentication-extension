@@ -86,15 +86,5 @@ event that you need assistance with configuring these systems, please contact
 
 ## Development
 
-### Installing the Extension
-
-Alongside this README file there exists a JavaScript file named `hook.js` that
-is able to package and install the extension. However, it has several
-dependencies and is configured using environment variables. It is intended
-primarily for developers testing against a non-production Helix Server. See the
-comments at the top of that file for additional information.
-
-### Controlling URL open
-
-Setting `P4USEBROWSER` to `false` prevents the browser from opening when you
-invoke `p4 login`.
+See the [development](./docs/Development.md) page for additional information
+regarding building and testing the service.

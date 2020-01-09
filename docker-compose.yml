@@ -9,6 +9,7 @@ version: '3.7'
 #
 
 services:
+  # other services are in the service repository
   p4d.doc:
     build:
       context: .

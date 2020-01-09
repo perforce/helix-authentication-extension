@@ -1,3 +1,4 @@
 User:	george
 Email:	george@example.org
 FullName:	Curious George
+AuthMethod:	ldap

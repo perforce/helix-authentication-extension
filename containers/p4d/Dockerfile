@@ -1,11 +1,12 @@
-FROM ubuntu:18.04
+FROM ubuntu:latest
+
 ARG BASE_PATH
 ARG PUB_KEY
 ARG APT_URL
 ARG P4PORT
 
 #
-# Install p4 and p4d using packages.
+# install p4 and p4d using packages
 #
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
@@ -26,7 +27,10 @@ WORKDIR /perforce
 #
 COPY $BASE_PATH/build.sh .
 COPY $BASE_PATH/user_george.txt .
+COPY $BASE_PATH/user_jackson.txt .
+COPY $BASE_PATH/user_johndoe.txt .
 COPY $BASE_PATH/group_notimeout.txt .
+COPY $BASE_PATH/ldap_simple.txt .
 COPY loginhook loginhook
 COPY $BASE_PATH/ext_config.awk .
 RUN ./build.sh

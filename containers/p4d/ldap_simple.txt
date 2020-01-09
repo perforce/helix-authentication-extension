@@ -1,0 +1,9 @@
+Name:	simple
+Host:	ldap.doc
+Port:	389
+Encryption:	none
+BindMethod:	simple
+Options:	nodowncase nogetattrs norealminusername
+SimplePattern:	uid=%user%,ou=people,dc=example,dc=org
+SearchScope:	subtree
+GroupSearchScope:	subtree
