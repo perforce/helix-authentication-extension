@@ -61,7 +61,7 @@ If this is not the first time you are installing the extension, remove the exist
 
 ## Configure
 
-Configure the Extension at both the "global" and "instance" level. To learn about these levels, see the "Server extension configuration (global and instance specs)" topic in the [Helix Core Extensions Developer Guide](https://www.perforce.com/manuals/extensions/Content/Extensions/extensionspec.html).
+Configure the Extension at both the _global_ and _instance_ level. To learn about these levels, see the "Server extension configuration (global and instance specs)" topic in the [Helix Core Extensions Developer Guide](https://www.perforce.com/manuals/extensions/Content/Extensions/extensionspec.html).
 
 ### Global
 
@@ -90,10 +90,10 @@ The `Auth-Protocol` can be any value supported by the authentication service. Th
 
 ### Instance
 
-To configure a single "instance" of the extension, include the `--name` option along with the `--configure` option. This example uses `loginhook-all` to be descriptive.
+To configure a single _instance_ of the extension, include the `--name` option along with the `--configure` option. This example uses `loginhook-a1` just as an example; you are free to use a more descriptive name.
 
 ```shell
-p4 extension --configure Auth::loginhook --name loginhook-all -o
+p4 extension --configure Auth::loginhook --name loginhook-a1 -o
 [snip]
 ExtConfig:
     enable-logging:
