@@ -61,11 +61,15 @@ If this is not the first time you are installing the extension, remove the exist
 
 ## Configure
 
-Configure the Extension at both the _global_ and _instance_ level. To learn about these levels, see the "Server extension configuration (global and instance specs)" topic in the [Helix Core Extensions Developer Guide](https://www.perforce.com/manuals/extensions/Content/Extensions/extensionspec.html).
+Configure the Extension at both the _global_ and _instance_ level. To learn about these levels, see the "Server extension configuration (global and instance specs)" topic in the [Helix Core Extensions Developer Guide](https://www.perforce.com/manuals/extensions/Content/Extensions/extensionspec.html). The extension has settings that are specific to the global and instance configuration, as described below.
+
+Both the global and instance configuration are defined using Perforce forms, in which fields consist of a label, a colon, a tab character, and a value. Fields that allow multiple values will start on a new line, with each value on a separate line, and all lines are prefixed by a tab character. Within the `ExtConfig` section, field labels are prefixed by **one** tab character, and values start on a new line and are prefixed with **two** tab characters.
+
+Specific to this extension, any value that starts with `...` means the value is left undefined, and the default behavior will take effect, if any. When defining a value for a configuration setting, remove the `...` and everything that follows on that line, then enter the desired value.
 
 ### Global
 
-Start by getting the global configuration of the extension:
+Start by setting the global configuration of the extension:
 
 ```shell
 $ p4 extension --configure Auth::loginhook
@@ -87,6 +91,22 @@ The first field to change is `ExtP4USER` which should be the Perforce user that 
 The `Service-URL` field must be changed to the address of the authentication service by which the Helix Server can make a connection.
 
 The `Auth-Protocol` can be any value supported by the authentication service. This determines the authentication protocol for SSO users to authenticate. This setting is optional because the authentication service will use its own settings to determine the protocol.
+
+#### Example
+
+In this following example, each level of indentation represents a single tab character. The labels are prefixed with **one** tab character and the values are all prefixed with **two** tab characters.
+
+```
+[snip]
+
+ExtP4USER:     super
+
+ExtConfig:
+    Auth-Protocol:
+        saml
+    Service-URL:
+        https://auth-svc.example.com:3000/
+```
 
 ### Instance
 
@@ -115,14 +135,35 @@ All of these settings have sensible defaults. However, for the extension to be e
 | Name | Description | Default |
 | ---- | ----------- | ------- |
 | `enable-logging` | Extension will write debug messages to a log if `true` | `false` |
-| `non-sso-users` | Those users who will not be using SSO. | _none_ |
-| `non-sso-groups` | Those groups who will not be using SSO. | _none_ |
+| `non-sso-users` | Those users who will not be using SSO. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
+| `non-sso-groups` | Those groups who will not be using SSO. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
 | `user-identifier` | Trigger variable used as unique user identifier, one of: `fullname`, `email`, or `user`. | `email` |
 | `name-identifier` | Field within identity provider user profile containing unique user identifer. | `email` |
 
+#### Example
+
+In this following example, each level of indentation represents a single tab character. The labels are prefixed with **one** tab character and the values are all prefixed with **two** tab characters.
+
+```
+[snip]
+ExtConfig:
+    enable-logging:
+        true
+    name-identifier:
+        nameID
+    non-sso-groups:
+        admins
+        supers
+    non-sso-users:
+        bruno
+        susan
+    user-identifier:
+        email
+```
+
 ### Debug logging
 
-When enabled, the extension writes debugging logs using the `Perforce.log()` API. The JSON formatted file will appear in the directory identified by the `data-dir` extension attribute. You can find the value for `data-dir` by searching the installed extensions using p4 extension as a privileged user.
+When enabled, the extension writes debugging logs to a JSON formatted file that will appear in the directory identified by the `data-dir` extension attribute. You can find the value for `data-dir` by searching the installed extensions using p4 extension as a privileged user.
 
 ```shell
 $ p4 extension --list --type=extensions
@@ -137,11 +178,11 @@ where `[snip]` means some information has been omitted.
 
 Helix user specs have several fields that can be used for matching with the profile information returned from the identity provider. The extension uses the trigger variables exposed by the server, namely `fullname`, `user`, and `email`, and the choice is configured in the extension by setting the `user-identifier` value (default is `email`) in the *instance* configuration.
 
-On the other side of the mapping is the user profile returned by the identity provider. Different protocols and providers return different fields, and there is no one field that works for all. Also, administrators are often free to adjust the output to suit their needs. As such, the extension has another *instance* configuration setting named `name-identifier`, which specifies the name of the field in the user profile that is to be used in matching with the Helix user. This defaults to email because that field is likely to be available and unique on both the IdP and Helix.
+On the other side of the mapping is the user profile returned by the identity provider. Different protocols and providers return different fields, and there is no one field that works for all. Also, administrators are often free to adjust the output to suit their needs. As such, the extension has another *instance* configuration setting named `name-identifier`, which specifies the name of the field in the user profile that is to be used in matching with the Helix user. This defaults to `email` because that field is likely to be available and unique on both the IdP and Helix.
 
-Generally, with SAML, the `name-identifier` extension setting should be given the value `nameID` because that field is always present in the user profile returned from the SAML IdP. Depending on the format of the name identifier, you will need to select an appropriate value for the `user-identifier`. If the IdP returns a "user name", and it matches the `User` field in the Perforce user spec, set `user-identifier` to `user` in the extension configuration. If the name identifier is an email address, use `email` instead of `user`. The value of `fullname` might also be appropriate.
+Generally, with **SAML**, the `name-identifier` extension setting should be given the value `nameID` because that field is always present in the user profile returned from the SAML IdP. Depending on the format of the name identifier, you will need to select an appropriate value for the `user-identifier`. If the IdP returns a "user name", and it matches the `User` field in the Perforce user spec, set `user-identifier` to `user` in the extension *instance* configuration. If the name identifier is an email address, use `email` instead of `user`. The value of `fullname` might also be appropriate, depending on the IdP configuration.
 
-For OIDC, the user profile often includes an email field. The server extension looks for this by default because `name-identifier` defaults to `email`. Hopefully this value matches the `Email` field of the Perforce user spec because the server extension uses email for the `user-identifier` by default.
+For **OIDC**, the user profile often includes an `email` field. The server extension looks for this by default because `name-identifier` defaults to `email`. Hopefully this value matches the `Email` field of the Perforce user spec because the server extension uses email for the `user-identifier` by default.
 
 If you are unsure of the contents of the user profile returned from the identity provider, enable the debug logging in either the authentication service or the server extension, and then examine the logs after attempting a login. With the server extension, set the `enable-logging` *instance* configuration setting to `true`, attempt a login, and look for the `log.json` file under the `server.extensions.dir` directory of the Helix depot. For the authentication service, set the `DEBUG` environment variable to `auth:*`, restart the service, attempt the login, and look at the output from the service (either in the console or in a pm2 log file, if you are using pm2).
 
