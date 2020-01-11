@@ -251,3 +251,27 @@ Without the `restart`, the server will report an error about a missing hook:
 ```
 Command unavailable: external authentication 'auth-check-sso' trigger not found.
 ```
+
+## Troubleshooting
+
+### Login via IdP successful, but server login fails
+
+The most likely scenario is that the user profile data returned by the identity provider is not matching the Perforce user. See the [Mapping User Profiles to Perforce Users](#mapping-user-profiles-to-perforce-users) section above for details on the basic setup. To determine if this is really the case, set the `enable-logging` *instance* configuration setting to `true` and look at the extension logs after making a login attempt. There should be an entry resembling the following:
+
+```json
+{"data":{"AuthCheckSSO":"received user data","sdata":{"nameID":"test-o365","nameIDFormat":"urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"},"userid":"test-o365@example.com"},"nanos":600042464,"recType":0,"seconds":1578021016}
+```
+
+Note that the `nameID` value does not match the `userid`, although they are similar. The extension will only accept values that match **exactly**. In this example, it would seem that the `userid` is an email address (the `Email` field of the Perforce user spec), while the SAML Name ID is a username. There are two choices for resolving this mismatch: 1) change the SAML IdP configuration to return an email address for the Name ID, 2) change the `user-identifier` *instance* configuration of the extension to `user` and hope that the Perforce user name matches the SAML Name ID.
+
+### Curl related errors in extension log
+
+If the extension is failing to authenticate the user, and the extension log file contains something like this:
+
+```json
+{"data":{"AuthCheckSSO":"auth validation failed for user kpalider","code":0,
+ "error":"[CURL-EASY][GOT_NOTHING] Server returned nothing (no headers, no data) (52)"},
+ "nanos":276255682,"pid":1661,"recType":0,"seconds":1578331572}
+```
+
+Then it may be that the service is experiencing an error. The `libcurl` error handling is very generalized, so the extension is not able to report detailed errors. When this happens, enable the debug logging in the authentication service and examine them after a login attempt to look for any possible errors.
