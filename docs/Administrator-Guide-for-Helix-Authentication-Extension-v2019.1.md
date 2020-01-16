@@ -33,7 +33,7 @@ $ p4 extension --list --type=extensions
 
 where `[snip]` means some information has been omitted.
 
-## Build
+## Building the Extension
 
 If you already have the `loginhook.p4-extension` file, go to the **Install** section.
 
@@ -45,7 +45,7 @@ $ p4 extension --package loginhook
 
 The result will be a zip file named `loginhook.p4-extension`
 
-## Install loginhook.p4-extension
+## Installing the Extension
 
 To install the extension, run the following command in a terminal window:
 
@@ -59,7 +59,7 @@ The `restart` is necessary because p4d prepares the authentication mechanisms du
 
 If this is not the first time you are installing the extension, remove the existing extension before reinstalling it. See **Removing the Extension**.
 
-## Configure
+## Configuring the Extension
 
 Configure the Extension at both the _global_ and _instance_ level. To learn about these levels, see the "Server extension configuration (global and instance specs)" topic in the [Helix Core Extensions Developer Guide](https://www.perforce.com/manuals/extensions/Content/Extensions/extensionspec.html). The extension has settings that are specific to the global and instance configuration, as described below.
 
@@ -251,6 +251,27 @@ Without the `restart`, the server will report an error about a missing hook:
 ```
 Command unavailable: external authentication 'auth-check-sso' trigger not found.
 ```
+
+## Upgrading the Extension
+
+The procedure for upgrading the extension to a newer release consists of these steps:
+
+1. Print and retain the current extension configuration:
+    * `p4 extension --configure Auth::loginhook -o`
+    * `p4 extension --configure Auth::loginhook --name loginhook-a1 -o`
+        - The `loginhook-a1` name is an example, the name you chose may be different.
+1. Build the new extension package (`p4 extension --package loginhook`)
+    * See the [Building the Extension](#building-the-extension) section for details.
+1. Remove the existing installation (`p4 extension --delete --yes Auth::loginhook`)
+    * See the [Removing the Extension](#removing-the-extension) section for details.
+1. Install the new extension (`p4 extension --install loginhook.p4-extension -y`)
+    * See the [Installing the Extension](#installing-the-extension) section for details.
+1. Merge the previous configuration with those of the new extension
+    * `p4 extension --configure Auth::loginhook`
+    * `p4 extension --configure Auth::loginhook --name loginhook-a1`
+1. Restart the Helix Server (`p4 admin restart`)
+
+The process of migrating the old configuration to the new extension is not yet automated, so care must be taken to copy the values to the new extension configuration.
 
 ## Troubleshooting
 
