@@ -121,7 +121,7 @@ function AuthPreSSO()
   local user = Helix.Core.Server.GetVar( "user" )
   -- skip any individually named users
   if utils.isSkipUser( user ) then
-    utils.debug( { [ "AuthPreSSO" ] = "skipping user " .. user } )
+    utils.debug( { [ "AuthPreSSO" ] = "info: skipping user " .. user } )
     return true, "unused", "http://example.com", true
   end
   -- skip any users belonging to a specific group
@@ -131,7 +131,7 @@ function AuthPreSSO()
     return false, "error"
   end
   if inGroup then
-    utils.debug( { [ "AuthPreSSO" ] = "group-based skipping user " .. user } )
+    utils.debug( { [ "AuthPreSSO" ] = "info: group-based skipping user " .. user } )
     return true, "unused", "http://example.com", true
   end
   -- Get a request id from the service, save it in requestId; do this every time
@@ -144,7 +144,7 @@ function AuthPreSSO()
   if ok then
     requestId = sdata[ "request" ]
   else
-    utils.debug( { [ "AuthPreSSO" ] = "failed to get request identifier" } )
+    utils.debug( { [ "AuthPreSSO" ] = "error: failed to get request identifier" } )
     return false
   end
   local url = utils.loginUrl( sdata )
@@ -155,16 +155,16 @@ function AuthPreSSO()
   -- local clientversion = Helix.Core.Server.GetVar( "clientversion" )
   -- utils.debug( { [ "clientversion" ] = clientversion } )
   if string.find( clientprog, "P4PHP" ) then
-    utils.debug( { [ "AuthPreSSO" ] = "legacy mode for P4PHP client" } )
+    utils.debug( { [ "AuthPreSSO" ] = "info: legacy mode for P4PHP client" } )
     return true, url
   end
   -- if old SAML integration setting is present, use old behavior
   local ssoArgs = Helix.Core.Server.GetVar( "ssoArgs" )
   if string.find( ssoArgs, "--idpUrl" ) then
-    utils.debug( { [ "AuthPreSSO" ] = "legacy mode for desktop agent" } )
+    utils.debug( { [ "AuthPreSSO" ] = "info: legacy mode for desktop agent" } )
     return true, url
   end
-  utils.debug( { [ "AuthPreSSO" ] = "invoking URL " .. url } )
+  utils.debug( { [ "AuthPreSSO" ] = "info: invoking URL " .. url } )
   return true, "unused", url, false
 end
 
@@ -175,9 +175,9 @@ function AuthCheckSSO()
   -- so in that case, the "token" in AuthCheckSSO is set to the username.
   local user = Helix.Core.Server.GetVar( "user" )
   local token = Helix.Core.Server.GetVar( "token" )
-  utils.debug( { [ "AuthCheckSSO" ] = "checking user " .. user } )
+  utils.debug( { [ "AuthCheckSSO" ] = "info: checking user " .. user } )
   if user ~= token then
-    utils.debug( { [ "AuthCheckSSO" ] = "legacy mode login for user " .. user } )
+    utils.debug( { [ "AuthCheckSSO" ] = "info: legacy mode login for user " .. user } )
     -- If a password/token has been provided, then perhaps this is the legacy
     -- support scenario, and the token is the SAML response coming from the
     -- desktop agent or Swarm. In that case, try to extract the response and
@@ -188,10 +188,14 @@ function AuthCheckSSO()
       -- send SAML response to auth service for validation
       local ok, url, sdata = validateResponse( utils.validateUrl(), response )
       if ok then
-        utils.debug( { [ "AuthCheckSSO" ] = "legacy mode user data", [ "sdata" ] = sdata } )
+        utils.debug( { [ "AuthCheckSSO" ] = "info: legacy mode user data", [ "sdata" ] = sdata } )
         return userid == utils.nameIdentifier( sdata )
       end
-      utils.debug( { [ "AuthCheckSSO" ] = "legacy mode validation failed for user " .. user } )
+      utils.debug( {
+        [ "AuthCheckSSO" ] = "error: legacy mode validation failed for user " .. user,
+        [ "http-code" ] = url,
+        [ "http-error" ] = tostring( sdata )
+      } )
     end
   end
   -- Commence so-called normal behavior, in which we request the authenticated
@@ -201,7 +205,7 @@ function AuthCheckSSO()
   if ok then
     local nameid = utils.nameIdentifier( sdata )
     utils.debug( {
-      [ "AuthCheckSSO" ] = "received user data",
+      [ "AuthCheckSSO" ] = "info: received user data",
       [ "sdata" ] = sdata,
       [ "userid" ] = userid,
       [ "nameid" ] = nameid
@@ -209,9 +213,9 @@ function AuthCheckSSO()
     return userid == nameid
   end
   utils.debug( {
-    [ "AuthCheckSSO" ] = "auth validation failed for user " .. user,
-    [ "code" ] = url,
-    [ "error" ] = tostring( sdata )
+    [ "AuthCheckSSO" ] = "error: auth validation failed for user " .. user,
+    [ "http-code" ] = url,
+    [ "http-error" ] = tostring( sdata )
   } )
   return false
 end
