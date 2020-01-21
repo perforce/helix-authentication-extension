@@ -275,6 +275,16 @@ The process of migrating the old configuration to the new extension is not yet a
 
 ## Troubleshooting
 
+### Login fails with 'P4LOGINSSO' not set
+
+If a Perforce client sees the `Single sign-on on client failed: 'P4LOGINSSO' not set` error when attempting to log in to a Helix Server with the authentication extension installed, then it is likely that the authentication service was not reachable from the extension. The nature of this error can be confirmed by enabling the logging in the extension, attempt the login again, and look for a log entry that resembles the following:
+
+```javascript
+{"data":{"AuthPreSSO":"failed to get request identifier"},"nanos":927914375,"pid":11047,"recType":0,"seconds":1579641470}
+```
+
+As indicated in the log message, the extension was unable to reach the service to get a request identifier.
+
 ### Login via IdP successful, but server login fails
 
 The most likely scenario is that the user profile data returned by the identity provider is not matching the Perforce user. See the [Mapping User Profiles to Perforce Users](#mapping-user-profiles-to-perforce-users) section above for details on the basic setup. To determine if this is really the case, set the `enable-logging` *instance* configuration setting to `true` and look at the extension logs after making a login attempt. There should be an entry resembling the following:
