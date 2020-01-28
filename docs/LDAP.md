@@ -19,10 +19,14 @@ the service together, along with an LDAP service and the Shibboleth IdP.
 
 Permitting a combination of authentication mechanisms is a matter of setting the
 Perforce configuration appropriately, and defining which users are authenticated
-by which method. First, define an LDAP configuration in Perforce using the `p4
-ldap` command as described in the knowledge base
-[guide](https://community.perforce.com/s/article/2590). Next, define several
-settings that will allow a combination of authentication paths, as shown below:
+by which method.
+
+Start by defining an LDAP configuration in Perforce using the `p4 ldap` command
+as described in this knowledge base
+[guide](https://community.perforce.com/s/article/2590).
+
+Once a basic LDAP configuration is in place, define several settings that will
+allow a combination of authentication paths, as shown below:
 
 ```shell
 $ p4 configure set auth.default.method=ldap
@@ -33,16 +37,18 @@ $ p4 configure set auth.sso.nonldap=1
 
 The above commands set LDAP as the default authentication mechanism, but allow
 for non-LDAP users (those whose `AuthMethod` is set to `perforce`), and
-additionally the SSO mechanism is set to allow "password" authenticated users
+additionally instructs the SSO mechanism to allow "password" authenticated users
 (those users that are authenticated by the server without delegation to LDAP or
 SSO). This is just an example, and by no means the only possible configuration.
 
 Once the configuration is in place, those users that will be using LDAP
-authentication must be named in the `non-sso-users` extension configuration, as
-well as have their `AuthMethod` set to `ldap`. If there are going to be many
-users that authenticate with LDAP, then defining a group of users and naming
-that group in the `non-sso-groups` may be more practical.
+authentication must have their `AuthMethod` set to `ldap`. For any user whose
+`AuthMethod` is set to `ldap` the authentication extension will defer their
+authentication to the server, which will use LDAP, if given the configuration
+shown above.
 
-Additionally, users that will authenticate with a database password should also
-be named in either the `non-sso-users` extension configuration, or belong to a
-group named in `non-sso-groups`, and have their `AuthMethod` set to `perforce`.
+Users that will authenticate with a database password should be named in either
+the `non-sso-users` extension configuration, or belong to a group named in
+`non-sso-groups`, and have their `AuthMethod` set to `perforce`. This setting,
+in combination with `auth.sso.allow.passwd=1`, instructs the server to use the
+database password for non-SSO and non-LDAP users.

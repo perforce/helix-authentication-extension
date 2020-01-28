@@ -31,7 +31,7 @@
 
 /non-sso-users:/ {
     print;
-    print "\t\tsuper\n\t\tgeorge";
+    print "\t\tsuper";
     getline;
     next;
 }

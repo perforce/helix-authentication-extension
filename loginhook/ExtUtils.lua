@@ -120,6 +120,21 @@ function ExtUtils.isSkipUser( user )
   return false
 end
 
+function ExtUtils.isUserLdap( user )
+  local p4 = P4.P4:new()
+  p4.prog = ExtUtils.getID()
+  p4:autoconnect()
+  p4:connect()
+  local method = "perforce"
+  local userData = p4:run( "user", "-o", user )
+  for i, dict in ipairs( userData ) do
+    if dict[ "AuthMethod" ] then
+      method = dict[ "AuthMethod" ]
+    end
+  end
+  return method == "ldap"
+end
+
 function isUserInGroups( user, groups )
   -- copied from login_motd example code...
   local e = Helix.Core.P4API.Error.new()

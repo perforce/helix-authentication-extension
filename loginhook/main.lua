@@ -134,6 +134,12 @@ function AuthPreSSO()
     utils.debug( { [ "AuthPreSSO" ] = "info: group-based skipping user " .. user } )
     return true, "unused", "http://example.com", true
   end
+  -- skip any users whose AuthMethod is set to ldap
+  local isLdap = utils.isUserLdap( user )
+  if isLdap then
+    utils.debug( { [ "AuthPreSSO" ] = "info: skipping LDAP user " .. user } )
+    return true, "unused", "http://example.com", true
+  end
   -- Get a request id from the service, save it in requestId; do this every time
   -- for every user, in case the same user logs in from multiple systems. We
   -- will use this request identifier to get the status of the user later.
