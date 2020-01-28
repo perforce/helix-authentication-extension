@@ -37,8 +37,10 @@ The authentication extension has been tested with the following clients:
 
 ## Documentation
 
-See the product documentation in the [docs](./docs) directory. The documentation
-includes instructions for packaging and installing the extension.
+See the administrative guide in the [docs](./docs) directory for instructions on
+installing and configuring the extension. Additionally, guidance on configuring
+LDAP authentication, along with SSO, is given in the [LDAP](./docs/LDAP.md)
+guide.
 
 ## Known Issues
 
