@@ -26,7 +26,7 @@ settings that will allow a combination of authentication paths, as shown below:
 
 ```shell
 $ p4 configure set auth.default.method=ldap
-$ p4 configure set auth.ldap.order.1=simple
+$ p4 configure set auth.ldap.order.1=<name-of-your-ldap-config>
 $ p4 configure set auth.sso.allow.passwd=1
 $ p4 configure set auth.sso.nonldap=1
 ```
