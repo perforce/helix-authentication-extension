@@ -161,6 +161,65 @@ ExtConfig:
         email
 ```
 
+### Multiple Instance Configurations
+
+The extension is not designed to support multiple instance configurations. To find out what configurations have been defined, use the `p4 extension --list` command like so:
+
+```shell
+$ p4 extension --list --type configs
+... config foobar
+... extension Auth::loginhook
+... uuid 117E9283-732B-45A6-9993-AE64C354F1C5
+... revision 1
+... owner super
+... type auth-check-sso
+... arg auth
+
+... config foobar
+... extension Auth::loginhook
+... uuid 117E9283-732B-45A6-9993-AE64C354F1C5
+... revision 1
+... owner super
+... type auth-pre-sso
+... arg auth
+
+... config loginhook
+... extension Auth::loginhook
+... uuid 117E9283-732B-45A6-9993-AE64C354F1C5
+... revision 1
+... owner super
+... type global-extcfg
+
+... config loginhook-all
+... extension Auth::loginhook
+... uuid 117E9283-732B-45A6-9993-AE64C354F1C5
+... revision 1
+... owner super
+... type auth-check-sso
+... arg auth
+
+... config loginhook-all
+... extension Auth::loginhook
+... uuid 117E9283-732B-45A6-9993-AE64C354F1C5
+... revision 1
+... owner super
+... type auth-pre-sso
+... arg auth
+```
+
+From the example output above, we see two instance configurations, one of which is named `foobar`. To remove this extraneous configuration, use the `p4 extension --delete` command, as shown in the example below:
+
+```
+$ p4 extension --delete Auth::loginhook --name foobar
+Would delete Extension 'Auth::loginhook#1, foobar'.
+This was report mode. Use -y to perform the operation.
+
+$ p4 extension --delete Auth::loginhook --name foobar -y
+Extension 'Auth::loginhook#1, foobar' successfully deleted.
+```
+
+That command will remove the named instance configuration, leaving the other configurations and the extension itself.
+
 ### Debug logging
 
 When enabled, the extension writes debugging logs to a JSON formatted file that will appear in the directory identified by the `data-dir` extension attribute. You can find the value for `data-dir` by searching the installed extensions using p4 extension as a privileged user.
