@@ -338,8 +338,9 @@ The process of migrating the old configuration to the new extension is not yet a
 
 If a Perforce client sees the `Single sign-on on client failed: 'P4LOGINSSO' not set` error when attempting to log in to a Helix Server with the authentication extension installed, then it is likely that the authentication service was not reachable from the extension. The nature of this error can be confirmed by enabling the logging in the extension, attempt the login again, and look for a log entry that resembles the following:
 
-```javascript
-{"data":{"AuthPreSSO":"failed to get request identifier"},"nanos":927914375,"pid":11047,"recType":0,"seconds":1579641470}
+```json
+{"data":{"AuthPreSSO":"failed to get request identifier"},"nanos":927914375,
+ "pid":11047,"recType":0,"seconds":1579641470}
 ```
 
 As indicated in the log message, the extension was unable to reach the service to get a request identifier.
@@ -349,7 +350,9 @@ As indicated in the log message, the extension was unable to reach the service t
 The most likely scenario is that the user profile data returned by the identity provider is not matching the Perforce user. See the [Mapping User Profiles to Perforce Users](#mapping-user-profiles-to-perforce-users) section above for details on the basic setup. To determine if this is really the case, set the `enable-logging` *instance* configuration setting to `true` and look at the extension logs after making a login attempt. There should be an entry resembling the following:
 
 ```json
-{"data":{"AuthCheckSSO":"received user data","sdata":{"nameID":"test-o365","nameIDFormat":"urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"},"userid":"test-o365@example.com"},"nanos":600042464,"recType":0,"seconds":1578021016}
+{"data":{"AuthCheckSSO":"received user data","sdata":{"nameID":"test-o365",
+ "nameIDFormat":"urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"},
+ "userid":"test-o365@example.com"},"nanos":600042464,"recType":0,"seconds":1578021016}
 ```
 
 Note that the `nameID` value does not match the `userid`, although they are similar. The extension will only accept values that match **exactly**. In this example, it would seem that the `userid` is an email address (the `Email` field of the Perforce user spec), while the SAML Name ID is a username. There are two choices for resolving this mismatch: 1) change the SAML IdP configuration to return an email address for the Name ID, 2) change the `user-identifier` *instance* configuration of the extension to `user` and hope that the Perforce user name matches the SAML Name ID.
