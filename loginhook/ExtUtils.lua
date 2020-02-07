@@ -1,5 +1,5 @@
 --[[
-  Copyright 2019 Perforce Software
+  Copyright 2020 Perforce Software
 ]]--
 local ExtUtils = {}
 local cjson = require "cjson"
@@ -121,47 +121,51 @@ function ExtUtils.isSkipUser( user )
 end
 
 function ExtUtils.isUserLdap( user )
-  local p4 = P4.P4:new()
-  p4.prog = ExtUtils.getID()
-  p4:autoconnect()
-  p4:connect()
-  local method = "perforce"
-  local userData = p4:run( "user", "-o", user )
-  for i, dict in ipairs( userData ) do
-    if dict[ "AuthMethod" ] then
-      method = dict[ "AuthMethod" ]
-    end
-  end
-  return method == "ldap"
-end
-
-function isUserInGroups( user, groups )
-  -- copied from login_motd example code...
   local e = Helix.Core.P4API.Error.new()
   local cu = Helix.Core.P4API.ClientUser.new()
-  -- This function automatically logs the P4USER specified in the
-  -- Extension's global config into the server running the Extension.
-  -- Note that this doesn't help configure an SSL/Unicode server.
   local ca = Helix.Core.Server.GetAutoClientApi()
-
   ca:SetProtocol( "tag", "" )
   ca:SetProg( "P4-Lua" )
-
+  ca:SetVersion( ExtUtils.getID() )
   ca:Init( e )
 
   if e:Test() then
     ca:Final()
-    return true, e:Fmt()
+    return false, e:Fmt()
   end
 
+  local method = "perforce"
+  cu.OutputStat = function ( self, dict )
+    for k, v in dict:pairs() do
+      if k == "AuthMethod" then
+        method = v
+      end
+    end
+  end
+
+  ca:SetVar( ca:Null(), "-o" )
+  ca:SetVar( ca:Null(), user )
+  ca:Run( "user", cu )
+  ca:Final()
+
+  return true, method == "ldap"
+end
+
+function isUserInGroups( user, groups )
+  local e = Helix.Core.P4API.Error.new()
+  local cu = Helix.Core.P4API.ClientUser.new()
+  local ca = Helix.Core.Server.GetAutoClientApi()
+  ca:SetProtocol( "tag", "" )
+  ca:SetProg( "P4-Lua" )
   ca:SetVersion( ExtUtils.getID() )
+  ca:Init( e )
+
+  if e:Test() then
+    ca:Final()
+    return false, e:Fmt()
+  end
 
   local gs = {}
-
-  -- Override the ClientUser::OutputStat function to record the
-  -- list of groups.  This API mirrors the C++ P4API:
-  -- https://www.perforce.com/perforce/doc.current/manuals/p4api/
-
   cu.OutputStat = function( self, dict )
     gs[ dict[ "group" ] ] = 1
   end
@@ -174,11 +178,11 @@ function isUserInGroups( user, groups )
 
   for k, v in rawpairs( groups ) do
     if gs[ k ] ~= nil then
-      return false, true
+      return true, true
     end
   end
 
-  return false, false
+  return true, false
 end
 
 function ExtUtils.isUserInSkipGroup( user )
@@ -187,7 +191,7 @@ function ExtUtils.isUserInSkipGroup( user )
     local groups = ExtUtils.iCfgData[ "groups" ]
     return isUserInGroups( user, groups )
   end
-  return false, false
+  return true, false
 end
 
 -- Extract SAML response from the given string (presumably from the desktop

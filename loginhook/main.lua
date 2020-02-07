@@ -1,7 +1,7 @@
 --[[
   Authentication extensions for OpenID Connect and SAML 2.0
 
-  Copyright 2019 Perforce Software
+  Copyright 2020 Perforce Software
 ]]--
 local cjson = require "cjson"
 local curl = require "cURL.safe"
@@ -125,9 +125,9 @@ function AuthPreSSO()
     return true, "unused", "http://example.com", true
   end
   -- skip any users belonging to a specific group
-  local err, inGroup = utils.isUserInSkipGroup( user )
-  if err then
-    Helix.Core.Server.SetClientMsg( utils.msgHeader() .. err )
+  local ok, inGroup = utils.isUserInSkipGroup( user )
+  if not ok then
+    Helix.Core.Server.SetClientMsg( utils.msgHeader() .. inGroup )
     return false, "error"
   end
   if inGroup then
@@ -135,7 +135,11 @@ function AuthPreSSO()
     return true, "unused", "http://example.com", true
   end
   -- skip any users whose AuthMethod is set to ldap
-  local isLdap = utils.isUserLdap( user )
+  local ok, isLdap = utils.isUserLdap( user )
+  if not ok then
+    Helix.Core.Server.SetClientMsg( utils.msgHeader() .. isLdap )
+    return false, "error"
+  end
   if isLdap then
     utils.debug( { [ "AuthPreSSO" ] = "info: skipping LDAP user " .. user } )
     return true, "unused", "http://example.com", true
