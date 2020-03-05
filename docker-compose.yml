@@ -20,11 +20,41 @@ services:
         P4PORT: "0.0.0.0:1666"
         APT_URL: "http://package.perforce.com/apt/ubuntu"
         PUB_KEY: "http://package.perforce.com/perforce.pubkey"
+    container_name: p4d.doc
     networks:
       - authen
     ports:
       - "1666:1666"
-
+  chicago.doc:
+    build:
+      context: .
+      dockerfile: containers/chicago/Dockerfile
+      args:
+        BASE_PATH: "containers/chicago"
+        APT_URL: "http://package.perforce.com/apt/ubuntu"
+        PUB_KEY: "http://package.perforce.com/perforce.pubkey"
+    container_name: chicago.doc
+    image: chicago:latest
+    networks:
+      - authen
+    ports:
+      - "2666:2666"
+  tokyo.doc:
+    build:
+      context: .
+      dockerfile: containers/tokyo/Dockerfile
+      args:
+        BASE_PATH: "containers/tokyo"
+        APT_URL: "http://package.perforce.com/apt/ubuntu"
+        PUB_KEY: "http://package.perforce.com/perforce.pubkey"
+    container_name: tokyo.doc
+    depends_on:
+      - chicago.doc
+    networks:
+      - authen
+    ports:
+      - "3666:3666"
+            
 networks:
   authen:
     name: auth-service

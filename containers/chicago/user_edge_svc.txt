@@ -1,0 +1,4 @@
+User:	svc_tokyo_edge
+Email:	svc-tokyo@example.com
+FullName:	Edge Service
+Type:	service

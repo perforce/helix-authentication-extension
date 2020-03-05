@@ -1,0 +1,4 @@
+User:	svc_chicago_commit
+Email:	svc-chicago@example.com
+FullName:	Commit Service
+Type:	service
