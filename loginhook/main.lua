@@ -154,7 +154,11 @@ function AuthPreSSO()
   if ok then
     requestId = sdata[ "request" ]
   else
-    utils.debug( { [ "AuthPreSSO" ] = "error: failed to get request identifier" } )
+    utils.debug( {
+      [ "AuthPreSSO" ] = "error: failed to get request identifier",
+      [ "http-code" ] = url,
+      [ "http-error" ] = tostring( sdata )
+    } )
     return false
   end
   local url = utils.loginUrl( sdata )
