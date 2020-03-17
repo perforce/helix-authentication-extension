@@ -37,7 +37,7 @@ RUN ./build.sh
 # image after a successful build.
 #
 # remove empty files that cause the checkpoint to fail
-RUN rm -f /chicago/root/db.nameval
+RUN find /chicago/root -name 'db.*' -type f -empty -delete
 RUN p4d -r /chicago/root -K "db.have,db.working,db.locks,db.resolve,db.revsh,db.workingx,db.resolvex,db.stash,db.haveg,db.workingg,db.locksg,db.resolveg" -z -jd edge.ckp
 
 # install the login extension
