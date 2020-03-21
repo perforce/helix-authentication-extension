@@ -34,6 +34,8 @@ p4 user -f -i < user_jackson.txt
 yes 94f6ce8c-fbea-4fcd-b7d0-564de93beb1b | p4 passwd jackson
 p4 user -f -i < user_johndoe.txt
 yes 18873fa3-1918-43ca-a518-c706def5e07f | p4 passwd johndoe
+p4 user -f -i < user_swarm.txt
+yes ${P4PASSWD} | p4 passwd swarm
 
 #
 # create a group with long lived tickets, log in again
@@ -41,6 +43,13 @@ yes 18873fa3-1918-43ca-a518-c706def5e07f | p4 passwd johndoe
 p4 group -i < group_notimeout.txt
 p4 logout
 echo ${P4PASSWD} | p4 login
+
+#
+# give the swarm user admin protections
+#
+p4 protect -o > protects.txt
+echo '	admin user swarm * //...' >> protects.txt
+p4 protect -i < protects.txt
 
 #
 # enable LDAP authentication as well as database password

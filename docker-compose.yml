@@ -54,7 +54,22 @@ services:
       - authen
     ports:
       - "3666:3666"
-            
+  swarm.doc:
+    build:
+      context: .
+      dockerfile: containers/swarm/Dockerfile
+      args:
+        BASE_PATH: "containers/swarm"
+        P4PORT: "p4d.doc:1666"
+        APT_URL: "http://package.perforce.com/apt/ubuntu"
+        PUB_KEY: "http://package.perforce.com/perforce.pubkey"
+    container_name: swarm.doc
+    networks:
+      - authen
+    ports:
+      - "8080:80"
+      - "443:443"
+                
 networks:
   authen:
     name: auth-service
