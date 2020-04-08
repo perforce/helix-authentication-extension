@@ -18,18 +18,6 @@
   "supported_locales": [
     "en"
   ],
-  "permissions": [
-    "runNativeCode",
-    "accessFilesystem",
-    "userInteraction",
-    "userDisplay",
-    "commandOverride",
-    "modifyCommandInvocation",
-    "createNewCommand",
-    "dataPersistence",
-    "networkAccess",
-    "*"
-  ],
   "developer": {
     "name": "Perforce",
     "url": "http://perforce.com/"
