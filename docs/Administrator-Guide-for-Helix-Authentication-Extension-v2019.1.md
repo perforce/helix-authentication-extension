@@ -33,6 +33,18 @@ $ p4 extension --list --type=extensions
 
 where `[snip]` means some information has been omitted.
 
+## Preparing for Installation
+
+Before installing the authentication extension there are a few steps to be taken.
+
+### Upgrade the Clients
+
+It is helpful for the end users to have updated Helix Core clients. The updated clients will direct the user to the web browser during the login progress. Older clients may only print the URL on the screen and not open the browser automatically. See the `README.md` file for the list of supported client versions.
+
+### Allow for non-SSO Users
+
+See the section below titled [Allowing for non-SSO Users](#(optional)-allowing-for-non-sso-users) for details. Administrative users should have a fallback of a database password in the event the SSO mechanism is not operational (for instance, the identity provider is temporarily unavailable).
+
 ## Building the Extension
 
 If you already have the `loginhook.p4-extension` file, go to the **Install** section.
@@ -52,10 +64,7 @@ To install the extension, run the following command in a terminal window:
 ```shell
 $ p4 extension --install loginhook.p4-extension -y
 Extension 'Auth::loginhook#1.0' installed successfully.
-$ p4 admin restart
 ```
-
-The `restart` is necessary because p4d prepares the authentication mechanisms during startup. This is true when adding or removing `auth-` related triggers, as well as when installing or removing the loginhook extension.
 
 If this is not the first time you are installing the extension, remove the existing extension before reinstalling it. See **Removing the Extension**.
 
@@ -219,6 +228,16 @@ Extension 'Auth::loginhook#1, foobar' successfully deleted.
 ```
 
 That command will remove the named instance configuration, leaving the other configurations and the extension itself.
+
+## Applying the Changes
+
+After installing and configuring the authentication extension, the Helix Core server must be restarted for the changes to take effect.
+
+```shell
+$ p4 admin restart
+```
+
+The `restart` is necessary because Helix Core prepares the authentication mechanisms during startup. This is true when adding or removing `auth-` related triggers, as well as when installing or removing the loginhook extension.
 
 ### Debug logging
 
