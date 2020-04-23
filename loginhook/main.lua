@@ -182,6 +182,29 @@ function AuthPreSSO()
   return true, "unused", url, false
 end
 
+local function compareIdentifiers( userid, nameid )
+  utils.debug( {
+    [ "AuthCheckSSO" ] = "info: received user data",
+    [ "sdata" ] = sdata,
+    [ "userid" ] = userid,
+    [ "nameid" ] = nameid
+  } )
+  -- Compare the identifiers case-insensitively for now; if this proves to be a
+  -- problem, the sensitivity could be made configurable (e.g. use the server
+  -- sensitivity setting).
+  local ok = (userid:lower() == nameid:lower())
+  if ok then
+      utils.debug( { [ "AuthCheckSSO" ] = "info: identifiers match" } )
+    else
+      utils.debug( {
+        [ "AuthCheckSSO" ] = "error: identifiers do not match",
+        [ "userid" ] = userid,
+        [ "nameid" ] = nameid
+      } )
+  end
+  return ok
+end
+
 function AuthCheckSSO()
   utils.init()
   local userid = utils.userIdentifier()
@@ -203,7 +226,8 @@ function AuthCheckSSO()
       local ok, url, sdata = validateResponse( utils.validateUrl(), response )
       if ok then
         utils.debug( { [ "AuthCheckSSO" ] = "info: legacy mode user data", [ "sdata" ] = sdata } )
-        return userid == utils.nameIdentifier( sdata )
+        local nameid = utils.nameIdentifier( sdata )
+        return compareIdentifiers( userid, nameid )
       end
       utils.debug( {
         [ "AuthCheckSSO" ] = "error: legacy mode validation failed for user " .. user,
@@ -218,13 +242,7 @@ function AuthCheckSSO()
   local ok, url, sdata = getData( utils.statusUrl() .. requestId )
   if ok then
     local nameid = utils.nameIdentifier( sdata )
-    utils.debug( {
-      [ "AuthCheckSSO" ] = "info: received user data",
-      [ "sdata" ] = sdata,
-      [ "userid" ] = userid,
-      [ "nameid" ] = nameid
-    } )
-    return userid == nameid
+    return compareIdentifiers( userid, nameid )
   end
   utils.debug( {
     [ "AuthCheckSSO" ] = "error: auth validation failed for user " .. user,
