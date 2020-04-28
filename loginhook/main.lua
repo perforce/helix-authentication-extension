@@ -183,9 +183,15 @@ function AuthPreSSO()
 end
 
 local function compareIdentifiers( userid, nameid )
+  if nameid == nil then
+    utils.debug( {
+      [ "AuthCheckSSO" ] = "error: nameid is nil",
+      [ "userid" ] = userid
+    } )
+    return false
+  end
   utils.debug( {
-    [ "AuthCheckSSO" ] = "info: received user data",
-    [ "sdata" ] = sdata,
+    [ "AuthCheckSSO" ] = "info: comparing user identifiers",
     [ "userid" ] = userid,
     [ "nameid" ] = nameid
   } )
@@ -241,6 +247,7 @@ function AuthCheckSSO()
   -- time out if the user does not authenticate with the IdP in a timely manner.
   local ok, url, sdata = getData( utils.statusUrl() .. requestId )
   if ok then
+    utils.debug( { [ "AuthCheckSSO" ] = "info: received user data", [ "sdata" ] = sdata } )
     local nameid = utils.nameIdentifier( sdata )
     return compareIdentifiers( userid, nameid )
   end
