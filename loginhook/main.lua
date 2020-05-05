@@ -162,20 +162,17 @@ function AuthPreSSO()
     return false
   end
   local url = utils.loginUrl( sdata )
-  -- For now, use the old behavior for P4PHP/Swarm clients; N.B. when Swarm is
+  -- For now, use the 1-step procedure for P4PHP clients; N.B. when Swarm is
   -- logging the user into Perforce, the clientprog is P4PHP instead of SWARM.
   local clientprog = Helix.Core.Server.GetVar( "clientprog" )
-  -- utils.debug( { [ "clientprog" ] = clientprog } )
-  -- local clientversion = Helix.Core.Server.GetVar( "clientversion" )
-  -- utils.debug( { [ "clientversion" ] = clientversion } )
   if string.find( clientprog, "P4PHP" ) then
-    utils.debug( { [ "AuthPreSSO" ] = "info: legacy mode for P4PHP client" } )
+    utils.debug( { [ "AuthPreSSO" ] = "info: 1-step mode for P4PHP client" } )
     return true, url
   end
-  -- if old SAML integration setting is present, use old behavior
+  -- If the old SAML integration setting is present, use 1-step procedure.
   local ssoArgs = Helix.Core.Server.GetVar( "ssoArgs" )
   if string.find( ssoArgs, "--idpUrl" ) then
-    utils.debug( { [ "AuthPreSSO" ] = "info: legacy mode for desktop agent" } )
+    utils.debug( { [ "AuthPreSSO" ] = "info: 1-step mode for desktop agent" } )
     return true, url
   end
   utils.debug( { [ "AuthPreSSO" ] = "info: invoking URL " .. url } )
@@ -220,29 +217,28 @@ function AuthCheckSSO()
   local token = Helix.Core.Server.GetVar( "token" )
   utils.debug( { [ "AuthCheckSSO" ] = "info: checking user " .. user } )
   if user ~= token then
-    utils.debug( { [ "AuthCheckSSO" ] = "info: legacy mode login for user " .. user } )
-    -- If a password/token has been provided, then perhaps this is the legacy
-    -- support scenario, and the token is the SAML response coming from the
-    -- desktop agent or Swarm. In that case, try to extract the response and
-    -- send it to the service for validation. If that works, we're done,
-    -- otherwise fall back to the normal behavior.
+    utils.debug( { [ "AuthCheckSSO" ] = "info: 1-step mode login for user " .. user } )
+    -- If a password/token has been provided, then this is the 1-step procedure,
+    -- and the token is the SAML response coming from the desktop agent or
+    -- Swarm. In that case, try to extract the response and send it to the
+    -- service for validation. If that does not work, fall back to the normal
+    -- behavior.
     local response = utils.getResponse( token )
     if response then
-      -- send SAML response to auth service for validation
       local ok, url, sdata = validateResponse( utils.validateUrl(), response )
       if ok then
-        utils.debug( { [ "AuthCheckSSO" ] = "info: legacy mode user data", [ "sdata" ] = sdata } )
+        utils.debug( { [ "AuthCheckSSO" ] = "info: 1-step mode user data", [ "sdata" ] = sdata } )
         local nameid = utils.nameIdentifier( sdata )
         return compareIdentifiers( userid, nameid )
       end
       utils.debug( {
-        [ "AuthCheckSSO" ] = "error: legacy mode validation failed for user " .. user,
+        [ "AuthCheckSSO" ] = "error: 1-step mode validation failed for user " .. user,
         [ "http-code" ] = url,
         [ "http-error" ] = tostring( sdata )
       } )
     end
   end
-  -- Commence so-called normal behavior, in which we request the authenticated
+  -- Commence the usual 2-step procedure, in which we request the authenticated
   -- user data using a long-poll on the auth service. The service request will
   -- time out if the user does not authenticate with the IdP in a timely manner.
   local ok, url, sdata = getData( utils.statusUrl() .. requestId )
