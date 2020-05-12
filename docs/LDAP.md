@@ -9,12 +9,6 @@ Perforce authentication), an LDAP-based password (as defined with `p4 ldap`), as
 well as SSO authentication by means of the `auth-check-sso` trigger (which the
 authentication extension implements).
 
-## Docker Demo
-
-See the [Development.md](./Development.md) file for details on setting up and
-starting the docker containers which demonstrate the use of the extension and
-the service together, along with an LDAP service and the Shibboleth IdP.
-
 ## Perforce Configuration
 
 Permitting a combination of authentication mechanisms is a matter of setting the

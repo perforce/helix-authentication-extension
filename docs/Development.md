@@ -1,5 +1,8 @@
 # Development
 
+This document is intended for developers who are interested in learning how
+to modify and test the Helix Authentication Service.
+
 ## Docker
 
 A container with a standalone instance of Helix Core is defined for use with
