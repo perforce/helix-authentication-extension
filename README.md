@@ -42,43 +42,6 @@ installing and configuring the extension. Additionally, guidance on configuring
 LDAP authentication, along with SSO, is given in the [LDAP](./docs/LDAP.md)
 guide.
 
-## Known Issues
-
-Perforce cannot guarantee and has not exhaustively tested the compatibility of
-3rd Party Plugins with the Helix Authentication Service. It is up to each 3rd
-party plugin owner to make his/her plugin compatible.
-
-Users authenticating with the Helix Server will likely need to use one of the
-supported clients to authenticate. Once a valid P4 ticket has been acquired,
-then clients other than those listed above should function normally. In
-particular, the clients need to handle the `invokeURL` feature added in the
-2019.1 P4API. This includes the P4API-derived clients (P4Python, P4Ruby, etc)
-which at this time do not yet support this feature.
-
-### P4Eclipse
-
-When using P4Eclipse, you must authenticate using one of the clients listed
-above under the **Requirements** section. Then, when setting up the initial P4
-connection in P4Eclipse, you are prompted for a user and password. Only put in
-the username and leave the password field blank. The client will then use the
-existing connection.
-
-### P4SL
-
-When using P4SL, you must authenticate using one of the clients listed above
-under the **Requirements** section. Then, when setting up the initial P4
-connection in P4SL, you are prompted for a user and password. Only put in the
-username and leave the password field blank. The client will then use the
-existing connection.
-
-### IntelliJ (3rd Party Plugin)
-
-When logging in to Perforce using IntelliJ, it will prompt for a password but
-also open the browser to the identity provider. Once you have authenticated with
-the IdP and acquired a P4 ticket, IntelliJ will still be waiting for a password.
-Submit that login request and let it fail, after which IntelliJ will operate
-normally.
-
 ## How to Get Help
 
 Configuring the extension, the authentication service, and the identity provider
