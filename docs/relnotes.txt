@@ -98,13 +98,13 @@ Changes in every release: Bugs Fixed, New Functionality
 ----------------------------------------------------------------------
 New functionality in 2019.1.1.000001
 
-    AS-37 (Change #1911767)
+    HAS-37 (Change #1911767)
         Treat users whose AuthMethod is LDAP as non-SSO users.
 
 ----------------------------------------------------------------------
-Bugs fixed in  2019.1.1.000001
+Bugs fixed in 2019.1.1.000001
 
-    AS-47 (Change #1952506)
+    HAS-47 (Change #1952506)
         User identifiers should be compared in a case-insensitive fashion.
 
 ----------------------------------------------------------------------
