@@ -8,8 +8,8 @@
   "key": "117E9283-732B-45A6-9993-AE64C354F1C5",
   "name": "loginhook",
   "namespace": "Auth",
-  "version": "2019.1.1.000001",
-  "version_name": "2019.1 patch 1 snapshot 1",
+  "version": "2020.1-snapshot",
+  "version_name": "2020.1 pre-release snapshot",
   "description": "SSO auth integration",
   "compatible_products": [
     "p4d"
