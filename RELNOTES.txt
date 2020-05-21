@@ -1,0 +1,113 @@
+                            Release Notes for
+                        Helix Authentication Extension
+                            Version 2019.1.1.000001
+
+
+Introduction
+
+    The Helix Authentication Extension is a Helix Core extension that integrates
+    with the Helix Authentication Service to facilitate the integration of
+    identity providers supporting either the OpenID Connect or SAML 2.0
+    authentication protocols.
+
+    Perforce numbers releases YYYY.R/CCCCC, for example 2002.2/30547. YYYY is
+    the year; R is the release of that year; CCCCC is the bug fix change level.
+    Each bug fix in these release notes is marked by its change number. Any
+    build includes (1) all bug fixes for all previous releases and (2) all bug
+    fixes for the current release up to the bug fix change level.
+
+
+Important Notes
+
+    Logging out of a Helix Core or Helix ALM client does not invoke a logout
+    with the identity provider (IdP). Depending on the IdP, subsequently
+    starting a Helix Core or Helix ALM client might result with the user being
+    logged in again without the user being prompted to provide credentials.
+
+
+Supported Platforms
+
+    Linux (x86_64)
+        RHEL 7, 8
+        CentOS 7, 8.0
+        Ubuntu 16.04, 18.04
+
+    The above platforms are tested and subject to regression testing on a
+    frequent basis. Errors or bugs discovered in these platforms are prioritized
+    for correction. Any platform not listed above is not actively tested by
+    Perforce.
+
+
+Requirements
+
+    Helix Core Server 2019.1 or higher
+
+
+Documentation
+
+    The Helix Authentication Extension Administrator's Guide is publicly
+    available on perforce.com. The guide details the steps for installation,
+    upgrade, and configuration of the server extension.
+
+
+Known Limitations
+
+    Commit/Edge Servers
+
+        Support for commit/edge server configurations has a known issue (job
+        #102020) in which the login URL either does not appear or appears twice.
+
+    Perforce cannot guarantee and has not exhaustively tested the compatibility
+    of 3rd Party Plugins with the Helix Authentication Service. It is up to each
+    3rd party plugin owner to make his/her plugin compatible.
+
+    Users authenticating with the Helix Server will likely need to use one of
+    the supported clients to authenticate. Once a valid P4 ticket has been
+    acquired, then clients other than those listed above should function
+    normally. In particular, the clients need to handle the `invokeURL` feature
+    added in the 2019.1 P4API. This includes the P4API-derived clients
+    (P4Python, P4Ruby, etc) which at this time do not yet support this feature.
+
+    P4Eclipse
+
+        When using P4Eclipse, you must authenticate using one of the clients
+        listed above under the **Requirements** section. Then, when setting up
+        the initial P4 connection in P4Eclipse, you are prompted for a user and
+        password. Only put in the username and leave the password field blank.
+        The client will then use the existing connection.
+
+    P4SL
+
+        When using P4SL, you must authenticate using one of the clients listed
+        above under the **Requirements** section. Then, when setting up the
+        initial P4 connection in P4SL, you are prompted for a user and password.
+        Only put in the username and leave the password field blank. The client
+        will then use the existing connection.
+
+    IntelliJ (3rd Party Plugin)
+
+        When logging in to Perforce using IntelliJ, it will prompt for a
+        password but also open the browser to the identity provider. Once you
+        have authenticated with the IdP and acquired a P4 ticket, IntelliJ will
+        still be waiting for a password. Submit that login request and let it
+        fail, after which IntelliJ will operate normally.
+
+
+Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in 2019.1.1.000001
+
+    HAS-37 (Change #1911767)
+        Treat users whose AuthMethod is LDAP as non-SSO users.
+
+----------------------------------------------------------------------
+Bugs fixed in 2019.1.1.000001
+
+    HAS-47 (Change #1952506)
+        User identifiers should be compared in a case-insensitive fashion.
+
+----------------------------------------------------------------------
+2019.1
+
+    Initial release
