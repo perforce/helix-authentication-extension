@@ -8,15 +8,16 @@ authentication protocols.
 ## Versions
 
 Official releases will have version numbers of the form `YYYY.N`, such as
-2019.1, 2020.1, or 2020.2. These releases have undergone testing and are
+`2019.1`, `2020.1`, or `2020.2`. These releases have undergone testing and are
 available on *releases* page in the GitHub project.
 
 Patch releases will have version numbers with three dot separated numbers, such
-as 2020.1.1 or 2019.1.2.
+as `2020.1.1` or `2019.1.2`.
 
 The unofficial "snapshot" releases will have `-snapshot` after the version
 number: `YYYY.N-snapshot` after a major release, and `YYYY.N.N-snapshot` after a
-patch release.
+patch release. These may include changes that are not yet reflected in the
+documentation, and these versions are limited to Community Support.
 
 ## Overview
 
