@@ -60,6 +60,9 @@ p4 configure set auth.ldap.order.1=simple
 p4 configure set auth.sso.allow.passwd=1
 p4 configure set auth.sso.nonldap=1
 
+# disable the signed extensions requirement for testing
+p4 configure set server.extensions.allow.unsigned=1
+
 #
 # stop the server so that the run script can start it again,
 # and the authentication changes will take effect
