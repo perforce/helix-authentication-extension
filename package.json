@@ -1,0 +1,34 @@
+{
+  "name": "helix-auth-extension",
+  "version": "2019.1.1-000001",
+  "description": "Helix Authentication Extension",
+  "keywords": [
+    "authentication",
+    "oidc",
+    "saml"
+  ],
+  "homepage": "http://www.perforce.com",
+  "license": "UNLICENSED",
+  "author": {
+    "name": "Perforce Software",
+    "email": "support@perforce.com"
+  },
+  "main": "hook.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "mocha --recursive --exit"
+  },
+  "private": true,
+  "dependencies": {
+    "express": "^4.17.1",
+    "http-errors": "^1.7.3"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "fs-extra": "^9.0.0",
+    "mocha": "^7.2.0",
+    "p4api": "^3.3.1"
+  }
+}
