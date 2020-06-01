@@ -50,9 +50,9 @@ function startServerGeneric (config, ssldir) {
     p4d.stdout.on('data', (data) => {
       if (data.toString().includes('Perforce Server starting...')) {
         p4d.unref()
-        // give the server just a little more time before we try connecting,
+        // give the server a little more time before we try connecting,
         // otherwise random tests will intermittently fail on the first call
-        setTimeout(resolve, 20)
+        setTimeout(resolve, 100)
       }
     })
     p4d.stderr.on('data', (data) => {

@@ -45,11 +45,11 @@ describe('Extension', function () {
         P4USEBROWSER: false
       }
 
-      before(function () {
+      before(async function () {
         // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'oidc', 'http://localhost:3003/pass/oidc')
-        helpers.restartServer(runner.config)
+        await helpers.restartServer(runner.config)
       })
 
       it('should login successfully', function () {
@@ -59,6 +59,9 @@ describe('Extension', function () {
         assert.include(loginCmd.error[0].data, 'Navigate to URL')
         // and it has already verified the profile so we have a ticket
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+        const log = helpers.readExtensionLog(runner.config)
+        assert.include(log, '"preferred_username":"repoman"')
+        assert.include(log, 'info: identifiers match')
       })
     })
 
@@ -69,11 +72,11 @@ describe('Extension', function () {
         P4USEBROWSER: false
       }
 
-      before(function () {
+      before(async function () {
         // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'saml', 'http://localhost:3003/pass/saml')
-        helpers.restartServer(runner.config)
+        await helpers.restartServer(runner.config)
       })
 
       it('should login successfully', function () {
@@ -83,6 +86,9 @@ describe('Extension', function () {
         assert.include(loginCmd.error[0].data, 'Navigate to URL')
         // and it has already verified the profile so we have a ticket
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+        const log = helpers.readExtensionLog(runner.config)
+        assert.include(log, '"nameID":"repoman@example.com"')
+        assert.include(log, 'info: identifiers match')
       })
     })
 
@@ -93,11 +99,11 @@ describe('Extension', function () {
         P4USEBROWSER: false
       }
 
-      before(function () {
+      before(async function () {
         // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'saml', 'http://localhost:3003/pass/case')
-        helpers.restartServer(runner.config)
+        await helpers.restartServer(runner.config)
       })
 
       it('should login successfully', function () {
@@ -107,6 +113,9 @@ describe('Extension', function () {
         assert.include(loginCmd.error[0].data, 'Navigate to URL')
         // and it has already verified the profile so we have a ticket
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+        const log = helpers.readExtensionLog(runner.config)
+        assert.include(log, '"nameID":"rEpOmAn@example.com"')
+        assert.include(log, 'info: identifiers match')
       })
     })
   })
@@ -119,11 +128,11 @@ describe('Extension', function () {
         P4USEBROWSER: false
       }
 
-      before(function () {
+      before(async function () {
         // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'oidc', 'http://localhost:3003/fail/401')
-        helpers.restartServer(runner.config)
+        await helpers.restartServer(runner.config)
       })
 
       it('should login successfully', function () {
@@ -133,6 +142,8 @@ describe('Extension', function () {
         assert.include(loginCmd.error[0].data, 'Navigate to URL')
         // and it has already failed validation
         assert.include(loginCmd.error[1].data, 'validation failed')
+        const log = helpers.readExtensionLog(runner.config)
+        assert.include(log, '"http-code":401')
       })
     })
 
@@ -143,11 +154,11 @@ describe('Extension', function () {
         P4USEBROWSER: false
       }
 
-      before(function () {
+      before(async function () {
         // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'oidc', 'http://localhost:3003/fail/403')
-        helpers.restartServer(runner.config)
+        await helpers.restartServer(runner.config)
       })
 
       it('should login successfully', function () {
@@ -157,6 +168,8 @@ describe('Extension', function () {
         assert.include(loginCmd.error[0].data, 'Navigate to URL')
         // and it has already failed validation
         assert.include(loginCmd.error[1].data, 'validation failed')
+        const log = helpers.readExtensionLog(runner.config)
+        assert.include(log, '"http-code":403')
       })
     })
 
@@ -167,11 +180,11 @@ describe('Extension', function () {
         P4USEBROWSER: false
       }
 
-      before(function () {
+      before(async function () {
         // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'oidc', 'http://localhost:3003/fail/408')
-        helpers.restartServer(runner.config)
+        await helpers.restartServer(runner.config)
       })
 
       it('should login successfully', function () {
@@ -181,6 +194,8 @@ describe('Extension', function () {
         assert.include(loginCmd.error[0].data, 'Navigate to URL')
         // and it has already failed validation
         assert.include(loginCmd.error[1].data, 'validation failed')
+        const log = helpers.readExtensionLog(runner.config)
+        assert.include(log, '"http-code":408')
       })
     })
 
@@ -191,11 +206,11 @@ describe('Extension', function () {
         P4USEBROWSER: false
       }
 
-      before(function () {
+      before(async function () {
         // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'oidc', 'http://localhost:3003/fail/start')
-        helpers.restartServer(runner.config)
+        await helpers.restartServer(runner.config)
       })
 
       it('should login successfully', function () {
@@ -204,6 +219,8 @@ describe('Extension', function () {
         // should fallback to attempting the ususal SSO login which fails
         // because P4LOGINSSO is not set in the client
         assert.include(loginCmd.error[0].data, 'Single sign-on on client failed')
+        const log = helpers.readExtensionLog(runner.config)
+        assert.include(log, '"http-code":500')
       })
     })
 
@@ -214,11 +231,11 @@ describe('Extension', function () {
         P4USEBROWSER: false
       }
 
-      before(function () {
+      before(async function () {
         // install and configure the extension
         helpers.installExtension(runner.config)
-        helpers.configureExtension(runner.config, 'oidc', 'http://localhost:3003/fail/mismatch')
-        helpers.restartServer(runner.config)
+        helpers.configureExtension(runner.config, 'saml', 'http://localhost:3003/fail/mismatch')
+        await helpers.restartServer(runner.config)
       })
 
       it('should login successfully', function () {
@@ -228,6 +245,8 @@ describe('Extension', function () {
         assert.include(loginCmd.error[0].data, 'Navigate to URL')
         // and it has already failed validation
         assert.include(loginCmd.error[1].data, 'validation failed')
+        const log = helpers.readExtensionLog(runner.config)
+        assert.include(log, 'error: identifiers do not match')
       })
     })
   })

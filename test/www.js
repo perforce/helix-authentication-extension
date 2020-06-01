@@ -2,7 +2,7 @@
 // Copyright 2020 Perforce Software
 //
 const http = require('http')
-const app = require('../app')
+const app = require('./app')
 
 const port = normalizePort(getPort())
 app.set('port', port)

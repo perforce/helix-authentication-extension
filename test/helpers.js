@@ -3,6 +3,7 @@
 //
 const { fork } = require('child_process')
 const fs = require('fs')
+const path = require('path')
 const { assert } = require('chai')
 const { P4 } = require('p4api')
 
@@ -79,8 +80,19 @@ function configureExtension (config, protocol, serviceUrl) {
 }
 
 function restartServer (config) {
-  const p4 = makeP4(config)
-  p4.cmdSync('admin restart')
+  return new Promise((resolve, reject) => {
+    const p4 = makeP4(config)
+    p4.cmdSync('admin restart')
+    // give the server time to start up again
+    setTimeout(resolve, 100)
+  })
+}
+
+const dataDirPath = ['server.extensions.dir', '117E9283-732B-45A6-9993-AE64C354F1C5', '1-data']
+
+function readExtensionLog (config) {
+  const logPath = path.join(config.p4root, ...dataDirPath, 'log.json')
+  return fs.readFileSync(logPath, 'utf8')
 }
 
 module.exports = {
@@ -89,5 +101,6 @@ module.exports = {
   startService,
   installExtension,
   configureExtension,
-  restartServer
+  restartServer,
+  readExtensionLog
 }
