@@ -30,12 +30,21 @@ function establishSuper (config) {
   assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
 }
 
-function createUser (user, config) {
+function createUser (user, password, config) {
   const p4 = makeP4(config)
   const userIn = p4.cmdSync('user -i -f', user)
   assert.equal(userIn.info[0].data, `User ${user.User} saved.`)
-  const passwdCmd = p4.cmdSync(`passwd -P 3E61275075F3AE4D1844 ${user.User}`)
+  const passwdCmd = p4.cmdSync(`passwd -P ${password} ${user.User}`)
   assert.equal(passwdCmd.info[0].data, 'Password updated.')
+}
+
+function createGroup (group, config) {
+  const p4 = makeP4(config)
+  const groupOut = p4.cmdSync(`group -o ${group.Group}`)
+  const input = Object.assign({}, groupOut.stat[0], group)
+  delete input.code
+  const groupIn = p4.cmdSync('group -i', input)
+  assert.equal(groupIn.info[0].data, 'Group admins created.')
 }
 
 function startService (port) {
@@ -50,7 +59,9 @@ function installExtension (config) {
     const deleteCmd = p4.cmdSync('extension --delete Auth::loginhook -y')
     assert.include(deleteCmd.info[0].data, 'successfully deleted')
   }
-  fs.unlinkSync('loginhook.p4-extension')
+  if (fs.existsSync('loginhook.p4-extension')) {
+    fs.unlinkSync('loginhook.p4-extension')
+  }
   const packageCmd = p4.cmdSync('extension --package loginhook')
   assert.equal(packageCmd.info[0].data, 'Extension packaged successfully.')
   const installCmd = p4.cmdSync('extension --install loginhook.p4-extension -y')
@@ -72,7 +83,7 @@ function configureExtension (config, protocol, serviceUrl) {
   const instanceSpec = instanceOut.stat[0]
   instanceSpec.ExtConfig = 'enable-logging:\n\ttrue\n' +
     `name-identifier:\n\t${protocol === 'oidc' ? 'email' : 'nameID'}\n` +
-    'non-sso-groups:\n\t...\n' +
+    'non-sso-groups:\n\tadmins\n' +
     'non-sso-users:\n\tbruno\n' +
     'user-identifier:\n\temail\n'
   const instanceIn = p4.cmdSync('extension --configure Auth::loginhook --name testing -i', instanceSpec)
@@ -98,6 +109,7 @@ function readExtensionLog (config) {
 module.exports = {
   establishSuper,
   createUser,
+  createGroup,
   startService,
   installExtension,
   configureExtension,

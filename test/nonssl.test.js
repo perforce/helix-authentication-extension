@@ -22,6 +22,15 @@ describe('Extension', function () {
       User: 'repoman',
       Email: 'repoman@example.com',
       FullName: 'Repo Man'
+    }, '3E61275075F3AE4D1844', runner.config)
+    helpers.createUser({
+      User: 'nimda',
+      Email: 'nimda@example.com',
+      FullName: 'Admin Man'
+    }, 'secret123', runner.config)
+    helpers.createGroup({
+      Group: 'admins',
+      Users0: 'nimda'
     }, runner.config)
     // start the authentication mock service
     serviceProcess = helpers.startService(3003)
@@ -38,6 +47,44 @@ describe('Extension', function () {
   })
 
   describe('Success cases', function () {
+    describe('non-sso-users login', function () {
+      before(async function () {
+        helpers.installExtension(runner.config)
+        helpers.configureExtension(runner.config, 'oidc', 'http://localhost:3003/pass/oidc')
+        await helpers.restartServer(runner.config)
+      })
+
+      it('should login successfully', function () {
+        const p4 = new P4({
+          P4PORT: runner.config.port,
+          P4USER: runner.config.user
+        })
+        const loginCmd = p4.cmdSync('login', 'p8ssword')
+        assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+        const log = helpers.readExtensionLog(runner.config)
+        assert.include(log, 'info: skipping user bruno')
+      })
+    })
+
+    describe('non-sso-groups login', function () {
+      before(async function () {
+        helpers.installExtension(runner.config)
+        helpers.configureExtension(runner.config, 'oidc', 'http://localhost:3003/pass/oidc')
+        await helpers.restartServer(runner.config)
+      })
+
+      it('should login successfully', function () {
+        const p4 = new P4({
+          P4PORT: runner.config.port,
+          P4USER: 'nimda'
+        })
+        const loginCmd = p4.cmdSync('login', 'secret123')
+        assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+        const log = helpers.readExtensionLog(runner.config)
+        assert.include(log, 'info: group-based skipping user nimda')
+      })
+    })
+
     describe('login with OpenID Connect', function () {
       const config = {
         P4USER: 'repoman',
@@ -46,7 +93,6 @@ describe('Extension', function () {
       }
 
       before(async function () {
-        // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'oidc', 'http://localhost:3003/pass/oidc')
         await helpers.restartServer(runner.config)
@@ -73,7 +119,6 @@ describe('Extension', function () {
       }
 
       before(async function () {
-        // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'saml', 'http://localhost:3003/pass/saml')
         await helpers.restartServer(runner.config)
@@ -100,7 +145,6 @@ describe('Extension', function () {
       }
 
       before(async function () {
-        // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'saml', 'http://localhost:3003/pass/case')
         await helpers.restartServer(runner.config)
@@ -129,7 +173,6 @@ describe('Extension', function () {
       }
 
       before(async function () {
-        // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'oidc', 'http://localhost:3003/fail/401')
         await helpers.restartServer(runner.config)
@@ -155,7 +198,6 @@ describe('Extension', function () {
       }
 
       before(async function () {
-        // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'oidc', 'http://localhost:3003/fail/403')
         await helpers.restartServer(runner.config)
@@ -181,7 +223,6 @@ describe('Extension', function () {
       }
 
       before(async function () {
-        // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'oidc', 'http://localhost:3003/fail/408')
         await helpers.restartServer(runner.config)
@@ -207,7 +248,6 @@ describe('Extension', function () {
       }
 
       before(async function () {
-        // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'oidc', 'http://localhost:3003/fail/start')
         await helpers.restartServer(runner.config)
@@ -232,7 +272,6 @@ describe('Extension', function () {
       }
 
       before(async function () {
-        // install and configure the extension
         helpers.installExtension(runner.config)
         helpers.configureExtension(runner.config, 'saml', 'http://localhost:3003/fail/mismatch')
         await helpers.restartServer(runner.config)
