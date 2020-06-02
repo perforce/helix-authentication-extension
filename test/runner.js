@@ -5,24 +5,23 @@ const fs = require('fs-extra')
 const path = require('path')
 const process = require('process')
 const { exec, spawn } = require('child_process')
+const getPort = require('get-port')
 const { version } = require('../package.json')
 
 const defaultConfig = {
   user: 'bruno',
   password: 'p8ssword',
-  port: 'localhost:2666',
   prog: 'p4api',
   progv: version,
-  p4root: './tmp/p4d-2666'
+  p4root: './tmp/p4d-nonssl'
 }
 
-const sslConfig = {
+const defaultSslConfig = {
   user: 'bruno',
   password: 'p8ssword',
-  port: 'ssl:localhost:2667',
   prog: 'p4api',
   progv: version,
-  p4root: './tmp/p4d-2667'
+  p4root: './tmp/p4d-ssl'
 }
 
 function startServerGeneric (config, ssldir) {
@@ -52,7 +51,7 @@ function startServerGeneric (config, ssldir) {
         p4d.unref()
         // give the server a little more time before we try connecting,
         // otherwise random tests will intermittently fail on the first call
-        setTimeout(resolve, 100)
+        setTimeout(() => resolve(config), 100)
       }
     })
     p4d.stderr.on('data', (data) => {
@@ -61,11 +60,17 @@ function startServerGeneric (config, ssldir) {
   })
 }
 
-function startServer (config) {
+async function startServer () {
+  const portnum = await getPort()
+  const port = `localhost:${portnum}`
+  const config = Object.assign({}, defaultConfig, { port })
   return startServerGeneric(config, null)
 }
 
-function startSslServer (config) {
+async function startSslServer () {
+  const portnum = await getPort()
+  const port = `ssl:localhost:${portnum}`
+  const config = Object.assign({}, defaultSslConfig, { port })
   // set up everything for the SSL server
   const ssldir = path.join(config.p4root, 'ssl')
   fs.emptyDirSync(ssldir)
@@ -108,8 +113,6 @@ function stopServer (config) {
 }
 
 module.exports = {
-  config: defaultConfig,
-  sslConfig,
   startServer,
   startSslServer,
   stopServer

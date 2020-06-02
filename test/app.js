@@ -71,8 +71,9 @@ app.use((err, req, res, next) => {
 })
 
 function newRequest (req, res, next) {
-  const requestId = 'purpletuesday'
-  const baseUrl = 'http://localhost:3003'
+  const port = app.get('port')
+  const requestId = 'greenthursday'
+  const baseUrl = `http://localhost:${port}`
   const loginUrl = `${baseUrl}/saml/login/${requestId}`
   res.json({
     request: requestId,

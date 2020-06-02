@@ -4,34 +4,20 @@
 const http = require('http')
 const app = require('./app')
 
+//
+// Spawned via child_process.fork() and output is hidden. Note that it seems to
+// be spawned twice, once with the desired environment and another time with the
+// parent's environment. That process's output is not hidden, so to avoid
+// cluttering the test output, this module prints nothing at all.
+//
+
 const port = normalizePort(getPort())
 app.set('port', port)
 
 const server = http.createServer(app)
 server.listen(port)
-server.on('error', (error) => {
-  if (error.syscall !== 'listen') {
-    throw error
-  }
-  const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error('%s requires elevated privileges', bind)
-      process.exit(1)
-    case 'EADDRINUSE':
-      console.error('%s is already in use', bind)
-      process.exit(1)
-    default:
-      throw error
-  }
-})
-server.on('listening', () => {
-  const addr = server.address()
-  const bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port
-  console.debug('Listening on %s', bind)
+server.on('error', (_err) => {
+  process.exit(1)
 })
 
 function getPort () {
