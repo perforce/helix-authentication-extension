@@ -8,7 +8,7 @@ const getPort = require('get-port')
 const helpers = require('./helpers')
 const runner = require('./runner')
 
-describe('Extension', function () {
+describe('Non-SSL', function () {
   let serviceProcess
   let p4config
   let port

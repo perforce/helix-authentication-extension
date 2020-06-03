@@ -30,10 +30,6 @@ function startServerGeneric (config, ssldir) {
     if (ssldir) {
       env = Object.assign({}, env, { P4SSLDIR: ssldir })
     }
-
-    // ensure an empty test directory exists
-    fs.emptyDirSync(config.p4root)
-
     const args = [
       '-r', config.p4root,
       '-J', 'journal',
@@ -64,6 +60,8 @@ async function startServer () {
   const portnum = await getPort()
   const port = `localhost:${portnum}`
   const config = Object.assign({}, defaultConfig, { port })
+  // ensure an empty test directory exists
+  fs.emptyDirSync(config.p4root)
   return startServerGeneric(config, null)
 }
 
@@ -71,9 +69,11 @@ async function startSslServer () {
   const portnum = await getPort()
   const port = `ssl:localhost:${portnum}`
   const config = Object.assign({}, defaultSslConfig, { port })
+  // ensure an empty test directory exists
+  fs.emptyDirSync(config.p4root)
   // set up everything for the SSL server
   const ssldir = path.join(config.p4root, 'ssl')
-  fs.emptyDirSync(ssldir)
+  fs.mkdir(ssldir)
   fs.chmodSync(ssldir, 0o700)
   const certfile = path.join(ssldir, 'certificate.txt')
   fs.copyFileSync('test/fixtures/certificate.txt', certfile)

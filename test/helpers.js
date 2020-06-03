@@ -16,6 +16,12 @@ function makeP4 (config) {
   return p4
 }
 
+function establishTrust (config) {
+  const p4 = makeP4(config)
+  const trustCmd = p4.cmdSync('trust -y -f')
+  assert.include(trustCmd.data, 'Added trust for P4PORT')
+}
+
 function establishSuper (config) {
   const p4 = makeP4(config)
   const userOut = p4.cmdSync('user -o')
@@ -28,13 +34,15 @@ function establishSuper (config) {
   assert.equal(passwdCmd.info[0].data, 'Password updated.')
   const loginCmd = p4.cmdSync('login', 'p8ssword')
   assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+  const configCmd = p4.cmdSync('configure set security=3')
+  assert.equal(configCmd.stat[0].Action, 'set')
 }
 
 function createUser (user, password, config) {
   const p4 = makeP4(config)
   const userIn = p4.cmdSync('user -i -f', user)
   assert.equal(userIn.info[0].data, `User ${user.User} saved.`)
-  const passwdCmd = p4.cmdSync(`passwd -P ${password} ${user.User}`)
+  const passwdCmd = p4.cmdSync(`passwd ${user.User}`, `${password}\n${password}`)
   assert.equal(passwdCmd.info[0].data, 'Password updated.')
 }
 
@@ -107,6 +115,7 @@ function readExtensionLog (config) {
 }
 
 module.exports = {
+  establishTrust,
   establishSuper,
   createUser,
   createGroup,
