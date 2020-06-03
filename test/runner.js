@@ -73,7 +73,7 @@ async function startSslServer () {
   fs.emptyDirSync(config.p4root)
   // set up everything for the SSL server
   const ssldir = path.join(config.p4root, 'ssl')
-  fs.mkdir(ssldir)
+  fs.mkdirSync(ssldir)
   fs.chmodSync(ssldir, 0o700)
   const certfile = path.join(ssldir, 'certificate.txt')
   fs.copyFileSync('test/fixtures/certificate.txt', certfile)
