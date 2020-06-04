@@ -31,6 +31,24 @@ This will set up an instance of Helix Core with several test users, as well as
 install the extension with a sensible configuration for testing with a test
 installation of the authentication service, as described in the next section.
 
+### Container Name Resolution
+
+The docker containers have names that are used internally to find each other. In
+order for the container host to resolve these names, it may be helpful to
+install [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html). The easiest
+way to run dnsmasq is via Docker. If using a macOS system, the commands below
+will get dnsmasq and the host configured appropriately:
+
+```shell
+$ echo "address=/.doc/127.0.0.1" | sudo tee - /etc/dnsmasq.conf
+$ sudo mkdir /etc/resolver
+$ echo 'nameserver 127.0.0.1' | sudo tee /etc/resolver/doc
+$ docker run --name dnsmasq -d -p 53:53/udp -p 5380:8080 \
+    -v /etc/dnsmasq.conf:/etc/dnsmasq.conf \
+    --log-opt 'max-size=1m'  -e 'HTTP_USER=admin' -e 'HTTP_PASS=admin' \
+    --restart always jpillora/dnsmasq
+```
+
 ### Authentication Service
 
 The containers for the authentication service and test identity providers
