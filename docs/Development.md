@@ -1,7 +1,19 @@
 # Development
 
 This document is intended for developers who are interested in learning how
-to modify and test the Helix Authentication Service.
+to modify and test the Helix Authentication Extension.
+
+## Automated Testing
+
+Automated tests for this extension are written using JavaScript testing tools
+(Chai and Mocha). To prepare and run the tests, you will need to install
+[Node.js](https://nodejs.org/) *LTS* and run these commands in the directory
+containing the `package.json` file:
+
+```shell
+npm install
+npm test
+```
 
 ## Docker
 
@@ -11,8 +23,8 @@ Compose](https://docs.docker.com/compose/). To build and start the container,
 use `docker-compose` like so:
 
 ```shell
-$ docker-compose build p4d.doc
-$ docker-compose up -d p4d.doc
+docker-compose build p4d.doc
+docker-compose up -d p4d.doc
 ```
 
 This will set up an instance of Helix Core with several test users, as well as
@@ -32,14 +44,12 @@ project.
 In addition to a standalone container running a single instance of Helix Core,
 there are two containers that define a commit/edge server pair. They are
 configured in a similar fashion to the standalone instance, with the addition of
-one being a commit server and the other being an edge server. To bring this
+one being a commit server and the other being an edge server. To bring these
 containers up and get them connected, use the following commands:
 
 ```shell
-docker-compose build chicago.doc
-docker-compose build tokyo.doc
-docker-compose up -d chicago.doc
-docker-compose up -d tokyo.doc
+docker-compose up --build -d chicago.doc
+docker-compose up --build -d tokyo.doc
 docker-compose exec chicago.doc /setup/login.sh
 ```
 
@@ -47,13 +57,27 @@ The last `exec` command is to perform the commit service user login to the edge
 server instance, which cannot be done until both containers have been started
 (hence it cannot be done during the build).
 
+### Swarm Testing
+
+A container that installs the latest release of Swarm, configured to connect to
+the Helix Server in the `p4d.doc` container, is defined with the name
+`swarm.doc`, and can be built and started like so:
+
+```shell
+docker-compose up --build -d swarm.doc
+```
+
+This Swarm instance is pre-configured to use the authentication service instance
+reachable at `https://auth-svc.doc:3000/`, running in a container defined in the
+Helix Authentication Service code base.
+
 ## Installing the Extension
 
 Alongside this README file there exists a JavaScript file named `hook.js` that
 is able to package and install the extension. However, it has several
-dependencies and is configured using environment variables. It is intended
-primarily for developers testing against a non-production Helix Server. See the
-comments at the top of that file for additional information.
+dependencies and can only be configured using environment variables. It is
+intended primarily for **developers** testing against a **non-production** Helix
+Server. This script is unsupported.
 
 ## Controlling URL open
 
