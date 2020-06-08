@@ -8,7 +8,7 @@
     "saml"
   ],
   "homepage": "http://www.perforce.com",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "author": {
     "name": "Perforce Software",
     "email": "support@perforce.com"
@@ -20,7 +20,6 @@
   "scripts": {
     "test": "mocha --recursive --exit"
   },
-  "private": true,
   "devDependencies": {
     "chai": "^4.2.0",
     "express": "^4.17.1",
