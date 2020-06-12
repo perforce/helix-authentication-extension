@@ -44,9 +44,13 @@ local function curlSecureOptions( c )
   c:setopt( curl.OPT_USE_SSL, true )
   c:setopt( curl.OPT_SSLCERT, Helix.Core.Server.GetArchDirFileName( "client.crt" ) )
   c:setopt( curl.OPT_SSLKEY, Helix.Core.Server.GetArchDirFileName( "client.key" ) )
-  -- verification can be set to true only if the certs are not self-signed
+  -- Use a specific certificate authority rather than the default bundle because
+  -- we ship with self-signed certificates.
   c:setopt_cainfo( Helix.Core.Server.GetArchDirFileName( "ca.crt" ) )
+  -- Ensure the server certificate is valid by checking certificate authority;
+  -- verification can be set to true only if the certs are not self-signed.
   c:setopt( curl.OPT_SSL_VERIFYPEER, false )
+  -- Ensure host name matches common name in server certificate.
   c:setopt( curl.OPT_SSL_VERIFYHOST, false )
 end
 

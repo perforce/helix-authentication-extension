@@ -376,6 +376,16 @@ The most likely scenario is that the user profile data returned by the identity 
 
 Note that the `nameID` value does not match the `userid`, although they are similar. The extension will only accept values that match **exactly**. In this example, it would seem that the `userid` is an email address (the `Email` field of the Perforce user spec), while the SAML Name ID is a username. There are two choices for resolving this mismatch: 1) change the SAML IdP configuration to return an email address for the Name ID, 2) change the `user-identifier` *instance* configuration of the extension to `user` and hope that the Perforce user name matches the SAML Name ID.
 
+### HTTP error code 403 in extension log
+
+If the extension is failing to authenticate the user, and the extension log file contains something like this:
+
+```json
+{"data":{"AuthCheckSSO":"error: auth validation failed for user bruno","http-code":403,"http-error":"nil"},"nanos":194320152,"pid":30482,"recType":0,"seconds":1591982194}
+```
+
+Then the issue is that the client certificates used by the extension to request the user profile from the authentication service is not acceptable. Either the certificate issuer is not trusted by the certificate authority in use (as named by the `CA_CERT_FILE` or `CA_CERT_PATH` settings in the service), or the common name in the client certificate does not match the pattern provided in the `CLIENT_CERT_CN` service setting. It could also be the case that the client certificate expired. In most cases, updating the client certificates in extension will resolve the issue.
+
 ### Curl related errors in extension log
 
 If the extension is failing to authenticate the user, and the extension log file contains something like this:
