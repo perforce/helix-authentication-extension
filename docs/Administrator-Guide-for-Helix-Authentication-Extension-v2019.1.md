@@ -43,7 +43,7 @@ It is helpful for the end users to have updated Helix Core clients. The updated 
 
 ### Allow for non-SSO Users
 
-See the section below titled [Allowing for non-SSO Users](#(optional)-allowing-for-non-sso-users) for details. Administrative users should have a fallback of a database password in the event the SSO mechanism is not operational (for instance, the identity provider is temporarily unavailable).
+See the section below titled [Allowing for non-SSO Users](#allowing-for-non-sso-users) for details. Administrative users should have a fallback of a database password in the event the SSO mechanism is not operational (for instance, the identity provider is temporarily unavailable).
 
 ## Building the Extension
 
@@ -264,7 +264,9 @@ For **OIDC**, the user profile often includes an `email` field. The server exten
 
 If you are unsure of the contents of the user profile returned from the identity provider, enable the debug logging in either the authentication service or the server extension, and then examine the logs after attempting a login. With the server extension, set the `enable-logging` *instance* configuration setting to `true`, attempt a login, and look for the `log.json` file under the `server.extensions.dir` directory of the Helix depot. For the authentication service, set the `DEBUG` environment variable to `auth:*`, restart the service, attempt the login, and look at the output from the service (either in the console or in a pm2 log file, if you are using pm2).
 
-### (Optional) Allowing for non-SSO Users
+### Allowing for non-SSO Users
+
+Configuring the extension to allow for non-SSO users is not required, however, it is recommended to have at least the administrative user named, either individually, or as part of a group of admin users. If either the Helix Authentication Service or the identity provider were to be unavailable, admin users would still be able to authenticate with Helix Core using another method, such as a database password or LDAP authentication.
 
 The process for enabling non-SSO users consists of three steps:
 
