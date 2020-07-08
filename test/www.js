@@ -16,7 +16,8 @@ app.set('port', port)
 
 const server = http.createServer(app)
 server.listen(port)
-server.on('error', (_err) => {
+server.on('error', (err) => {
+  console.error(`error: ${err}`)
   process.exit(1)
 })
 
@@ -24,7 +25,7 @@ function getPort () {
   if (process.env.PORT) {
     return process.env.PORT
   }
-  return '3000'
+  return '3300'
 }
 
 function normalizePort (val) {
