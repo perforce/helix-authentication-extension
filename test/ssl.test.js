@@ -34,7 +34,7 @@ describe('SSL', function () {
     }, p4config)
     // start the authentication mock service
     port = await getPort()
-    serviceProcess = helpers.startService(port)
+    serviceProcess = helpers.startSslService(port)
   })
 
   after(async function () {
@@ -46,7 +46,7 @@ describe('SSL', function () {
     describe('non-sso-users login', function () {
       before(async function () {
         helpers.installExtension(p4config)
-        helpers.configureExtension(p4config, 'oidc', `http://localhost:${port}/pass/oidc`)
+        helpers.configureExtension(p4config, 'oidc', `https://localhost:${port}/pass/oidc`)
         await helpers.restartServer(p4config)
       })
 
@@ -65,7 +65,7 @@ describe('SSL', function () {
     describe('non-sso-groups login', function () {
       before(async function () {
         helpers.installExtension(p4config)
-        helpers.configureExtension(p4config, 'oidc', `http://localhost:${port}/pass/oidc`)
+        helpers.configureExtension(p4config, 'oidc', `https://localhost:${port}/pass/oidc`)
         await helpers.restartServer(p4config)
       })
 
@@ -84,7 +84,7 @@ describe('SSL', function () {
     describe('login with OpenID Connect', function () {
       before(async function () {
         helpers.installExtension(p4config)
-        helpers.configureExtension(p4config, 'oidc', `http://localhost:${port}/pass/oidc`)
+        helpers.configureExtension(p4config, 'oidc', `https://localhost:${port}/pass/oidc`)
         await helpers.restartServer(p4config)
       })
 
@@ -111,7 +111,7 @@ describe('SSL', function () {
     describe('user identifiers do not match', function () {
       before(async function () {
         helpers.installExtension(p4config)
-        helpers.configureExtension(p4config, 'saml', `http://localhost:${port}/fail/mismatch`)
+        helpers.configureExtension(p4config, 'saml', `https://localhost:${port}/fail/mismatch`)
         await helpers.restartServer(p4config)
       })
 

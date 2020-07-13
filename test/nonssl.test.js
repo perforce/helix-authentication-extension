@@ -33,7 +33,7 @@ describe('Non-SSL', function () {
     }, p4config)
     // start the authentication mock service
     port = await getPort()
-    serviceProcess = helpers.startService(port)
+    serviceProcess = helpers.startNonSslService(port)
   })
 
   after(async function () {

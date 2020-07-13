@@ -78,7 +78,9 @@ local function getData( url )
   c:setopt( curl.OPT_URL, url )
   -- Store all the data in memory in the 'rsp' variable.
   c:setopt( curl.OPT_WRITEFUNCTION, function( chunk ) rsp = rsp .. chunk end )
-  curlSecureOptions( c )
+  if utils.shouldUseSsl( url ) then
+    curlSecureOptions( c )
+  end
   local ok, err = c:perform()
   local code = c:getinfo( curl.INFO_RESPONSE_CODE )
   c:close()
@@ -102,7 +104,9 @@ local function validateResponse( url, response )
   c:setopt_useragent( utils.getID() )
   local rsp = ""
   c:setopt( curl.OPT_WRITEFUNCTION, function( chunk ) rsp = rsp .. chunk end )
-  curlSecureOptions( c )
+  if utils.shouldUseSsl( url ) then
+    curlSecureOptions( c )
+  end
   local ok, err = c:perform()
   local code = c:getinfo( curl.INFO_RESPONSE_CODE )
   c:close()

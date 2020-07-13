@@ -107,6 +107,10 @@ function ExtUtils.validateUrl()
   return base .. "/saml/validate"
 end
 
+function ExtUtils.shouldUseSsl( url )
+  return string.match( url, "^https://" )
+end
+
 function ExtUtils.isSkipUser( user )
   local users = ExtUtils.iCfgData[ "non-sso-users" ]
   if string.match( users, "^%.%.%." ) == nil then

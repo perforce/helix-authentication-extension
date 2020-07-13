@@ -55,9 +55,17 @@ function createGroup (group, config) {
   assert.equal(groupIn.info[0].data, 'Group admins created.')
 }
 
-function startService (port) {
+function startService (env) {
   // must run the service in another process
-  return fork('./test/www', [], { env: { PORT: port }, stdio: 'ignore' })
+  return fork('./test/www', [], { env, stdio: 'ignore' })
+}
+
+function startNonSslService (port) {
+  return startService({ PORT: port })
+}
+
+function startSslService (port) {
+  return startService({ PORT: port, USE_SSL: true })
 }
 
 function installExtension (config) {
@@ -119,7 +127,8 @@ module.exports = {
   establishSuper,
   createUser,
   createGroup,
-  startService,
+  startNonSslService,
+  startSslService,
   installExtension,
   configureExtension,
   restartServer,

@@ -1,20 +1,15 @@
 //
 // Copyright 2020 Perforce Software
 //
+const fs = require('fs')
 const http = require('http')
+const https = require('https')
 const app = require('./app')
-
-//
-// Spawned via child_process.fork() and output is hidden. Note that it seems to
-// be spawned twice, once with the desired environment and another time with the
-// parent's environment. That process's output is not hidden, so to avoid
-// cluttering the test output, this module prints nothing at all.
-//
 
 const port = normalizePort(getPort())
 app.set('port', port)
 
-const server = http.createServer(app)
+const server = createServer(app)
 server.listen(port)
 server.on('error', (err) => {
   console.error(`error: ${err}`)
@@ -37,4 +32,19 @@ function normalizePort (val) {
     return port
   }
   return false
+}
+
+function createServer (app) {
+  if (process.env.USE_SSL) {
+    const options = {
+      key: fs.readFileSync('test/fixtures/server.key'),
+      cert: fs.readFileSync('test/fixtures/server.crt'),
+      requestCert: true,
+      rejectUnauthorized: false,
+      ca: fs.readFileSync('test/fixtures/ca.crt')
+    }
+    return https.createServer(options, app)
+  } else {
+    return http.createServer(app)
+  }
 }

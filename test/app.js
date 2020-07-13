@@ -83,6 +83,19 @@ function newRequest (req, res, next) {
 }
 
 function oidcProfile (req, res, next) {
+  if (req.protocol === 'https') {
+    // perform a basic sanity check of the client certs, just to assert that the
+    // extension sent certificates to the service, unlike the non-ssl case
+    const cert = getClientCert(req)
+    if (!isClientAuthorized(req, cert)) {
+      if (cert && cert.subject) {
+        const msg = `certificates for ${cert.subject.CN} from ${cert.issuer.CN} are not permitted`
+        res.status(403).send(msg)
+      } else {
+        res.status(401).send('client certificate required')
+      }
+    }
+  }
   res.json({
     sub: '00u15xtrad5QDzt1D357',
     name: 'Repo Man',
@@ -136,6 +149,21 @@ function wrongProfile (req, res, next) {
     nameIDFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
     sessionIndex: '_443f9b1c4627383b0e42'
   })
+}
+
+function getClientCert (req) {
+  if (req.protocol === 'https' && req.connection.getPeerCertificate) {
+    return req.connection.getPeerCertificate()
+  }
+  return null
+}
+
+function isClientAuthorized (req, cert) {
+  if (req.protocol === 'https' && cert) {
+    return req.client.authorized
+  } else if (req.protocol === 'http') {
+    return true
+  }
 }
 
 module.exports = app
