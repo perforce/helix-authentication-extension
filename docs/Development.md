@@ -89,14 +89,6 @@ This Swarm instance is pre-configured to use the authentication service instance
 reachable at `https://auth-svc.doc:3000/`, running in a container defined in the
 Helix Authentication Service code base.
 
-## Installing the Extension
-
-Alongside this README file there exists a JavaScript file named `hook.js` that
-is able to package and install the extension. However, it has several
-dependencies and can only be configured using environment variables. It is
-intended primarily for **developers** testing against a **non-production** Helix
-Server. This script is unsupported.
-
 ## Controlling URL open
 
 Setting `P4USEBROWSER` to `false` prevents the browser from opening when you

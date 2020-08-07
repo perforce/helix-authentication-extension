@@ -13,7 +13,6 @@
     "name": "Perforce Software",
     "email": "support@perforce.com"
   },
-  "main": "hook.js",
   "directories": {
     "doc": "docs"
   },
