@@ -14,6 +14,7 @@ describe('Non-SSL', function () {
   let port
 
   before(async function () {
+    this.timeout(30000)
     p4config = await runner.startServer()
     // establish a super user and create the test user
     helpers.establishSuper(p4config)
@@ -37,11 +38,13 @@ describe('Non-SSL', function () {
   })
 
   after(async function () {
+    this.timeout(30000)
     await runner.stopServer(p4config)
     serviceProcess.kill()
   })
 
   describe('Success cases', function () {
+    this.timeout(30000)
     describe('non-sso-users login', function () {
       before(async function () {
         helpers.installExtension(p4config)
@@ -157,6 +160,7 @@ describe('Non-SSL', function () {
   })
 
   describe('Failure cases', function () {
+    this.timeout(30000)
     describe('extension receives 401 from service', function () {
       before(async function () {
         helpers.installExtension(p4config)

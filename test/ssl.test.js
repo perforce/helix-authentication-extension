@@ -14,6 +14,7 @@ describe('SSL', function () {
   let port
 
   before(async function () {
+    this.timeout(30000)
     p4config = await runner.startSslServer()
     helpers.establishTrust(p4config)
     // establish a super user and create the test user
@@ -38,11 +39,13 @@ describe('SSL', function () {
   })
 
   after(async function () {
+    this.timeout(30000)
     await runner.stopServer(p4config)
     serviceProcess.kill()
   })
 
   describe('Success cases', function () {
+    this.timeout(30000)
     describe('non-sso-users login', function () {
       before(async function () {
         helpers.installExtension(p4config)
@@ -108,6 +111,7 @@ describe('SSL', function () {
   })
 
   describe('Failure cases', function () {
+    this.timeout(30000)
     describe('user identifiers do not match', function () {
       before(async function () {
         helpers.installExtension(p4config)
