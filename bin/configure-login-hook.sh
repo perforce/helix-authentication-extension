@@ -750,7 +750,8 @@ EOT
         echo "  * Set instance non-sso-groups to ${NON_SSO_GROUPS}"
     fi
     echo "  * Set instance name-identifier to ${NAME_IDENTIFIER}"
-    echo "  * Set instance user-identifier to ${USER_IDENTIFIER}\n"
+    echo "  * Set instance user-identifier to ${USER_IDENTIFIER}"
+    echo ''
 }
 
 # Prompt user to proceed with or cancel the configuration.
