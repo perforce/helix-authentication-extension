@@ -613,7 +613,7 @@ be compared to the "user identifier" value in the Perforce user spec (either
 the username, full name, or email address).
 
 When using SAML, the name identifier is typically 'nameID', while for OIDC
-it is often 'email', however each identity provider may be difrerent, and
+it is often 'email', however each identity provider may be different, and
 custom configuration may have an effect on the returned profile data.
 
 EOT
