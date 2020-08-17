@@ -28,13 +28,11 @@ RUN /opt/perforce/sbin/configure-helix-p4d.sh -n -p ${P4PORT} -u super -P Rebar1
 # create a working directory for which the perforce user has write permissions
 RUN mkdir /workdir
 RUN chown perforce:perforce /workdir
-USER perforce
 WORKDIR /workdir
 
-# copy and extract the tarball from the previous build stage
-COPY helix-authentication-extension.tgz .
-RUN tar zxf helix-authentication-extension.tgz && \
-    mv helix-authentication-extension helix-auth-ext
-
+COPY bin helix-auth-ext/bin
+COPY loginhook helix-auth-ext/loginhook
 COPY test/install/runtest.sh .
+RUN chown -R perforce .
+USER perforce
 RUN ./runtest.sh
