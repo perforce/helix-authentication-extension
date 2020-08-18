@@ -251,7 +251,7 @@ Description:
         Restart the Helix Core server if running in non-interactive mode.
 
     --debug
-        Enable debugging reporting in this configuration script.
+        Enable debugging output for this configuration script.
 
     -h / --help
         Display this help message.
