@@ -1,7 +1,7 @@
 #
 # build the edge server image
 #
-FROM ubuntu:latest
+FROM ubuntu:18.04
 ARG PUB_KEY
 ARG APT_URL
 ARG BASE_PATH
