@@ -45,7 +45,21 @@ It is helpful for the end users to have updated Helix Core clients. The updated 
 
 See the section below titled [Allowing for non-SSO Users](#allowing-for-non-sso-users) for details. Administrative users should have a fallback of a database password in the event the SSO mechanism is not operational (for instance, the identity provider is temporarily unavailable).
 
-## Building the Extension
+## Installing the Extension
+
+The extension can be installed using the provided configuration script, or manually for systems not supported by the script. This section will describe how to use the configuration script, while the [Manual Installation](#manual-installation) section describes the detailed steps for building, installing, and configuring the extension.
+
+In both the assisted and manual installation procedures, the last step will involve restarting the Helix Core server.
+
+### Configuration Script
+
+The configuration script is a Linux-based bash script named `configure-login-hook.sh` in the `bin` directory. Since the script requires a Linux system, it does not support installation from a Windows system. The Helix Core server can be running on a Windows system, but the configure script must be run from a Linux system. The script can be run without prompting for input by providing all of the necessary command-line options, including `-n` to signal the script to run non-interactively. When run without options, the script will prompt for the required information. The script will use the provided information to build, install, and configure the extension. It will also restart the Helix Core server, if given permission to do so.
+
+Invoke the script with the `--help` option to learn the details of the options and usage of the script.
+
+## Manual Installation
+
+### Building the Extension
 
 If you already have the `loginhook.p4-extension` file, go to the **Install** section.
 
@@ -57,7 +71,7 @@ $ p4 extension --package loginhook
 
 The result will be a zip file named `loginhook.p4-extension`
 
-## Installing the Extension
+### Installing the Extension
 
 To install the extension, run the following command in a terminal window:
 
@@ -68,7 +82,7 @@ Extension 'Auth::loginhook#1.0' installed successfully.
 
 If this is not the first time you are installing the extension, remove the existing extension before reinstalling it. See **Removing the Extension**.
 
-## Configuring the Extension
+### Configuring the Extension
 
 Configure the Extension at both the _global_ and _instance_ level. To learn about these levels, see the "Server extension configuration (global and instance specs)" topic in the [Helix Core Extensions Developer Guide](https://www.perforce.com/manuals/extensions/Content/Extensions/extensionspec.html). The extension has settings that are specific to the global and instance configuration, as described below.
 
@@ -76,7 +90,7 @@ Both the global and instance configuration are defined using Perforce forms, in 
 
 Specific to this extension, any value that starts with `...` means the value is left undefined, and the default behavior will take effect, if any. When defining a value for a configuration setting, remove the `...` and everything that follows on that line, then enter the desired value.
 
-### Global
+#### Global
 
 Start by setting the global configuration of the extension:
 
@@ -101,7 +115,7 @@ The `Service-URL` field must be changed to the address of the authentication ser
 
 The `Auth-Protocol` can be any value supported by the authentication service. This determines the authentication protocol for SSO users to authenticate. This setting is optional because the authentication service will use its own settings to determine the protocol.
 
-#### Example
+##### Example
 
 In this following example, each level of indentation represents a single tab character. The labels are prefixed with **one** tab character and the values are all prefixed with **two** tab characters.
 
@@ -117,7 +131,7 @@ ExtConfig:
         https://auth-svc.example.com:3000/
 ```
 
-### Instance
+#### Instance
 
 To configure a single _instance_ of the extension, include the `--name` option along with the `--configure` option. This example uses `loginhook-a1` just as an example; you are free to use a more descriptive name.
 
@@ -149,7 +163,7 @@ All of these settings have sensible defaults. However, for the extension to be e
 | `user-identifier` | Trigger variable used as unique user identifier, one of: `fullname`, `email`, or `user`. | `email` |
 | `name-identifier` | Field within identity provider user profile containing unique user identifer. | `email` |
 
-#### Example
+##### Example
 
 In this following example, each level of indentation represents a single tab character. The labels are prefixed with **one** tab character and the values are all prefixed with **two** tab characters.
 
@@ -170,7 +184,7 @@ ExtConfig:
         email
 ```
 
-### Multiple Instance Configurations
+#### Multiple Instance Configurations
 
 The extension is not designed to support multiple instance configurations. To find out what configurations have been defined, use the `p4 extension --list` command like so:
 
@@ -229,7 +243,7 @@ Extension 'Auth::loginhook#1, foobar' successfully deleted.
 
 That command will remove the named instance configuration, leaving the other configurations and the extension itself.
 
-## Applying the Changes
+### Applying the Changes
 
 After installing and configuring the authentication extension, the Helix Core server must be restarted for the changes to take effect.
 
@@ -238,6 +252,8 @@ $ p4 admin restart
 ```
 
 The `restart` is necessary because Helix Core prepares the authentication mechanisms during startup. This is true when adding or removing `auth-` related triggers, as well as when installing or removing the loginhook extension.
+
+## Next Steps
 
 ### Debug logging
 
