@@ -83,7 +83,7 @@ end
 function ExtUtils.loginUrl( sdata )
   -- if auth protocol is defined, use that to assemble a login URL
   local protocol = ExtUtils.gCfgData[ "Auth-Protocol" ]
-  if string.match( protocol, "^%.%.%." ) == nil then
+  if string.len(protocol) > 0 and string.match( protocol, "^%.%.%." ) == nil then
     local base = sdata[ "baseUrl" ]
     local request = sdata[ "request" ]
     return base .. "/" .. protocol .. "/login/" .. request

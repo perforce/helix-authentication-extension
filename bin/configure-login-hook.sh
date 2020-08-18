@@ -729,6 +729,9 @@ function clean_inputs() {
         # trim trailing slashes
         SERVICE_URL="$(echo -n "$SERVICE_URL" | sed 's,[/]*$,,')"
     fi
+    if [[ -z "${DEFAULT_PROTOCOL}" ]]; then
+        DEFAULT_PROTOCOL='... use auth service default protocol'
+    fi
 }
 
 # Print what this script will do.
@@ -741,7 +744,7 @@ The operations involved are as follows:
 
 EOT
     echo "  * Set global Service-URL to ${SERVICE_URL}"
-    echo "  * Set global Auth-Protocol to ${DEFAULT_PROTOCOL}"
+    echo "  * Set global Auth-Protocol to '${DEFAULT_PROTOCOL}'"
     echo "  * Set instance enable-logging to ${ENABLE_LOGGING}"
     if [[ -n "${NON_SSO_USERS}" ]]; then
         echo "  * Set instance non-sso-users to ${NON_SSO_USERS}"
