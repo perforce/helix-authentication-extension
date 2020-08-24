@@ -14,7 +14,7 @@ Around the time this project first started, support for extensions was being int
 
 It was decided early on by the architect(s) to use Helix Core **extensions** to integrate with the authentication providers. While installation and configuration of extensions is easy, it does require having a current release of Helix Core (at least 2019.1).
 
-Other benefits of using extensions include the ease-of-use, primarily around installation and configuration. If triggers were used, they would need to be configured, probably with a file, and that file location would have to be known at run time by the triggers, and be readable by the user running the trigger. Additionally, the trigger would need a long-lived p4 ticket in order to be able to invoke commands against the server. With extensions, we do not have any of those problems.
+Other benefits of using extensions include the ease-of-use, primarily around installation and configuration. If triggers were used, they would need to be configured, probably with a file, and that file location would have to be known at run time by the triggers, and be readable by the user running the trigger. Additionally, the trigger would need a long-lived p4 ticket in order to be able to invoke commands against the server. With extensions, we do not have any of those problems. Lastly, since the extension stays resident in memory during the login process, the request identifier retrieved in `AuthPreSSO` is accessible to `AuthCheckSSO` without the need to persist the value on disk.
 
 ## Consequence
 
