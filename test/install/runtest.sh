@@ -83,7 +83,7 @@ echo 'configuring extension for SAML...'
     --superpassword Rebar123 \
     --service-url https://localhost:3000 \
     --default-protocol saml \
-    --non-sso-users duper \
+    --non-sso-users super \
     --name-identifier nameID \
     --user-identifier fullname \
     --yes
@@ -98,8 +98,48 @@ grep -q 'Service-URL: https://localhost:3000' output
 p4 extension --configure Auth::loginhook --name loginhook-a1 -o | tr -s '[:space:]' ' ' > output
 grep -q 'enable-logging: ... off' output
 grep -q 'name-identifier: nameID' output
-grep -q 'non-sso-users: duper' output
+grep -q 'non-sso-users: super' output
 grep -q 'user-identifier: fullname' output
+
+# Run the configure script without any P4 environment variables or login ticket;
+# the script is expected to take the settings from the user inputs, not the
+# environment, and log in as the super user.
+#
+# Also be sure the previous extension configuration does not lock out the super
+# user, otherwise this test will fail when the script tries to log in.
+echo 'configuring extension for SAML w/o P4 env...'
+p4 logout
+unset P4PASSWD
+unset P4PORT
+unset P4USER
+./helix-auth-ext/bin/configure-login-hook.sh -n \
+    --p4port localhost:1666 \
+    --super super \
+    --superpassword Rebar123 \
+    --service-url https://exthost:3000 \
+    --default-protocol saml \
+    --non-sso-users super \
+    --name-identifier nameID \
+    --user-identifier user \
+    --yes
+
+echo 'waiting for p4d to restart...'
+sleep 5
+
+# Set up the p4 environment again for the sake of these tests. Also note that
+# the configure script already logged the super user into p4d, so we have a
+# valid ticket at this point, too.
+export P4PORT=0.0.0.0:1666
+export P4USER=super
+p4 -ztag extension --configure Auth::loginhook -o | tr -s '[:space:]' ' ' > output
+grep -q 'Auth-Protocol: saml' output
+grep -q 'Service-URL: https://exthost:3000' output
+
+p4 extension --configure Auth::loginhook --name loginhook-a1 -o | tr -s '[:space:]' ' ' > output
+grep -q 'enable-logging: ... off' output
+grep -q 'name-identifier: nameID' output
+grep -q 'non-sso-users: super' output
+grep -q 'user-identifier: user' output
 
 # stop the server so that the run script can start it again,
 # and the authentication changes will take effect

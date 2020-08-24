@@ -772,10 +772,10 @@ function prompt_to_proceed() {
 function install_extension() {
     # remove the extension if it is already installed, cannot install on top of
     # an existing installation
-    local EXISTS=$(p4 extension --list --type=extensions)
+    local EXISTS=$(p4 -p "$P4PORT" -u "$P4USER" extension --list --type=extensions)
     if [[ "${EXISTS}" =~ 'Auth::loginhook' ]]; then
         debug 'removing existing extension install...'
-        local DELETE=$(p4 extension --delete Auth::loginhook --yes)
+        local DELETE=$(p4 -p "$P4PORT" -u "$P4USER" extension --delete Auth::loginhook --yes)
         if [[ ! "${DELETE}" =~ 'successfully deleted' ]]; then
             error 'Failed to remove existing extension installation'
             return 1
@@ -783,13 +783,13 @@ function install_extension() {
     fi
     debug 'building new extension...'
     rm -f loginhook.p4-extension
-    local BUILD=$(p4 extension --package loginhook)
+    local BUILD=$(p4 -p "$P4PORT" -u "$P4USER" extension --package loginhook)
     if [[ ! "${BUILD}" =~ 'packaged successfully' ]]; then
         error 'Failed to build extension package file'
         return 1
     fi
     debug 'installing new extension...'
-    local INSTALL=$(p4 extension --install loginhook.p4-extension -y)
+    local INSTALL=$(p4 -p "$P4PORT" -u "$P4USER" extension --install loginhook.p4-extension -y)
     if [[ ! "${INSTALL}" =~ 'installed successfully' ]]; then
         error 'Failed to install the extension on the server'
         return 1
@@ -819,9 +819,9 @@ function configure_extension() {
     local PROG1="/^ExtP4USER:/ { print \"ExtP4USER:\t${P4USER}\"; next; }"
     local PROG2="/Auth-Protocol:/ { print; print \"\t\t${DEFAULT_PROTOCOL}\"; getline; next; }"
     local PROG3="/Service-URL:/ { print; print \"\t\t${SERVICE_URL}\"; getline; next; }"
-    local GLOBAL=$(p4 extension --configure Auth::loginhook -o \
+    local GLOBAL=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook -o \
         | awk -e "${PROG1} ${PROG2} ${PROG3} {print}" -- \
-        | p4 extension --configure Auth::loginhook -i)
+        | p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook -i)
     if [[ ! "${GLOBAL}" =~ 'Extension config loginhook saved' ]]; then
         error 'Failed to configure global settings'
         return 1
@@ -842,9 +842,9 @@ function configure_extension() {
     # use printf to not emit the ORS that (g)awk print does by default
     local PROG4="/non-sso-groups:/ { print; printf \"${NON_GROUPS}\"; getline; next; }"
     local PROG5="/non-sso-users:/ { print; printf \"${NON_USERS}\"; getline; next; }"
-    local LOCAL=$(p4 extension --configure Auth::loginhook --name loginhook-a1 -o \
+    local LOCAL=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook --name loginhook-a1 -o \
         | awk -e "${PROG1} ${PROG2} ${PROG3} ${PROG4} ${PROG5} {print}" -- \
-        | p4 extension --configure Auth::loginhook --name loginhook-a1 -i)
+        | p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook --name loginhook-a1 -i)
     if [[ ! "${LOCAL}" =~ 'Extension config loginhook-a1 saved' ]]; then
         error 'Failed to configure instance settings'
         return 1
@@ -868,10 +868,10 @@ following command:
 EOT
         prompt_to_proceed
         debug 'Restarting Helix Core server...'
-        p4 admin restart
+        p4 -p "$P4PORT" -u "$P4USER" admin restart
     elif $RESTART_OK; then
         debug 'Restarting Helix Core server...'
-        p4 admin restart
+        p4 -p "$P4PORT" -u "$P4USER" admin restart
     else
         cat <<EOT
 
