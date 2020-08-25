@@ -332,7 +332,7 @@ $ p4 extension --list --type=extensions
 ### Step 2: Remove that extension by using the --delete option as an administrative user.
 
 ```shell
-$ p4 extension --delete --yes Auth::loginhook
+$ p4 extension --delete Auth::loginhook --yes
 Extension 'Auth::loginhook and its configurations' successfully deleted.
 ```
 
@@ -358,7 +358,7 @@ The procedure for upgrading the extension to a newer release consists of these s
         - The `loginhook-a1` name is an example, the name you chose may be different.
 1. Build the new extension package (`p4 extension --package loginhook`)
     * See the [Building the Extension](#building-the-extension) section for details.
-1. Remove the existing installation (`p4 extension --delete --yes Auth::loginhook`)
+1. Remove the existing installation (`p4 extension --delete Auth::loginhook --yes`)
     * See the [Removing the Extension](#removing-the-extension) section for details.
 1. Install the new extension (`p4 extension --install loginhook.p4-extension -y`)
     * See the [Installing the Extension](#installing-the-extension) section for details.
