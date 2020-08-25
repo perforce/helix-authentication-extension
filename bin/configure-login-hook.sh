@@ -102,7 +102,7 @@ function prompt_for() {
 # response is OK.
 #
 # prompt_for <VAR> <prompt> <default> [<validationfunc>]
-function prompt_for_secret() {
+function prompt_for_password() {
     local var="$1"
     local prompt="$2"
     local default="$3"
@@ -128,13 +128,13 @@ function prompt_for_secret() {
             if [[ -n "$default" ]]; then
                 break
             fi
-            read -s -e -p "Re-enter new secret value: " pw2
+            read -s -e -p "Re-enter new password: " pw2
             echo ''
             if [[ "$pw" == "$pw2" ]]; then
                 eval "$var=\"$pw\""
                 break
             else
-                echo 'Secret values do not match. Please try again.'
+                echo 'Passwords do not match. Please try again.'
             fi
         fi
     done
@@ -542,7 +542,7 @@ function prompt_for_p4user() {
 
 # Prompt for the password of the Perforce super user.
 function prompt_for_p4passwd() {
-    prompt_for_secret P4PASSWD 'Enter the password of the super user' "${P4PASSWD}"
+    prompt_for_password P4PASSWD 'Enter the password of the super user' "${P4PASSWD}"
 }
 
 # Prompt for the URL of the authentication service.
