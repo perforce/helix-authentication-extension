@@ -128,7 +128,7 @@ function prompt_for_password() {
             if [[ -n "$default" ]]; then
                 break
             fi
-            read -s -e -p "Re-enter new password: " pw2
+            read -s -e -p "Re-enter password: " pw2
             echo ''
             if [[ "$pw" == "$pw2" ]]; then
                 eval "$var=\"$pw\""
