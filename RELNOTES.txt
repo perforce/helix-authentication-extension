@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Extension
-                            Version 2019.1.1.000001
+                            Version 2019.1.1.000002
 
 
 Introduction
@@ -94,6 +94,21 @@ Known Limitations
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in 2019.1.1.000002
+
+    HAS-83 (Change #1983564)
+        Bypass SSL usage for plain HTTP service URL.
+
+    HAS-123 (Change #1995552)
+        Linux-based configuration script for login extension.
+
+----------------------------------------------------------------------
+Bugs fixed in 2019.1.1.000002
+
+    HAS-105 (Change #1999883)
+        Error 408 during login when the auth-protocol setting is empty.
 
 ----------------------------------------------------------------------
 New functionality in 2019.1.1.000001
