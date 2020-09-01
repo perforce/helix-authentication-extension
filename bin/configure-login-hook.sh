@@ -820,7 +820,7 @@ function configure_extension() {
     local PROG2="/Auth-Protocol:/ { print; print \"\t\t${DEFAULT_PROTOCOL}\"; getline; next; }"
     local PROG3="/Service-URL:/ { print; print \"\t\t${SERVICE_URL}\"; getline; next; }"
     local GLOBAL=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook -o \
-        | awk -e "${PROG1} ${PROG2} ${PROG3} {print}" -- \
+        | awk "${PROG1} ${PROG2} ${PROG3} {print}" \
         | p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook -i)
     if [[ ! "${GLOBAL}" =~ 'Extension config loginhook saved' ]]; then
         error 'Failed to configure global settings'
@@ -843,7 +843,7 @@ function configure_extension() {
     local PROG4="/non-sso-groups:/ { print; printf \"${NON_GROUPS}\"; getline; next; }"
     local PROG5="/non-sso-users:/ { print; printf \"${NON_USERS}\"; getline; next; }"
     local LOCAL=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook --name loginhook-a1 -o \
-        | awk -e "${PROG1} ${PROG2} ${PROG3} ${PROG4} ${PROG5} {print}" -- \
+        | awk "${PROG1} ${PROG2} ${PROG3} ${PROG4} ${PROG5} {print}" \
         | p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook --name loginhook-a1 -i)
     if [[ ! "${LOCAL}" =~ 'Extension config loginhook-a1 saved' ]]; then
         error 'Failed to configure instance settings'
