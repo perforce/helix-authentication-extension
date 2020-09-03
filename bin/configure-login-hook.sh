@@ -713,8 +713,12 @@ function validate_inputs() {
     fi
     validate_p4port "${P4PORT}"
     validate_p4user "${P4USER}"
-    check_perforce_server
-    check_perforce_super_user
+    if ! check_perforce_server; then
+        return 1
+    fi
+    if ! check_perforce_super_user; then
+        return 1
+    fi
     validate_protocol "${DEFAULT_PROTOCOL}"
     validate_user_list "${NON_SSO_USERS}"
     validate_user_list "${NON_SSO_GROUPS}"
