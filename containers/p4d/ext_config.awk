@@ -29,6 +29,13 @@
     next;
 }
 
+/user-identifier:/ {
+    print;
+    print "\t\temail";
+    getline;
+    next;
+}
+
 /non-sso-groups:/ {
     print;
     print "\t\tno_timeout";
