@@ -37,6 +37,8 @@ p4 user -f -i < user_jackson.txt
 yes 94f6ce8c-fbea-4fcd-b7d0-564de93beb1b | p4 passwd jackson
 p4 user -f -i < user_johndoe.txt
 yes 18873fa3-1918-43ca-a518-c706def5e07f | p4 passwd johndoe
+p4 user -f -i < user_janedoe.txt
+yes c96144c1-116b-4ed2-bedf-7455174eac0e | p4 passwd janedoe
 p4 user -f -i < user_swarm.txt
 yes ${P4PASSWD} | p4 passwd swarm
 
@@ -62,6 +64,8 @@ p4 configure set auth.default.method=ldap
 p4 configure set auth.ldap.order.1=simple
 p4 configure set auth.sso.allow.passwd=1
 p4 configure set auth.sso.nonldap=1
+
+p4 triggers -i < triggers.txt
 
 #
 # stop the server so that the run script can start it again,

@@ -1,0 +1,4 @@
+User:	janedoe
+Email:	janedoe@example.com
+FullName:	Jane Doe
+AuthMethod:	perforce+2fa

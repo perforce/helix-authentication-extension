@@ -1,0 +1,4 @@
+Triggers:
+	test-pre-2fa auth-pre-2fa auth "/perforce/mfa-trigger.sh --type=pre-2fa --email=%quote%%email%%quote% --user=%user% --host=%host%"
+	test-init-2fa auth-init-2fa auth "/perforce/mfa-trigger.sh --type=init-2fa --email=%quote%%email%%quote% --user=%user% --host=%host% --method=%method%"
+	test-check-2fa auth-check-2fa auth "/perforce/mfa-trigger.sh --type=check-2fa --email=%quote%%email%%quote% --user=%user% --host=%host% --scheme=%scheme% --token=%token%"

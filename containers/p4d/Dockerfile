@@ -28,12 +28,15 @@ WORKDIR /perforce
 COPY $BASE_PATH/build.sh .
 COPY $BASE_PATH/user_george.txt .
 COPY $BASE_PATH/user_jackson.txt .
+COPY $BASE_PATH/user_janedoe.txt .
 COPY $BASE_PATH/user_johndoe.txt .
 COPY $BASE_PATH/user_swarm.txt .
 COPY $BASE_PATH/group_notimeout.txt .
 COPY $BASE_PATH/ldap_simple.txt .
 COPY loginhook loginhook
 COPY $BASE_PATH/ext_config.awk .
+COPY $BASE_PATH/mfa-trigger.sh .
+COPY $BASE_PATH/triggers.txt .
 RUN ./build.sh
 
 USER perforce
