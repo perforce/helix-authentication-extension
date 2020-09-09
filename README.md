@@ -22,7 +22,7 @@ documentation, and these versions are limited to Community Support.
 ## Overview
 
 The Helix Authentication Extension is installed on the Helix Server, and hooks
-into the authentication "triggers" in the server. Whenever a user attempts to
+into the authentication facility of the server. Whenever a user attempts to
 authenticate with the server, they will be directed to the Helix Authentication
 Service via their default web browser, which in turn redirects the user to the
 configured identity provider (IdP). Once the user has successfully authenticated
@@ -35,6 +35,14 @@ The extension requires a Helix Server version that supports extensions. This is
 2019.1 or later for Linux systems. Windows support for extensions is still
 pending. When tested with a pre-release version of the server on Windows, the
 extension worked as expected.
+
+### Helix Authentication Service
+
+The extension integrates with the Helix Authentication Service
+(available on [GitHub](https://github.com/perforce/helix-authentication-service))
+in order to direct the user to the identity provider during the login process.
+As such, the authentication service must be running and accessible to the
+Helix Core Server running the extension.
 
 ### Perforce Clients
 
