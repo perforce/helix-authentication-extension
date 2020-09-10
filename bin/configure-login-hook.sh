@@ -7,7 +7,6 @@
 INTERACTIVE=true
 MONOCHROME=false
 DEBUG=false
-PLATFORM=''
 P4PORT=''
 P4USER=''
 P4PASSWD=''
@@ -381,13 +380,6 @@ function validate_user_identifier() {
 
 # Ensure OS is compatible and dependencies are already installed.
 function ensure_readiness() {
-    if [[ -e '/etc/redhat-release' ]]; then
-        PLATFORM=redhat
-    elif [[ -e '/etc/debian_version' ]]; then
-        PLATFORM=debian
-    else
-        die 'Could not determine OS distribution.'
-    fi
     if ! which p4 >/dev/null 2>&1; then
         die 'Perforce client "p4" is required. Please ensure "p4" is in the PATH.'
     fi
