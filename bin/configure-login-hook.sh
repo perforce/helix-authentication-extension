@@ -899,7 +899,7 @@ EOT
 
 What should be done now:
 EOT
-    if ! $RESTART_OK; then
+    if ! $INTERACTIVE && ! $RESTART_OK; then
         echo '  * Restart the Helix Core server at an appropriate time.'
     fi
     cat <<EOT
