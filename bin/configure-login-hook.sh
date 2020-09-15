@@ -315,7 +315,7 @@ function validate_p4port() {
         return 1
     fi
 
-    # check port range (port >= 1024 && port =< 65535)
+    # check port range (port >= 1024 && port <= 65535)
     # see http://www.iana.org/assignments/port-numbers for details
     local NUMRE='^[0-9]+$'
     if [[ ! $PNUM =~ $NUMRE ]] || [ $PNUM -lt 1024 -o $PNUM -gt 65535 ]; then
@@ -626,8 +626,18 @@ EOT
 # Prompt for inputs.
 function prompt_for_inputs() {
     prompt_for_p4port
+    while ! check_perforce_server; do
+        prompt_for_p4port
+    done
     prompt_for_p4user
     prompt_for_p4passwd
+    while ! check_perforce_super_user; do
+        prompt_for_p4user
+        # Clear the password so prompt_for_password will behave as if no
+        # password has yet been provided (which is partially true).
+        P4PASSWD=''
+        prompt_for_p4passwd
+    done
     prompt_for_service_url
     prompt_for_default_protocol
     prompt_for_enable_logging
@@ -704,10 +714,10 @@ function validate_inputs() {
         return 1
     fi
     validate_p4port "${P4PORT}"
-    validate_p4user "${P4USER}"
     if ! check_perforce_server; then
         return 1
     fi
+    validate_p4user "${P4USER}"
     if ! check_perforce_super_user; then
         return 1
     fi
