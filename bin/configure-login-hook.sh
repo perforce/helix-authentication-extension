@@ -127,14 +127,10 @@ function prompt_for_password() {
             if [[ -n "$default" ]]; then
                 break
             fi
-            read -s -e -p "Re-enter password: " pw2
-            echo ''
-            if [[ "$pw" == "$pw2" ]]; then
-                eval "$var=\"$pw\""
-                break
-            else
-                echo 'Passwords do not match. Please try again.'
-            fi
+            # No need to prompt again, the credentials will be checked
+            # immediately rather than after receiving all user input.
+            eval "$var=\"$pw\""
+            break
         fi
     done
     return 0
