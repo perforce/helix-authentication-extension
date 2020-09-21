@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Extension
-                            Version 2019.1.1.000002
+                            Version 2020.1
 
 
 Introduction
