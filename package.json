@@ -1,6 +1,6 @@
 {
   "name": "helix-auth-extension",
-  "version": "2020.1",
+  "version": "2020.1.0",
   "description": "Helix Authentication Extension",
   "keywords": [
     "authentication",
