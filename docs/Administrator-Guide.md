@@ -429,3 +429,7 @@ If the extension is failing to authenticate the user, and the extension log file
 Then it may be that the service is experiencing an error. The `libcurl` error handling is very generalized, so the extension is not able to report detailed errors. When this happens, enable the debug logging in the authentication service and examine them after a login attempt to look for any possible errors.
 
 If the service log does not indicate an error, the fault may lie with the SSL certificates used by the extension to connect to the service. On some systems, Debian buster being one example, the self-signed certificates provided with the extension are not adequately signed. These systems may require a message digest computed using SHA256, instead of the default SHA1. Try replacing the certificates in the extension, as described in the [Certificates](#certificates) section.
+
+### Client login reverts to password prompt
+
+In the event that the Perforce client begins prompting for a password, rather than directing the user's browser to the identity provider, check that the Helix Authentication Service is running at the address referenced in the extension configuration (`Service-URL`). If the extension is not able to connect to the service, it will defer back to the server to handle the user authentication.
