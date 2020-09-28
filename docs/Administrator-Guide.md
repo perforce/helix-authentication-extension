@@ -17,7 +17,7 @@ The configuration of the Helix Authentication Service to work with both the Iden
 
 ## Certificates
 
-Included with the authentication service files are sample self-signed certificates. For production systems, these files should be replaced with certificates signed by a valid certificate authority (CA).
+Included with the authentication extension files are sample self-signed certificates. For production systems, these files should be replaced with _client_ certificates signed by a valid certificate authority (CA).
 
 The Helix Server extension reads the CA certificate from `ca.crt` and the client certificates from `client.crt` and `client.key` within the directory named by the `arch-dir` attribute of the installed extension.
 
@@ -32,6 +32,18 @@ $ p4 extension --list --type=extensions
 ```
 
 where `[snip]` means some information has been omitted.
+
+To verify that the certificates used by the extension are _client_ certificates, you can use the `openssl` tool provided with the [OpenSSL](https://www.openssl.org) toolkit; note the **SSL client : Yes** in the example output below:
+
+```shell
+$ openssl x509 -in certificate.txt -noout -purpose
+Certificate purposes:
+SSL client : Yes
+SSL client CA : No
+SSL server : Yes
+SSL server CA : No
+[snip]
+```
 
 ## Preparing for Installation
 
