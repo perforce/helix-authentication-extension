@@ -198,6 +198,36 @@ function ExtUtils.isUserInSkipGroup( user )
   return true, false
 end
 
+-- Return true if the client appears to be an older P4V release. This logic only
+-- works for P4V, as both the clientprog and clientversion strings are entirely
+-- in the control of the client, meaning there is no convention for these
+-- values.
+function ExtUtils.isOlderP4V()
+  --
+  -- prompts for password, does not launch browser
+  -- info: clientprog: P4V/MACOSX1011X86_64/2017.1/1491634
+  -- info: clientversion: v81
+  --
+  -- prompts for password and opens browser
+  -- info: clientprog: Helix P4V/MACOSX1013X86_64/2019.1/1865170
+  -- info: clientversion: v86
+  --
+  -- opens browser
+  -- info: clientprog: Helix P4V/MACOSX1015X86_64/2020.1/1966006
+  -- info: clientversion: v87
+  --
+  local clientprog = Helix.Core.Server.GetVar( "clientprog" )
+  if string.find( clientprog, "P4V" ) then
+    -- strip the leading 'v' and check P4V's client version number
+    local clientversion = Helix.Core.Server.GetVar( "clientversion" )
+    local version = tonumber( string.sub( clientversion, 2 ) )
+    if version < 86 then
+      return true
+    end
+  end
+  return false
+end
+
 -- Extract SAML response from the given string (presumably from the desktop
 -- agent), returning just the base64-encoded response value.
 function ExtUtils.getResponse( str )

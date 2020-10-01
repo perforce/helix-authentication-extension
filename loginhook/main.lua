@@ -135,7 +135,7 @@ function AuthPreSSO()
   -- skip any users belonging to a specific group
   local ok, inGroup = utils.isUserInSkipGroup( user )
   if not ok then
-    Helix.Core.Server.SetClientMsg( utils.msgHeader() .. inGroup )
+    Helix.Core.Server.SetClientMsg( 'error checking user group membership' )
     return false, "error"
   end
   if inGroup then
@@ -145,7 +145,7 @@ function AuthPreSSO()
   -- skip any users whose AuthMethod is set to ldap
   local ok, isLdap = utils.isUserLdap( user )
   if not ok then
-    Helix.Core.Server.SetClientMsg( utils.msgHeader() .. isLdap )
+    Helix.Core.Server.SetClientMsg( 'error checking user AuthMethod' )
     return false, "error"
   end
   if isLdap then
@@ -218,6 +218,12 @@ end
 
 function AuthCheckSSO()
   utils.init()
+  -- Cannot check in auth-pre-sso as p4v does not receive/capture/report the
+  -- client messages sent from that trigger hook.
+  if utils.isOlderP4V() then
+    Helix.Core.Server.SetClientMsg( 'please upgrade P4V for login2 support' )
+    return false, "error"
+  end
   local userid = utils.userIdentifier()
   -- When using the invoke-URL feature, the client never passes anything back,
   -- so in that case, the "token" in AuthCheckSSO is set to the username.
@@ -260,5 +266,6 @@ function AuthCheckSSO()
     [ "http-code" ] = url,
     [ "http-error" ] = tostring( sdata )
   } )
+  Helix.Core.Server.SetClientMsg( 'check the loginhook extension logs' )
   return false
 end
