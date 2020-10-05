@@ -15,8 +15,10 @@ ADD ${PUB_KEY} perforce.pubkey
 RUN apt-key add perforce.pubkey && \
     rm -f perforce.pubkey
 RUN echo "deb ${APT_URL} $(lsb_release -sc) release" > /etc/apt/sources.list.d/perforce.sources.list
+# temporarily install swarm 2019.3 to get a working SSO login (does not do SSO
+# authentication at all for any user in swarm 2020.1)
 RUN apt-get update && \
-    apt-get -q -y install helix-cli helix-swarm
+    apt-get -q -y install helix-cli helix-swarm=2019.3-1914134~bionic
 
 RUN /opt/perforce/swarm/sbin/configure-swarm.sh -n -p ${P4PORT} -u swarm -w Rebar123 -H swarm.doc -e localhost -f
 RUN mkdir -p /opt/perforce/swarm/data/queue/tokens && \
