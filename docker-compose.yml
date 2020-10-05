@@ -64,6 +64,8 @@ services:
         APT_URL: "http://package.perforce.com/apt/ubuntu"
         PUB_KEY: "http://package.perforce.com/perforce.pubkey"
     container_name: swarm.doc
+    depends_on:
+      - p4d.doc
     networks:
       - authen
     ports:
