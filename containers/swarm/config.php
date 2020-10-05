@@ -30,7 +30,7 @@ return array(
     'saml' => array(
         'header' => 'saml-response: ',
         'sp' => array(
-            'entityId' => 'urn:example:sp',
+            'entityId' => 'urn:swarm-example:sp',
             'assertionConsumerService' => array(
                 'url' => 'http://swarm.doc:8080',
             ),
