@@ -135,7 +135,9 @@ function AuthPreSSO()
   -- skip any users belonging to a specific group
   local ok, inGroup = utils.isUserInSkipGroup( user )
   if not ok then
-    Helix.Core.Server.SetClientMsg( 'error checking user group membership' )
+    -- auth-pre-sso does not emit messages to the client
+    -- Helix.Core.Server.SetClientMsg( 'error checking user group membership' )
+    utils.debug( { [ "AuthPreSSO" ] = "error: failed to check user group membership" } )
     return false, "error"
   end
   if inGroup then
@@ -145,7 +147,9 @@ function AuthPreSSO()
   -- skip any users whose AuthMethod is set to ldap
   local ok, isLdap = utils.isUserLdap( user )
   if not ok then
-    Helix.Core.Server.SetClientMsg( 'error checking user AuthMethod' )
+    -- auth-pre-sso does not emit messages to the client
+    -- Helix.Core.Server.SetClientMsg( 'error checking user AuthMethod' )
+    utils.debug( { [ "AuthPreSSO" ] = "error: failed to check user AuthMethod" } )
     return false, "error"
   end
   if isLdap then
@@ -167,7 +171,11 @@ function AuthPreSSO()
       [ "http-code" ] = url,
       [ "http-error" ] = tostring( sdata )
     } )
-    return false
+    utils.debug( {
+      [ "AuthPreSSO" ] = "info: ensure Service-URL is valid",
+      [ "Service-URL" ] = utils.gCfgData[ "Service-URL" ]
+    } )
+    return false, "error"
   end
   local url = utils.loginUrl( sdata )
   -- For now, use the 1-step procedure for P4PHP clients; N.B. when Swarm is
@@ -193,7 +201,7 @@ local function compareIdentifiers( userid, nameid )
       [ "AuthCheckSSO" ] = "error: nameid is nil",
       [ "userid" ] = userid
     } )
-    return false
+    return false, "error"
   end
   utils.debug( {
     [ "AuthCheckSSO" ] = "info: comparing user identifiers",
@@ -222,7 +230,7 @@ function AuthCheckSSO()
   -- client messages sent from that trigger hook.
   if utils.isOlderP4V() then
     Helix.Core.Server.SetClientMsg( 'please upgrade P4V for login2 support' )
-    return false, "error"
+    return false
   end
   local userid = utils.userIdentifier()
   -- When using the invoke-URL feature, the client never passes anything back,
