@@ -96,6 +96,13 @@ Known Limitations
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
+Bugs fixed in 2020.1
+
+    HAS-43
+        Caused by P4-19549 in Helix Core Server, fixed in 2019.1.11,
+        2019.2.8, 2020.1.1, and 2020.2 releases.
+
+----------------------------------------------------------------------
 New functionality in 2019.1.1.000002
 
     HAS-83 (Change #1983564)
