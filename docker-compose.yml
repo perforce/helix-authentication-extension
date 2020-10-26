@@ -70,8 +70,7 @@ services:
       - authen
     ports:
       - "8080:80"
-      - "443:443"
-                
+
 networks:
   authen:
     name: auth-service
