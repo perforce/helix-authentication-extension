@@ -10,7 +10,7 @@
 
 /Service-URL:/ {
     print;
-    print "\t\thttps://auth-svc.doc:3000/";
+    print "\t\thttps://haproxy.doc/";
     getline;
     next;
 }

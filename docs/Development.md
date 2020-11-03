@@ -86,8 +86,8 @@ docker-compose up --build -d swarm.doc
 ```
 
 This Swarm instance is pre-configured to use the authentication service instance
-reachable at `https://auth-svc.doc:3000/`, running in a container defined in the
-Helix Authentication Service code base.
+reachable via a web proxy at `https://haproxy.doc/`, which is running in a
+container defined in the Helix Authentication Service code base.
 
 ## Controlling URL open
 
