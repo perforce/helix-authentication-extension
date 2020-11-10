@@ -433,3 +433,12 @@ If the service log does not indicate an error, the fault may lie with the SSL ce
 ### Client login reverts to password prompt
 
 In the event that the Perforce client begins prompting for a password, rather than directing the user's browser to the identity provider, check that the Helix Authentication Service is running at the address referenced in the extension configuration (`Service-URL`). If the extension is not able to connect to the service, it will defer back to the server to handle the user authentication.
+
+### Cannot change user password
+
+Perforce users that are _not_ authenticating using the SSO extension will still be able to change their passwords in the Perforce server, however, the `auth.sso.allow.passwd` configurable must be set to `1` as described in the [Allowing for non-SSO Users](#allowing-for-non-sso-users) section. The error message below demonstrates the issue when `auth.sso.allow.passwd` is _not_ set to `1`:
+
+```shell
+$ p4 -u janedoe -p p4d.doc:1666 passwd
+Command unavailable: external authentication 'auth-set' trigger not found.
+```
