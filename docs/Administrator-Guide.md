@@ -442,3 +442,18 @@ Perforce users that are _not_ authenticating using the SSO extension will still 
 $ p4 -u janedoe -p p4d.doc:1666 passwd
 Command unavailable: external authentication 'auth-set' trigger not found.
 ```
+
+### Cannot install unsigned extension
+
+If when installing the extension you see a message from Helix Core Server like this:
+
+```
+Installation failure: extension package must be signed but is missing required
+signature file or certificate file to validate authenticity.
+```
+
+Then it will be necessary to configure the server to allow for unsigned extensions. This is done by setting the `server.extensions.allow.unsigned` configurable to `1`, as shown below.
+
+```shell
+$ p4 configure set server.extensions.allow.unsigned=1
+```
