@@ -141,6 +141,55 @@ grep -q 'name-identifier: nameID' output
 grep -q 'non-sso-users: super' output
 grep -q 'user-identifier: user' output
 
-# stop the server so that the run script can start it again,
-# and the authentication changes will take effect
-p4dctl stop despot
+#
+# Switch to the negative cases in which we expect the configure script to return
+# a non-zero exit code.
+#
+set +e
+./helix-auth-ext/bin/configure-login-hook.sh -m -n > output 2>&1 2>&1
+set -e
+grep -q 'valid base URL' output
+
+set +e
+./helix-auth-ext/bin/configure-login-hook.sh -m -n \
+    --service-url http://has > output 2>&1
+set -e
+grep -q 'Port number out of range' output
+
+set +e
+./helix-auth-ext/bin/configure-login-hook.sh -m -n \
+    --service-url http://has \
+    --p4port :1666 > output 2>&1
+set -e
+grep -q 'Username must start with a letter' output
+
+set +e
+./helix-auth-ext/bin/configure-login-hook.sh -m -n \
+    --service-url http://has \
+    --p4port :1666 \
+    --super super \
+    --superpassword Rebar123 > output 2>&1
+set -e
+grep -q 'value is required for the name identifier' output
+
+set +e
+./helix-auth-ext/bin/configure-login-hook.sh -m -n \
+    --service-url http://has \
+    --p4port :1666 \
+    --super super \
+    --superpassword Rebar123 \
+    --name-identifier email > output 2>&1
+set -e
+grep -q 'Enter either "user", "email", or "fullname" for user identifier' output
+
+#
+# finally everything is okay once again
+#
+./helix-auth-ext/bin/configure-login-hook.sh -m -n \
+    --service-url http://has \
+    --p4port :1666 \
+    --super super \
+    --superpassword Rebar123 \
+    --name-identifier email \
+    --user-identifier email > output 2>&1
+grep -q 'script is ready to make the configuration changes' output

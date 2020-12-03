@@ -302,12 +302,12 @@ function validate_p4port() {
         HOST=${BITS[1]}
         PNUM=${BITS[2]}
     elif [[ $COUNT -gt 3 ]]; then
-        error_prompt "Too many parts in P4PORT: $PORT"
+        error "Too many parts in P4PORT: $PORT"
         return 1
     fi
 
     if [[ -n "$PROTO" ]] && [[ ! $PROTOS =~ $PROTO ]]; then
-        error_prompt "Invalid Helix protocol: $PROTO"
+        error "Invalid Helix protocol: $PROTO"
         return 1
     fi
 
@@ -315,7 +315,7 @@ function validate_p4port() {
     # see http://www.iana.org/assignments/port-numbers for details
     local NUMRE='^[0-9]+$'
     if [[ ! $PNUM =~ $NUMRE ]] || [ $PNUM -lt 1024 -o $PNUM -gt 65535 ]; then
-        error_prompt "Port number out of range (1024-65535): $PNUM"
+        error "Port number out of range (1024-65535): $PNUM"
         return 1
     fi
     return 0
@@ -325,7 +325,7 @@ function validate_p4port() {
 function validate_p4user() {
     local USERRE='^[a-zA-Z]+'
     if [[ -z "$1" ]] || [[ ! "$1" =~ $USERRE ]]; then
-        error_prompt 'Username must start with a letter.'
+        error 'Username must start with a letter.'
         return 1
     fi
     return 0
@@ -352,7 +352,7 @@ function validate_protocol() {
     if [[ -z "$1" || "$1" == 'oidc' || "$1" == 'saml' ]]; then
         return 0
     fi
-    error_prompt 'Enter either "oidc" or "saml" for the protocol, or leave this blank.'
+    error 'Enter either "oidc" or "saml" for the protocol, or leave this blank.'
     return 1
 }
 
@@ -361,7 +361,7 @@ function validate_name_identifier() {
     if [[ -n "$1" ]]; then
         return 0
     fi
-    error_prompt 'A value is required for the name identifier.'
+    error 'A value is required for the name identifier.'
     return 1
 }
 
@@ -370,7 +370,7 @@ function validate_user_identifier() {
     if [[ "$1" == 'user' || "$1" == 'email' || "$1" == 'fullname' ]]; then
         return 0
     fi
-    error_prompt 'Enter either "user", "email", or "fullname" for user identifier.'
+    error 'Enter either "user", "email", or "fullname" for user identifier.'
     return 1
 }
 
@@ -384,7 +384,7 @@ function ensure_readiness() {
 function read_arguments() {
     # build up the list of arguments in pieces since there are so many
     local ARGS=(p4port: super: superpassword: service-url: default-protocol: enable-logging)
-    ARGS+=(non-sso-users: non-sso-groups: name-identifier: user-identifier:)
+    ARGS+=(non-sso-users: non-sso-groups: sso-users: name-identifier: user-identifier:)
     ARGS+=(yes debug help)
     local TEMP=$(getopt -n 'configure-auth-service.sh' \
         -o 'hmn' \
@@ -565,7 +565,7 @@ function prompt_for_enable_logging() {
 }
 
 # Prompt for a set of optional Perforce users not using SSO auth.
-function prompt_for_nonsso_users() {
+function prompt_for_non_sso_users() {
     cat <<EOT
 
 
@@ -578,7 +578,7 @@ EOT
 }
 
 # Prompt for a set of optional Perforce groups not using SSO auth.
-function prompt_for_nonsso_groups() {
+function prompt_for_non_sso_groups() {
     cat <<EOT
 
 
@@ -637,8 +637,8 @@ function prompt_for_inputs() {
     prompt_for_service_url
     prompt_for_default_protocol
     prompt_for_enable_logging
-    prompt_for_nonsso_users
-    prompt_for_nonsso_groups
+    prompt_for_non_sso_users
+    prompt_for_non_sso_groups
     prompt_for_name_identifier
     prompt_for_user_identifier
 }
@@ -709,19 +709,33 @@ function validate_inputs() {
         error 'A valid base URL for the service must be provided.'
         return 1
     fi
-    validate_p4port "${P4PORT}"
+    if ! validate_p4port "${P4PORT}"; then
+        return 1
+    fi
     if ! check_perforce_server; then
         return 1
     fi
-    validate_p4user "${P4USER}"
+    if ! validate_p4user "${P4USER}"; then
+        return 1
+    fi
     if ! check_perforce_super_user; then
         return 1
     fi
-    validate_protocol "${DEFAULT_PROTOCOL}"
-    validate_user_list "${NON_SSO_USERS}"
-    validate_user_list "${NON_SSO_GROUPS}"
-    validate_name_identifier "${NAME_IDENTIFIER}"
-    validate_user_identifier "${USER_IDENTIFIER}"
+    if ! validate_protocol "${DEFAULT_PROTOCOL}"; then
+        return 1
+    fi
+    if ! validate_user_list "${NON_SSO_USERS}"; then
+        return 1
+    fi
+    if ! validate_user_list "${NON_SSO_GROUPS}"; then
+        return 1
+    fi
+    if ! validate_name_identifier "${NAME_IDENTIFIER}"; then
+        return 1
+    fi
+    if ! validate_user_identifier "${USER_IDENTIFIER}"; then
+        return 1
+    fi
     return 0
 }
 
@@ -747,7 +761,7 @@ The operations involved are as follows:
 EOT
     echo "  * Set global Service-URL to ${SERVICE_URL}"
     echo "  * Set global Auth-Protocol to '${DEFAULT_PROTOCOL}'"
-    echo "  * Set instance enable-logging to ${ENABLE_LOGGING}"
+    echo "  * Set instance enable-logging to ${ENABLE_LOGGING:-off}"
     if [[ -n "${NON_SSO_USERS}" ]]; then
         echo "  * Set instance non-sso-users to ${NON_SSO_USERS}"
     fi
