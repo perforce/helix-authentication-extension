@@ -106,6 +106,30 @@ function configureExtension (config, protocol, serviceUrl) {
   assert.equal(instanceIn.info[0].data, 'Extension config testing saved.')
 }
 
+// like configureExtension, but with only sso-users defined
+function configureSsoUsers (config, protocol, serviceUrl) {
+  const p4 = makeP4(config)
+  // configure global
+  const globalOut = p4.cmdSync('extension --configure Auth::loginhook -o')
+  const globalSpec = globalOut.stat[0]
+  globalSpec.ExtP4USER = config.user
+  globalSpec.ExtConfig = `Auth-Protocol:\n\t${protocol}\nService-URL:\n\t${serviceUrl}\n`
+  const globalIn = p4.cmdSync('extension --configure Auth::loginhook -i', globalSpec)
+  assert.equal(globalIn.info[0].data, 'Extension config loginhook saved.')
+
+  // configure instance
+  const instanceOut = p4.cmdSync('extension --configure Auth::loginhook --name testing -o')
+  const instanceSpec = instanceOut.stat[0]
+  instanceSpec.ExtConfig = 'enable-logging:\n\ttrue\n' +
+    `name-identifier:\n\t${protocol === 'oidc' ? 'email' : 'nameID'}\n` +
+    'non-sso-groups:\n\t... ignore\n' +
+    'non-sso-users:\n\t... ignore\n' +
+    'sso-users:\n\trepoman\n' +
+    'user-identifier:\n\temail\n'
+  const instanceIn = p4.cmdSync('extension --configure Auth::loginhook --name testing -i', instanceSpec)
+  assert.equal(instanceIn.info[0].data, 'Extension config testing saved.')
+}
+
 function restartServer (config) {
   return new Promise((resolve, reject) => {
     const p4 = makeP4(config)
@@ -131,6 +155,7 @@ module.exports = {
   startSslService,
   installExtension,
   configureExtension,
+  configureSsoUsers,
   restartServer,
   readExtensionLog
 }

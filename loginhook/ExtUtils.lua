@@ -112,15 +112,31 @@ function ExtUtils.shouldUseSsl( url )
 end
 
 function ExtUtils.isSkipUser( user )
-  local users = ExtUtils.iCfgData[ "non-sso-users" ]
-  if string.match( users, "^%.%.%." ) == nil then
-    local items = ExtUtils.splitWords( users )
+  -- users in the sso-users list are required to authenticate using SSO
+  local required = ExtUtils.iCfgData[ "sso-users" ]
+  if required ~= nil and string.match( required, "^%.%.%." ) == nil then
+    local items = ExtUtils.splitWords( required )
     for _, v in pairs( items ) do
       if v == user then
+        -- not skipping because user is required
+        return false
+      end
+    end
+    -- skipping because user was _not_ in the required list
+    return true
+  end
+  -- users in the non-sso-users list are excluded from SSO authentication
+  local excluded = ExtUtils.iCfgData[ "non-sso-users" ]
+  if excluded ~= nil and string.match( excluded, "^%.%.%." ) == nil then
+    local items = ExtUtils.splitWords( excluded )
+    for _, v in pairs( items ) do
+      if v == user then
+        -- skipping because user was excluded
         return true
       end
     end
   end
+  -- in all other cases authenticate using SSO
   return false
 end
 

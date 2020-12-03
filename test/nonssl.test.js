@@ -83,6 +83,37 @@ describe('Non-SSL', function () {
       })
     })
 
+    describe('sso-users login', function () {
+      before(async function () {
+        helpers.installExtension(p4config)
+        helpers.configureSsoUsers(p4config, 'oidc', `http://localhost:${port}/pass/oidc`)
+        await helpers.restartServer(p4config)
+      })
+
+      it('should login required SSO users successfully', function () {
+        const p4 = new P4({
+          P4PORT: p4config.port,
+          P4USER: 'repoman'
+        })
+        const loginCmd = p4.cmdSync('login', 'secret123')
+        assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+        const log = helpers.readExtensionLog(p4config)
+        assert.include(log, 'info: checking user repoman')
+        assert.include(log, 'info: identifiers match')
+      })
+
+      it('should login non-SSO users successfully', function () {
+        const p4 = new P4({
+          P4PORT: p4config.port,
+          P4USER: p4config.user
+        })
+        const loginCmd = p4.cmdSync('login', 'p8ssword')
+        assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+        const log = helpers.readExtensionLog(p4config)
+        assert.include(log, 'info: skipping user bruno')
+      })
+    })
+
     describe('login with OpenID Connect', function () {
       before(async function () {
         helpers.installExtension(p4config)

@@ -23,6 +23,7 @@ function InstanceConfigFields()
     -- The leading ellipsis is used to indicate values that have not been
     -- changed from their default (documentation) values, since it is a wildcard
     -- in Perforce and cannot be used for anything else.
+    [ "sso-users" ] = "... Those users who must authenticate using SSO.",
     [ "non-sso-users" ] = "... Those users who will not be using SSO.",
     [ "non-sso-groups" ] = "... Those groups whose members will not be using SSO.",
     [ "user-identifier" ] = "... Trigger variable used as unique user identifier.",
