@@ -74,6 +74,8 @@ grep -q 'enable-logging: true' output
 grep -q 'name-identifier: email' output
 grep -q 'non-sso-users: super' output
 grep -q 'non-sso-groups: ... (none)' output
+grep -Eq '[^-]sso-users: ... \(none\)' output
+grep -Eq '[^-]sso-groups: ... \(none\)' output
 grep -q 'user-identifier: email' output
 
 # run the configure script and set up SAML
@@ -101,6 +103,8 @@ grep -q 'enable-logging: ... off' output
 grep -q 'name-identifier: nameID' output
 grep -q 'non-sso-users: super' output
 grep -q 'non-sso-groups: ... (none)' output
+grep -Eq '[^-]sso-users: ... \(none\)' output
+grep -Eq '[^-]sso-groups: ... \(none\)' output
 grep -q 'user-identifier: fullname' output
 
 #
@@ -129,6 +133,38 @@ p4 extension --configure Auth::loginhook --name loginhook-a1 -o | tr -s '[:space
 grep -q 'enable-logging: ... off' output
 grep -q 'name-identifier: nameID' output
 grep -Eq '[^-]sso-users: jackson' output
+grep -Eq '[^-]sso-groups: ... \(none\)' output
+grep -q 'non-sso-groups: ... (none)' output
+grep -q 'non-sso-users: ... (none)' output
+grep -q 'user-identifier: fullname' output
+
+#
+# run the configure script and set up SSO groups
+#
+echo 'configuring extension for SSO groups...'
+./helix-auth-ext/bin/configure-login-hook.sh -n \
+    --p4port localhost:1666 \
+    --super super \
+    --superpassword Rebar123 \
+    --service-url https://localhost:3000 \
+    --default-protocol saml \
+    --sso-groups requireds \
+    --name-identifier nameID \
+    --user-identifier fullname \
+    --yes
+
+echo 'waiting for p4d to restart...'
+sleep 5
+
+p4 -ztag extension --configure Auth::loginhook -o | tr -s '[:space:]' ' ' > output
+grep -q 'Auth-Protocol: saml' output
+grep -q 'Service-URL: https://localhost:3000' output
+
+p4 extension --configure Auth::loginhook --name loginhook-a1 -o | tr -s '[:space:]' ' ' > output
+grep -q 'enable-logging: ... off' output
+grep -q 'name-identifier: nameID' output
+grep -Eq '[^-]sso-users: ... \(none\)' output
+grep -Eq '[^-]sso-groups: requireds' output
 grep -q 'non-sso-groups: ... (none)' output
 grep -q 'non-sso-users: ... (none)' output
 grep -q 'user-identifier: fullname' output
@@ -172,6 +208,8 @@ grep -q 'enable-logging: ... off' output
 grep -q 'name-identifier: nameID' output
 grep -q 'non-sso-users: super' output
 grep -q 'non-sso-groups: ... (none)' output
+grep -Eq '[^-]sso-users: ... \(none\)' output
+grep -Eq '[^-]sso-groups: ... \(none\)' output
 grep -q 'user-identifier: user' output
 
 #

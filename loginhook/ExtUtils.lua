@@ -37,10 +37,26 @@ function getICfg()
   for k, v in pairs( Helix.Core.Server.GetInstanceConfigData() ) do
     cfg[ k ] = trim( v )
   end
+  -- massage the required groups into easier to evaluate data
+  cfg[ "num_sso_groups" ] = 0
+  if cfg[ "sso-groups" ] ~= nil then
+    -- only set num_sso_groups if we have an explicitly defined set of groups
+    if string.match( cfg[ "sso-groups" ], "^%.%.%." ) == nil then
+      local groups = {}
+      local n = 0
+      -- Create a table of groups whose members we target.
+      for g in string.gmatch( cfg[ "sso-groups" ], "%S+" ) do
+        groups[ g ] = 1
+        n = n + 1
+      end
+      cfg[ "sso_groups_tbl" ] = groups
+      cfg[ "num_sso_groups" ] = n
+    end
+  end
   -- massage the excluded groups into easier to evaluate data
-  cfg[ "ngroups" ] = 0
+  cfg[ "num_non_sso_groups" ] = 0
   if cfg[ "non-sso-groups" ] ~= nil then
-    -- only set ngroups if we have an explicitly defined set of groups
+    -- only set num_non_sso_groups if we have an explicitly defined set of groups
     if string.match( cfg[ "non-sso-groups" ], "^%.%.%." ) == nil then
       local groups = {}
       local n = 0
@@ -49,8 +65,8 @@ function getICfg()
         groups[ g ] = 1
         n = n + 1
       end
-      cfg[  "groups" ] = groups
-      cfg[ "ngroups" ] = n
+      cfg[ "non_sso_groups_tbl" ] = groups
+      cfg[ "num_non_sso_groups" ] = n
     end
   end
   return cfg
@@ -206,11 +222,31 @@ function isUserInGroups( user, groups )
 end
 
 function ExtUtils.isUserInSkipGroup( user )
-  local ngroups = ExtUtils.iCfgData[ "ngroups" ]
+  -- users in groups in the sso-groups list are required to use SSO
+  local ngroups = ExtUtils.iCfgData[ "num_sso_groups" ]
   if ngroups > 0 then
-    local groups = ExtUtils.iCfgData[ "groups" ]
+    local groups = ExtUtils.iCfgData[ "sso_groups_tbl" ]
+    -- skipping because user was excluded by group
+    local ok, inGroup = isUserInGroups( user, groups )
+    if not ok then
+      -- there was an error checking the group membership
+      return false, false
+    end
+    if inGroup then
+      -- not skipping because user is required
+      return true, false
+    end
+    -- skipping because user was _not_ in the required groups list
+    return true, true
+  end
+  -- users in groups in the non-sso-groups list are excluded
+  local ngroups = ExtUtils.iCfgData[ "num_non_sso_groups" ]
+  if ngroups > 0 then
+    local groups = ExtUtils.iCfgData[ "non_sso_groups_tbl" ]
+    -- skipping because user was excluded by group
     return isUserInGroups( user, groups )
   end
+  -- in all other cases authenticate using SSO
   return true, false
 end
 

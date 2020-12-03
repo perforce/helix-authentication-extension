@@ -19,6 +19,7 @@ NON_SSO_GROUPS=''
 NAME_IDENTIFIER=''
 USER_IDENTIFIER=''
 SSO_USERS=''
+SSO_GROUPS=''
 P4D_MIN_CHANGE='1797576'
 P4D_MIN_VERSION='2019.1'
 
@@ -245,10 +246,17 @@ Description:
 
     --sso-users <list>
         Comma-separated list of Perforce users required to log in with SSO.
-        When provided, any users not included in this list will not login
+        When provided, any users not included in this list will not log in
         using SSO. This option is useful for testing the authentication setup
         with a limited set of users. If this value is given, then the value
         for --non-sso-users will be ignored by the extension.
+
+    --sso-groups <list>
+        Comma-separated list of Perforce groups whose members are required
+        to log in with SSO. When provided, any users that are not members of
+        any of the listed groups will not log in using SSO. If this value is
+        given, then the value for --non-sso-groups will be ignored by the
+        extension.
 
     --yes
         Restart the Helix Core server if running in non-interactive mode.
@@ -392,7 +400,7 @@ function ensure_readiness() {
 function read_arguments() {
     # build up the list of arguments in pieces since there are so many
     local ARGS=(p4port: super: superpassword: service-url: default-protocol: enable-logging)
-    ARGS+=(non-sso-users: non-sso-groups: sso-users: name-identifier: user-identifier:)
+    ARGS+=(non-sso-users: non-sso-groups: sso-users: sso-groups: name-identifier: user-identifier:)
     ARGS+=(yes debug help)
     local TEMP=$(getopt -n 'configure-auth-service.sh' \
         -o 'hmn' \
@@ -455,6 +463,10 @@ function read_arguments() {
                 SSO_USERS=$2
                 shift 2
                 ;;
+            --sso-groups)
+                SSO_GROUPS=$2
+                shift 2
+                ;;
             --name-identifier)
                 NAME_IDENTIFIER=$2
                 shift 2
@@ -508,6 +520,7 @@ Debug logging enabled          [${ENABLE_LOGGING:-(not specified)}]
 List of non-SSO users          [${NON_SSO_USERS:-(not specified)}]
 List of non-SSO groups         [${NON_SSO_GROUPS:-(not specified)}]
 List of SSO users              [${SSO_USERS:-(not specified)}]
+List of SSO groups             [${SSO_GROUPS:-(not specified)}]
 Name identifier property       [${NAME_IDENTIFIER:-(not specified)}]
 Perforce user property         [${USER_IDENTIFIER:-(not specified)}]
 
@@ -588,11 +601,29 @@ will not authenticate using SSO. This is useful for testing the setup with
 a limited set of users.
 
 Note that setting a value for this configurable will mean that the value
-for the "non-SSO" users in the next prompt will be ignored by the extension
-during user authentication.
+for the "non-sso-users" setting will be ignored by the extension during
+user authentication.
 
 EOT
     prompt_for SSO_USERS 'Enter list of SSO users' "${SSO_USERS}" validate_user_list
+}
+
+# Prompt for a set of optional Perforce groups that must use SSO auth.
+function prompt_for_sso_groups() {
+    cat <<EOT
+
+
+You may specify a list of Perforce groups that are required to authenticate
+using the single-sign-on integration. Any users within any of those groups
+will be required to use SSO authentication. Any users that are not members
+of any of the groups will not authenticate using SSO.
+
+Note that setting a value for this configurable will mean that the value
+for the "non-sso-groups" setting will be ignored by the extension during
+user authentication.
+
+EOT
+    prompt_for SSO_GROUPS 'Enter list of SSO groups' "${SSO_GROUPS}" validate_user_list
 }
 
 # Prompt for a set of optional Perforce users not using SSO auth.
@@ -669,6 +700,7 @@ function prompt_for_inputs() {
     prompt_for_default_protocol
     prompt_for_enable_logging
     prompt_for_sso_users
+    prompt_for_sso_groups
     prompt_for_non_sso_users
     prompt_for_non_sso_groups
     prompt_for_name_identifier
@@ -759,6 +791,9 @@ function validate_inputs() {
     if ! validate_user_list "${SSO_USERS}"; then
         return 1
     fi
+    if ! validate_user_list "${SSO_GROUPS}"; then
+        return 1
+    fi
     if ! validate_user_list "${NON_SSO_USERS}"; then
         return 1
     fi
@@ -799,6 +834,9 @@ EOT
     echo "  * Set instance enable-logging to ${ENABLE_LOGGING:-off}"
     if [[ -n "${SSO_USERS}" ]]; then
         echo "  * Set instance sso-users to ${SSO_USERS}"
+    fi
+    if [[ -n "${SSO_GROUPS}" ]]; then
+        echo "  * Set instance sso-groups to ${SSO_GROUPS}"
     fi
     if [[ -n "${NON_SSO_USERS}" ]]; then
         echo "  * Set instance non-sso-users to ${NON_SSO_USERS}"
@@ -892,14 +930,16 @@ function configure_extension() {
     local PROG2="/name-identifier:/ { print; print \"\t\t${NAME_IDENTIFIER}\"; getline; next; }"
     local PROG3="/user-identifier:/ { print; print \"\t\t${USER_IDENTIFIER}\"; getline; next; }"
     local SSO_USERS=$(format_user_list "${SSO_USERS}")
+    local SSO_GROUPS=$(format_user_list "${SSO_GROUPS}")
     local NON_USERS=$(format_user_list "${NON_SSO_USERS}")
     local NON_GROUPS=$(format_user_list "${NON_SSO_GROUPS}")
     # use printf to not emit the ORS that (g)awk print does by default
     local PROG4="/non-sso-groups:/ { print; printf \"${NON_GROUPS}\"; getline; next; }"
     local PROG5="/non-sso-users:/ { print; printf \"${NON_USERS}\"; getline; next; }"
     local PROG6="/[^-]sso-users:/ { print; printf \"${SSO_USERS}\"; getline; next; }"
+    local PROG7="/[^-]sso-groups:/ { print; printf \"${SSO_GROUPS}\"; getline; next; }"
     local LOCAL=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook --name loginhook-a1 -o \
-        | awk "${PROG1} ${PROG2} ${PROG3} ${PROG4} ${PROG5} ${PROG6} {print}" \
+        | awk "${PROG1} ${PROG2} ${PROG3} ${PROG4} ${PROG5} ${PROG6} ${PROG7} {print}" \
         | p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook --name loginhook-a1 -i)
     if [[ ! "${LOCAL}" =~ 'Extension config loginhook-a1 saved' ]]; then
         error 'Failed to configure instance settings'
