@@ -16,6 +16,17 @@ function makeP4 (config) {
   return p4
 }
 
+function getData (command) {
+  // Some commands (or just `p4 extension --package` apparently) return their
+  // data differently depending on the version of p4/p4d. How fun.
+  if (command.prompt) {
+    return command.prompt.trim()
+  } else if (command.info && Array.isArray(command.info) && command.info.length > 0) {
+    return command.info[0].data
+  }
+  throw new Error('command does not have a readable value:', command)
+}
+
 function establishTrust (config) {
   const p4 = makeP4(config)
   const trustCmd = p4.cmdSync('trust -y -f')
@@ -79,7 +90,7 @@ function installExtension (config) {
     fs.unlinkSync('loginhook.p4-extension')
   }
   const packageCmd = p4.cmdSync('extension --package loginhook')
-  assert.equal(packageCmd.info[0].data, 'Extension packaged successfully.')
+  assert.equal(getData(packageCmd), 'Extension packaged successfully.')
   const installCmd = p4.cmdSync('extension --install loginhook.p4-extension -y')
   assert.include(installCmd.info[0].data, 'installed successfully')
 }
