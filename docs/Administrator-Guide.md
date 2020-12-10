@@ -53,9 +53,13 @@ Before installing the authentication extension there are a few steps to be taken
 
 It is helpful for the end users to have updated Helix Core clients. The updated clients will direct the user to the web browser during the login progress. Older clients may only print the URL on the screen and not open the browser automatically. See the `README.md` file for the list of supported client versions.
 
-### Allow for non-SSO Users
+### Testing the Extension
 
-See the section below titled [Allowing for non-SSO Users](#allowing-for-non-sso-users) for details. Administrative users should have a fallback of a database password in the event the SSO mechanism is not operational (for instance, the identity provider is temporarily unavailable).
+To test the extension with a limited set of users, prior to enabling SSO for all users, you can set the `sso-users` or `sso-groups` configuration settings, as described in the [Testing](#testing) section below. With either of these settings in place, only users that are listed in `sso-users`, or are a member of one of the groups listed in `sso-groups`, will be authenticated using the extension. Once the proper functioning of the extension has been established, you can then clear these settings to enable SSO for all users.
+
+### Excluding some users from SSO
+
+See the section below titled [Allowing for non-SSO Users](#allowing-for-non-sso-users) for details. It is **recommended** to have at least one administrative user named among the non-SSO users. Administrative users should be using a database password to avoid being locked out in the event that the SSO mechanism is not operational (for instance, the identity provider is temporarily inaccessible).
 
 ## Installing the Extension
 
