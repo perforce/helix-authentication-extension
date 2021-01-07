@@ -1002,6 +1002,10 @@ EOT
     if ! $INTERACTIVE && ! $RESTART_OK; then
         echo '  * Restart the Helix Core server at an appropriate time.'
     fi
+    if [[ -n "${NON_SSO_USERS}" ]] || [[ -n "${NON_SSO_GROUPS}" ]]; then
+        echo '  * Set the Perforce configurable auth.sso.allow.passwd to 1 to allow'
+        echo '    non-SSO user access via a database password, LDAP, or triggers.'
+    fi
     cat <<EOT
   * If not already completed, please install and configure the Helix
     Authenication Service on a system addressed by the URL entered in the
