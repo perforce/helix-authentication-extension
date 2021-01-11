@@ -78,7 +78,7 @@ function prompt_for() {
     local check_func=true
 
     [[ -n "$4" ]] && check_func=$4
-    [[ "$default" =~ [[:space:]]+ ]] && default=''
+    [[ "$default" =~ ^[[:space:]]+$ ]] && default=''
 
     while true; do
         local input=''
@@ -110,7 +110,7 @@ function prompt_for_password() {
     local check_func=true
 
     [[ -n "$4" ]] && check_func=$4
-    [[ "$default" =~ [[:space:]]+ ]] && default=''
+    [[ "$default" =~ ^[[:space:]]+$ ]] && default=''
 
     while true; do
         local pw=''
@@ -696,6 +696,9 @@ function prompt_for_inputs() {
         P4PASSWD=''
         prompt_for_p4passwd
     done
+    # Now that we have a valid p4 ticket for the super user, we can prime the
+    # inputs based on the existing extension installation, if any.
+    fetch_extension_settings
     prompt_for_service_url
     prompt_for_default_protocol
     prompt_for_enable_logging
@@ -765,6 +768,60 @@ function check_perforce_super_user() {
         return 1
     fi
     return 0
+}
+
+# Retrieve any existing extension settings to prime the inputs.
+#
+# Requires a valid p4 ticket for the super user.
+function fetch_extension_settings() {
+    GLOBAL=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook -o)
+    if (( $? != 0 )); then
+        return
+    fi
+    PROTO=$(awk '/Auth-Protocol:/ { getline; sub(/^[ \t]+/, ""); print }' <<< ${GLOBAL})
+    if [[ ! "${PROTO}" =~ '... ' ]]; then
+        DEFAULT_PROTOCOL=${PROTO}
+    fi
+    URL=$(awk '/Service-URL:/ { getline; sub(/^[ \t]+/, ""); print }' <<< ${GLOBAL})
+    if [[ ! "${URL}" =~ '... ' ]]; then
+        SERVICE_URL=${URL}
+    fi
+    INSTANCE=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook --name loginhook-a1 -o)
+    if (( $? != 0 )); then
+        return
+    fi
+    LOGGING=$(awk '/enable-logging:/ { getline; sub(/^[ \t]+/, ""); print }' <<< ${INSTANCE})
+    if [[ ! "${LOGGING}" =~ '... ' ]]; then
+        ENABLE_LOGGING='yes'
+    fi
+    NAMEID=$(awk '/name-identifier:/ { getline; sub(/^[ \t]+/, ""); print }' <<< ${INSTANCE})
+    if [[ ! "${NAMEID}" =~ '... ' ]]; then
+        NAME_IDENTIFIER="${NAMEID}"
+    fi
+    USERID=$(awk '/user-identifier:/ { getline; sub(/^[ \t]+/, ""); print }' <<< ${INSTANCE})
+    if [[ ! "${USERID}" =~ '... ' ]]; then
+        USER_IDENTIFIER="${USERID}"
+    fi
+    NON_USERS=$(awk '/non-sso-users:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<< ${INSTANCE})
+    if [[ ! "${NON_USERS}" =~ '... ' ]]; then
+        IFS=',' readarray -t NAMES <<< "$NON_USERS"
+        NON_SSO_USERS="${NAMES[*]}"
+    fi
+    NON_GROUPS=$(awk '/non-sso-groups:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<< ${INSTANCE})
+    if [[ ! "${NON_GROUPS}" =~ '... ' ]]; then
+        IFS=',' readarray -t NAMES <<< "$NON_USERS"
+        NON_SSO_GROUPS="${NAMES[*]}"
+    fi
+    SSOUSERS=$(awk '/\tsso-users:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<< ${INSTANCE})
+    if [[ ! "${SSOUSERS}" =~ '... ' ]]; then
+        IFS=',' readarray -t NAMES <<< "$NON_USERS"
+        SSO_USERS="${NAMES[*]}"
+    fi
+    SSOGROUPS=$(awk '/\tsso-groups:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<< ${INSTANCE})
+    if [[ ! "${SSOGROUPS}" =~ '... ' ]]; then
+        IFS=',' readarray -t NAMES <<< "$NON_USERS"
+        SSO_GROUPS="${NAMES[*]}"
+    fi
 }
 
 # Validate all of the inputs however they may have been provided.
