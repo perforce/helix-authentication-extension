@@ -774,6 +774,9 @@ function check_perforce_super_user() {
 #
 # Requires a valid p4 ticket for the super user.
 function fetch_extension_settings() {
+    if ! p4 extension --list --type extensions | grep -q '... extension Auth::loginhook'; then
+        return
+    fi
     GLOBAL=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook -o)
     if (( $? != 0 )); then
         return
