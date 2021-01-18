@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Extension
-                            Version 2020.1
+                            Version 2020.2
 
 
 Introduction
@@ -30,7 +30,7 @@ Supported Platforms
     Linux (x86_64)
         RHEL 7, 8
         CentOS 7, 8.0
-        Ubuntu 16.04, 18.04
+        Ubuntu 16.04, 18.04, 20.04
 
     The above platforms are tested and subject to regression testing on a
     frequent basis. Errors or bugs discovered in these platforms are prioritized
@@ -94,6 +94,13 @@ Known Limitations
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+Bugs fixed in 2020.2
+
+    HAS-78 (Change #2049963, 2050005)
+        Add options "sso-users" and "sso-groups" to define Perforce users
+        and groups that must use the SSO authentication mechanism.
 
 ----------------------------------------------------------------------
 Bugs fixed in 2020.1
