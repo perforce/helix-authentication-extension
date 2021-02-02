@@ -83,12 +83,14 @@ local function getData( url )
   if utils.shouldUseSsl( url ) then
     curlSecureOptions( c )
   end
+  utils.debug( { [ "getData" ] = "info: fetching " .. url } )
   local ok, err = c:perform()
   local code = c:getinfo( curl.INFO_RESPONSE_CODE )
   c:close()
   if code == 200 then
     return curlResponseFmt( url, ok, ok and cjson.decode( rsp ) or err )
   end
+  utils.debug( { [ "getData" ] = "error: HTTP response: " .. tostring( rsp ) } )
   return false, code, err
 end
 
