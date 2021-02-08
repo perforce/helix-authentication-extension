@@ -9,8 +9,8 @@ ARG P4PORT="0.0.0.0:1666"
 
 # The docker base images are generally minimal, and our install and configure
 # scripts have certain requirements, so install those now.
-RUN apt-get -q update --fix-missing
-RUN apt-get -q -y install gawk
+RUN apt-get -q update --fix-missing && \
+    apt-get -q -y install gawk
 
 # install p4 and p4d using packages
 ENV DEBIAN_FRONTEND noninteractive
