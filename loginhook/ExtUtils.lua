@@ -269,10 +269,11 @@ function ExtUtils.isOlderP4V()
   -- info: clientversion: v87
   --
   local clientprog = Helix.Core.Server.GetVar( "clientprog" )
-  if string.find( clientprog, "P4V" ) then
-    -- strip the leading 'v' and check P4V's client version number
+  -- Check against P4V/ string because P4VS could match too
+  if string.find( clientprog, "P4V/" ) then
+    -- strip the leading 'v' and trailing potential brokered string then check P4V's client version number
     local clientversion = Helix.Core.Server.GetVar( "clientversion" )
-    local version = tonumber( string.sub( clientversion, 2 ) )
+    local version = tonumber( string.match( clientversion, "%d+" ) )
     if version < 86 then
       return true
     end
