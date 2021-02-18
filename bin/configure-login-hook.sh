@@ -781,11 +781,11 @@ function fetch_extension_settings() {
     if (( $? != 0 )); then
         return
     fi
-    PROTO=$(awk '/Auth-Protocol:/ { getline; sub(/^[ \t]+/, ""); print }' <<< ${GLOBAL})
+    PROTO=$(awk '/Auth-Protocol:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
     if [[ ! "${PROTO}" =~ '... ' ]]; then
         DEFAULT_PROTOCOL=${PROTO}
     fi
-    URL=$(awk '/Service-URL:/ { getline; sub(/^[ \t]+/, ""); print }' <<< ${GLOBAL})
+    URL=$(awk '/Service-URL:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
     if [[ ! "${URL}" =~ '... ' ]]; then
         SERVICE_URL=${URL}
     fi
@@ -793,34 +793,34 @@ function fetch_extension_settings() {
     if (( $? != 0 )); then
         return
     fi
-    LOGGING=$(awk '/enable-logging:/ { getline; sub(/^[ \t]+/, ""); print }' <<< ${INSTANCE})
+    LOGGING=$(awk '/enable-logging:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${INSTANCE}")
     if [[ ! "${LOGGING}" =~ '... ' ]]; then
         ENABLE_LOGGING='yes'
     fi
-    NAMEID=$(awk '/name-identifier:/ { getline; sub(/^[ \t]+/, ""); print }' <<< ${INSTANCE})
+    NAMEID=$(awk '/name-identifier:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${INSTANCE}")
     if [[ ! "${NAMEID}" =~ '... ' ]]; then
         NAME_IDENTIFIER="${NAMEID}"
     fi
-    USERID=$(awk '/user-identifier:/ { getline; sub(/^[ \t]+/, ""); print }' <<< ${INSTANCE})
+    USERID=$(awk '/user-identifier:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${INSTANCE}")
     if [[ ! "${USERID}" =~ '... ' ]]; then
         USER_IDENTIFIER="${USERID}"
     fi
-    NON_USERS=$(awk '/non-sso-users:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<< ${INSTANCE})
+    NON_USERS=$(awk '/non-sso-users:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
     if [[ ! "${NON_USERS}" =~ '... ' ]]; then
         IFS=',' readarray -t NAMES <<< "$NON_USERS"
         NON_SSO_USERS="${NAMES[*]}"
     fi
-    NON_GROUPS=$(awk '/non-sso-groups:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<< ${INSTANCE})
+    NON_GROUPS=$(awk '/non-sso-groups:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
     if [[ ! "${NON_GROUPS}" =~ '... ' ]]; then
         IFS=',' readarray -t NAMES <<< "$NON_USERS"
         NON_SSO_GROUPS="${NAMES[*]}"
     fi
-    SSOUSERS=$(awk '/\tsso-users:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<< ${INSTANCE})
+    SSOUSERS=$(awk '/\tsso-users:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
     if [[ ! "${SSOUSERS}" =~ '... ' ]]; then
         IFS=',' readarray -t NAMES <<< "$NON_USERS"
         SSO_USERS="${NAMES[*]}"
     fi
-    SSOGROUPS=$(awk '/\tsso-groups:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<< ${INSTANCE})
+    SSOGROUPS=$(awk '/\tsso-groups:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
     if [[ ! "${SSOGROUPS}" =~ '... ' ]]; then
         IFS=',' readarray -t NAMES <<< "$NON_USERS"
         SSO_GROUPS="${NAMES[*]}"
