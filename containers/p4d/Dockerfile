@@ -10,7 +10,7 @@ ARG P4PORT
 #
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
-    apt-get -q -y install apt-utils lsb-release gnupg
+    apt-get -q -y install apt-utils lsb-release gnupg patch
 ADD ${PUB_KEY} perforce.pubkey
 RUN apt-key add perforce.pubkey && \
     rm -f perforce.pubkey
@@ -18,6 +18,10 @@ RUN echo "deb ${APT_URL} $(lsb_release -sc) release" > /etc/apt/sources.list.d/p
 RUN apt-get update && \
     apt-get -q -y install helix-cli helix-p4d
 
+# patch configure script to wait for p4d to start fully
+COPY $BASE_PATH/../configure.diff /tmp
+RUN cd /opt/perforce/sbin && \
+    patch -p0 </tmp/configure.diff
 RUN /opt/perforce/sbin/configure-helix-p4d.sh -n -p ${P4PORT} -u super -P Rebar123 despot
 
 WORKDIR /perforce

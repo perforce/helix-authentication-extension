@@ -1,0 +1,10 @@
+--- configure-helix-p4d.sh	2021-02-03 14:52:48.000000000 -0800
++++ containers/configure-helix-p4d.sh	2021-02-19 11:22:44.000000000 -0800
+@@ -963,6 +963,7 @@
+         if [ $attemps -gt 10 ]; then
+             die "Server failed to start!"
+         fi
++        sleep 1
+     done
+ 
+     # If it's not a fresh installation, we're done at this point
