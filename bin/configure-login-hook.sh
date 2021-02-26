@@ -278,15 +278,6 @@ function join_by() {
     local IFS="$1"; shift; echo "$*";
 }
 
-# Validate the given argument is not empty, returning 0 if okay, 1 otherwise.
-function validate_nonempty() {
-    if [[ -z "$1" ]]; then
-        error_prompt 'Please enter a value.'
-        return 1
-    fi
-    return 0
-}
-
 # Validate the given argument as a URL, returning 0 if okay, 1 otherwise.
 function validate_url() {
     local URLRE='^https?://.+'
@@ -667,7 +658,7 @@ it is often 'email', however each identity provider may be different, and
 custom configuration may have an effect on the returned profile data.
 
 EOT
-    prompt_for NAME_IDENTIFIER 'Enter name of user profile property' "${NAME_IDENTIFIER}" validate_nonempty
+    prompt_for NAME_IDENTIFIER 'Enter name of user profile property' "${NAME_IDENTIFIER}" validate_name_identifier
 }
 
 # Prompt for a user identifier value.
@@ -783,11 +774,11 @@ function fetch_extension_settings() {
     fi
     PROTO=$(awk '/Auth-Protocol:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
     if [[ ! "${PROTO}" =~ '... ' ]]; then
-        DEFAULT_PROTOCOL=${PROTO}
+        DEFAULT_PROTOCOL=${DEFAULT_PROTOCOL:-${PROTO}}
     fi
     URL=$(awk '/Service-URL:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
     if [[ ! "${URL}" =~ '... ' ]]; then
-        SERVICE_URL=${URL}
+        SERVICE_URL=${SERVICE_URL:-${URL}}
     fi
     INSTANCE=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook --name loginhook-a1 -o)
     if (( $? != 0 )); then
@@ -799,31 +790,31 @@ function fetch_extension_settings() {
     fi
     NAMEID=$(awk '/name-identifier:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${INSTANCE}")
     if [[ ! "${NAMEID}" =~ '... ' ]]; then
-        NAME_IDENTIFIER="${NAMEID}"
+        NAME_IDENTIFIER="${NAME_IDENTIFIER:-${NAMEID}}"
     fi
     USERID=$(awk '/user-identifier:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${INSTANCE}")
     if [[ ! "${USERID}" =~ '... ' ]]; then
-        USER_IDENTIFIER="${USERID}"
+        USER_IDENTIFIER="${USER_IDENTIFIER:-${USERID}}"
     fi
     NON_USERS=$(awk '/non-sso-users:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
     if [[ ! "${NON_USERS}" =~ '... ' ]]; then
         IFS=',' readarray -t NAMES <<< "$NON_USERS"
-        NON_SSO_USERS="${NAMES[*]}"
+        NON_SSO_USERS="${NON_SSO_USERS:-${NAMES[*]}}"
     fi
     NON_GROUPS=$(awk '/non-sso-groups:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
     if [[ ! "${NON_GROUPS}" =~ '... ' ]]; then
-        IFS=',' readarray -t NAMES <<< "$NON_USERS"
-        NON_SSO_GROUPS="${NAMES[*]}"
+        IFS=',' readarray -t NAMES <<< "$NON_GROUPS"
+        NON_SSO_GROUPS="${NON_SSO_GROUPS:-${NAMES[*]}}"
     fi
     SSOUSERS=$(awk '/\tsso-users:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
     if [[ ! "${SSOUSERS}" =~ '... ' ]]; then
-        IFS=',' readarray -t NAMES <<< "$NON_USERS"
-        SSO_USERS="${NAMES[*]}"
+        IFS=',' readarray -t NAMES <<< "$SSOUSERS"
+        SSO_USERS="${SSO_USERS:-${NAMES[*]}}"
     fi
     SSOGROUPS=$(awk '/\tsso-groups:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
     if [[ ! "${SSOGROUPS}" =~ '... ' ]]; then
-        IFS=',' readarray -t NAMES <<< "$NON_USERS"
-        SSO_GROUPS="${NAMES[*]}"
+        IFS=',' readarray -t NAMES <<< "$SSOGROUPS"
+        SSO_GROUPS="${SSO_GROUPS:-${NAMES[*]}}"
     fi
 }
 
