@@ -156,7 +156,7 @@ function ExtUtils.isSkipUser( user )
   return false
 end
 
-function ExtUtils.isUserLdap( user )
+function ExtUtils.isLdapOrNonStandard( user )
   local e = Helix.Core.P4API.Error.new()
   local cu = Helix.Core.P4API.ClientUser.new()
   local ca = Helix.Core.Server.GetAutoClientApi()
@@ -171,10 +171,13 @@ function ExtUtils.isUserLdap( user )
   end
 
   local method = "perforce"
+  local type = "standard"
   cu.OutputStat = function ( self, dict )
     for k, v in dict:pairs() do
       if k == "AuthMethod" then
         method = v
+      elseif k == "Type" then
+        type = v
       end
     end
   end
@@ -184,7 +187,7 @@ function ExtUtils.isUserLdap( user )
   ca:Run( "user", cu )
   ca:Final()
 
-  return true, method == "ldap"
+  return true, method == "ldap" or type ~= "standard"
 end
 
 function isUserInGroups( user, groups )
@@ -209,7 +212,7 @@ function isUserInGroups( user, groups )
   ca:SetVar( ca:Null(), "-u" )
   ca:SetVar( ca:Null(), "-i" )
   ca:SetVar( ca:Null(), user )
-  ca:Run( "groups", cu );
+  ca:Run( "groups", cu )
   ca:Final()
 
   for k, v in rawpairs( groups ) do

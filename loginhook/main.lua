@@ -148,8 +148,10 @@ function AuthPreSSO()
     utils.debug( { [ "AuthPreSSO" ] = "info: group-based skipping user " .. user } )
     return true, "unused", "http://example.com", true
   end
-  -- skip any users whose AuthMethod is set to ldap
-  local ok, isLdap = utils.isUserLdap( user )
+  -- Skip any users whose AuthMethod is set to 'ldap', or have a Type that is
+  -- not 'standard' (i.e. service or operator), as they are very unlikely to
+  -- authenticate using single-sign-on.
+  local ok, isLdap = utils.isLdapOrNonStandard( user )
   if not ok then
     -- auth-pre-sso does not emit messages to the client
     -- Helix.Core.Server.SetClientMsg( 'error checking user AuthMethod' )
