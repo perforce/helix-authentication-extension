@@ -157,9 +157,13 @@ function ExtUtils.isSkipUser( user )
 end
 
 function ExtUtils.isLdapOrNonStandard( user )
+  -- get ClientApi configured for login-less access to the current server
+  local ca, err = Helix.Core.Server.GetAutoClientApi()
+  if err ~= nil then
+    return false, tostring( err )
+  end
   local e = Helix.Core.P4API.Error.new()
   local cu = Helix.Core.P4API.ClientUser.new()
-  local ca = Helix.Core.Server.GetAutoClientApi()
   ca:SetProtocol( "tag", "" )
   ca:SetProg( "P4-Lua" )
   ca:SetVersion( ExtUtils.getID() )
@@ -172,6 +176,12 @@ function ExtUtils.isLdapOrNonStandard( user )
 
   local method = "perforce"
   local type = "standard"
+  cu.Message = function( self, m )
+    ExtUtils.debug( { [ "isLdapOrNonStandard" ] = "info: " .. m:Fmt() } )
+  end
+  cu.HandleError = function( self, m )
+    ExtUtils.debug( { [ "isLdapOrNonStandard" ] = "error: " .. m:Fmt() } )
+  end
   cu.OutputStat = function ( self, dict )
     for k, v in dict:pairs() do
       if k == "AuthMethod" then
@@ -191,9 +201,13 @@ function ExtUtils.isLdapOrNonStandard( user )
 end
 
 function isUserInGroups( user, groups )
+  -- get ClientApi configured for login-less access to the current server
+  local ca, err = Helix.Core.Server.GetAutoClientApi()
+  if err ~= nil then
+    return false, tostring( err )
+  end
   local e = Helix.Core.P4API.Error.new()
   local cu = Helix.Core.P4API.ClientUser.new()
-  local ca = Helix.Core.Server.GetAutoClientApi()
   ca:SetProtocol( "tag", "" )
   ca:SetProg( "P4-Lua" )
   ca:SetVersion( ExtUtils.getID() )
@@ -205,6 +219,12 @@ function isUserInGroups( user, groups )
   end
 
   local gs = {}
+  cu.Message = function( self, m )
+    ExtUtils.debug( { [ "isUserInGroups" ] = "info: " .. m:Fmt() } )
+  end
+  cu.HandleError = function( self, m )
+    ExtUtils.debug( { [ "isUserInGroups" ] = "error: " .. m:Fmt() } )
+  end
   cu.OutputStat = function( self, dict )
     gs[ dict[ "group" ] ] = 1
   end
