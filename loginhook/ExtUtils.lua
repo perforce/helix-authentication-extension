@@ -253,7 +253,7 @@ function ExtUtils.isUserInSkipGroup( user )
     local ok, inGroup = isUserInGroups( user, groups )
     if not ok then
       -- there was an error checking the group membership
-      return false, false
+      return false, inGroup
     end
     if inGroup then
       -- not skipping because user is required

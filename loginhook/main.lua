@@ -141,7 +141,11 @@ function AuthPreSSO()
   if not ok then
     -- auth-pre-sso does not emit messages to the client
     -- Helix.Core.Server.SetClientMsg( 'error checking user group membership' )
-    utils.debug( { [ "AuthPreSSO" ] = "error: failed to check user group membership" } )
+    utils.debug( {
+      [ "AuthPreSSO" ] = "error: failed to check user group membership",
+      -- in the event of an error, 'inGroup' is the formatted error
+      [ "cause" ] = inGroup
+    } )
     return false, "error"
   end
   if inGroup then
@@ -155,7 +159,11 @@ function AuthPreSSO()
   if not ok then
     -- auth-pre-sso does not emit messages to the client
     -- Helix.Core.Server.SetClientMsg( 'error checking user AuthMethod' )
-    utils.debug( { [ "AuthPreSSO" ] = "error: failed to check user AuthMethod" } )
+    utils.debug( {
+      [ "AuthPreSSO" ] = "error: failed to check user AuthMethod",
+      -- in the event of an error, 'isLdap' is the formatted error
+      [ "cause" ] = isLdap
+    } )
     return false, "error"
   end
   if isLdap then
