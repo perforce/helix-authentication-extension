@@ -10,7 +10,7 @@ ARG P4PORT="0.0.0.0:1666"
 # The docker base images are generally minimal, and our install and configure
 # scripts have certain requirements, so install those now.
 RUN apt-get -q update --fix-missing && \
-    apt-get -q -y install gawk
+    apt-get -q -y install gawk patch
 
 # install p4 and p4d using packages
 ENV DEBIAN_FRONTEND noninteractive
@@ -25,6 +25,10 @@ RUN echo "deb ${APT_URL} bionic release" > /etc/apt/sources.list.d/perforce.sour
 RUN apt-get update && \
     apt-get -q -y install helix-cli helix-p4d
 
+# patch configure script to wait for p4d to start fully (P4-20611)
+COPY containers/configure.diff /tmp
+RUN cd /opt/perforce/sbin && \
+    patch -p0 </tmp/configure.diff
 RUN /opt/perforce/sbin/configure-helix-p4d.sh -n -p ${P4PORT} -u super -P Rebar123 despot
 
 # create a working directory for which the perforce user has write permissions
