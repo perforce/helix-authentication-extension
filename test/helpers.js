@@ -17,12 +17,22 @@ function makeP4 (config) {
 }
 
 function getData (command) {
-  // Some commands (or just `p4 extension --package` apparently) return their
-  // data differently depending on the version of p4/p4d. How fun.
+  // Some commands return their data differently depending on seemingly random
+  // conditions. How fun.
   if (command.prompt) {
     return command.prompt.trim()
   } else if (command.info && Array.isArray(command.info) && command.info.length > 0) {
     return command.info[0].data
+  } else if (command.error && Array.isArray(command.error) && command.error.length > 0) {
+    return command.error[0].data
+  }
+  throw new Error('command does not have a readable value:', command)
+}
+
+function getErrorData (command) {
+  // same story as getData(), no consistent API, must hack away
+  if (command.error && Array.isArray(command.error) && command.error.length > 0) {
+    return command.error[0].data
   }
   throw new Error('command does not have a readable value:', command)
 }
@@ -183,6 +193,8 @@ function readExtensionLog (config) {
 }
 
 module.exports = {
+  getData,
+  getErrorData,
   establishTrust,
   establishSuper,
   createUser,
