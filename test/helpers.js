@@ -16,25 +16,28 @@ function makeP4 (config) {
   return p4
 }
 
-function getData (command) {
-  // Some commands return their data differently depending on seemingly random
-  // conditions. How fun.
-  if (command.prompt) {
-    return command.prompt.trim()
-  } else if (command.info && Array.isArray(command.info) && command.info.length > 0) {
-    return command.info[0].data
-  } else if (command.error && Array.isArray(command.error) && command.error.length > 0) {
-    return command.error[0].data
+// Search all the things to find a string of output that contains query.
+function findData (command, query) {
+  if (command.prompt && typeof command.prompt === 'string') {
+    if (command.prompt.includes(query)) {
+      return true
+    }
   }
-  throw new Error('command does not have a readable value:', command)
-}
-
-function getErrorData (command) {
-  // same story as getData(), no consistent API, must hack away
-  if (command.error && Array.isArray(command.error) && command.error.length > 0) {
-    return command.error[0].data
+  if (command.info && Array.isArray(command.info)) {
+    for (const entry of command.info) {
+      if (typeof entry.data === 'string' && entry.data.includes(query)) {
+        return true
+      }
+    }
   }
-  throw new Error('command does not have a readable value:', command)
+  if (command.error && Array.isArray(command.error)) {
+    for (const entry of command.error) {
+      if (typeof entry.data === 'string' && entry.data.includes(query)) {
+        return true
+      }
+    }
+  }
+  return false
 }
 
 function establishTrust (config) {
@@ -100,7 +103,7 @@ function installExtension (config) {
     fs.unlinkSync('loginhook.p4-extension')
   }
   const packageCmd = p4.cmdSync('extension --package loginhook')
-  assert.equal(getData(packageCmd), 'Extension packaged successfully.')
+  assert.isTrue(findData(packageCmd, 'Extension packaged successfully.'))
   const installCmd = p4.cmdSync('extension --install loginhook.p4-extension -y')
   assert.include(installCmd.info[0].data, 'installed successfully')
 }
@@ -193,8 +196,7 @@ function readExtensionLog (config) {
 }
 
 module.exports = {
-  getData,
-  getErrorData,
+  findData,
   establishTrust,
   establishSuper,
   createUser,

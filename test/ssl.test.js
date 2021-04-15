@@ -100,7 +100,7 @@ describe('SSL', function () {
         const p4 = new P4(config)
         const loginCmd = p4.cmdSync('login')
         // should prompt the user to open a URL
-        assert.include(helpers.getData(loginCmd), 'Navigate to URL')
+        assert.isTrue(helpers.findData(loginCmd, 'Navigate to URL'))
         // and it has already verified the profile so we have a ticket
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
         const log = helpers.readExtensionLog(p4config)
@@ -128,9 +128,9 @@ describe('SSL', function () {
         const p4 = new P4(config)
         const loginCmd = p4.cmdSync('login')
         // should prompt the user to open a URL
-        assert.include(helpers.getData(loginCmd), 'Navigate to URL')
+        assert.isTrue(helpers.findData(loginCmd, 'Navigate to URL'))
         // and it has already failed validation
-        assert.include(helpers.getErrorData(loginCmd), 'validation failed')
+        assert.isTrue(helpers.findData(loginCmd, 'validation failed'))
         const log = helpers.readExtensionLog(p4config)
         assert.include(log, 'error: identifiers do not match')
       })

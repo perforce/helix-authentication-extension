@@ -165,7 +165,7 @@ describe('Non-SSL', function () {
         const p4 = new P4(config)
         const loginCmd = p4.cmdSync('login')
         // should prompt the user to open a URL
-        assert.include(helpers.getData(loginCmd), 'Navigate to URL')
+        assert.isTrue(helpers.findData(loginCmd, 'Navigate to URL'))
         // and it has already verified the profile so we have a ticket
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
         const log = helpers.readExtensionLog(p4config)
@@ -190,7 +190,7 @@ describe('Non-SSL', function () {
         const p4 = new P4(config)
         const loginCmd = p4.cmdSync('login')
         // should prompt the user to open a URL
-        assert.include(helpers.getData(loginCmd), 'Navigate to URL')
+        assert.isTrue(helpers.findData(loginCmd, 'Navigate to URL'))
         // and it has already verified the profile so we have a ticket
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
         const log = helpers.readExtensionLog(p4config)
@@ -215,7 +215,7 @@ describe('Non-SSL', function () {
         const p4 = new P4(config)
         const loginCmd = p4.cmdSync('login')
         // should prompt the user to open a URL
-        assert.include(helpers.getData(loginCmd), 'Navigate to URL')
+        assert.isTrue(helpers.findData(loginCmd, 'Navigate to URL'))
         // and it has already verified the profile so we have a ticket
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
         const log = helpers.readExtensionLog(p4config)
@@ -243,9 +243,9 @@ describe('Non-SSL', function () {
         const p4 = new P4(config)
         const loginCmd = p4.cmdSync('login')
         // should prompt the user to open a URL
-        assert.include(helpers.getData(loginCmd), 'Navigate to URL')
+        assert.isTrue(helpers.findData(loginCmd, 'Navigate to URL'))
         // and it has already failed validation
-        assert.include(helpers.getErrorData(loginCmd), 'validation failed')
+        assert.isTrue(helpers.findData(loginCmd, 'validation failed'))
         const log = helpers.readExtensionLog(p4config)
         assert.include(log, '"http-code":401')
       })
@@ -267,9 +267,9 @@ describe('Non-SSL', function () {
         const p4 = new P4(config)
         const loginCmd = p4.cmdSync('login')
         // should prompt the user to open a URL
-        assert.include(helpers.getData(loginCmd), 'Navigate to URL')
+        assert.isTrue(helpers.findData(loginCmd, 'Navigate to URL'))
         // and it has already failed validation
-        assert.include(helpers.getErrorData(loginCmd), 'validation failed')
+        assert.isTrue(helpers.findData(loginCmd, 'validation failed'))
         const log = helpers.readExtensionLog(p4config)
         assert.include(log, '"http-code":403')
       })
@@ -291,9 +291,9 @@ describe('Non-SSL', function () {
         const p4 = new P4(config)
         const loginCmd = p4.cmdSync('login')
         // should prompt the user to open a URL
-        assert.include(helpers.getData(loginCmd), 'Navigate to URL')
+        assert.isTrue(helpers.findData(loginCmd, 'Navigate to URL'))
         // and it has already failed validation
-        assert.include(helpers.getErrorData(loginCmd), 'validation failed')
+        assert.isTrue(helpers.findData(loginCmd, 'validation failed'))
         const log = helpers.readExtensionLog(p4config)
         assert.include(log, '"http-code":408')
       })
@@ -316,7 +316,7 @@ describe('Non-SSL', function () {
         const loginCmd = p4.cmdSync('login')
         // should fallback to attempting the ususal SSO login which fails
         // because P4LOGINSSO is not set in the client
-        assert.include(loginCmd.error[0].data, 'Single sign-on on client failed')
+        assert.isTrue(helpers.findData(loginCmd, 'Single sign-on on client failed'))
         const log = helpers.readExtensionLog(p4config)
         assert.include(log, '"http-code":500')
       })
@@ -338,9 +338,9 @@ describe('Non-SSL', function () {
         const p4 = new P4(config)
         const loginCmd = p4.cmdSync('login')
         // should prompt the user to open a URL
-        assert.include(helpers.getData(loginCmd), 'Navigate to URL')
+        assert.isTrue(helpers.findData(loginCmd, 'Navigate to URL'))
         // and it has already failed validation
-        assert.include(helpers.getErrorData(loginCmd), 'validation failed')
+        assert.isTrue(helpers.findData(loginCmd, 'validation failed'))
         const log = helpers.readExtensionLog(p4config)
         assert.include(log, 'error: identifiers do not match')
       })
