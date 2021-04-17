@@ -13,7 +13,7 @@ return array(
         'port' => 'p4d.doc:1666',
         'user' => 'swarm',
         'password' => 'REPLACEME',
-        'sso_enabled' => true,
+        'sso' => 'optional',
     ),
     'security' => array(
         'require_login' => false,
