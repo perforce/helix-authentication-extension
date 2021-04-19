@@ -2,6 +2,10 @@
   "name": "helix-auth-extension",
   "version": "2020.2.0",
   "description": "Helix Authentication Extension",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/perforce/helix-authentication-extension.git"
+  },
   "keywords": [
     "authentication",
     "oidc",
