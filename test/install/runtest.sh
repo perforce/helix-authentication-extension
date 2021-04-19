@@ -42,7 +42,7 @@ echo 'configuring extension for OIDC...'
     --yes
 
 echo 'waiting for p4d to restart...'
-sleep 5
+sleep 10
 
 p4 -ztag extension --configure Auth::loginhook -o | tr -s '[:space:]' ' ' > output
 grep -q 'Auth-Protocol: ... ' output
@@ -63,7 +63,7 @@ echo 'configuring extension for OIDC...'
     --yes
 
 echo 'waiting for p4d to restart...'
-sleep 5
+sleep 10
 
 p4 -ztag extension --configure Auth::loginhook -o | tr -s '[:space:]' ' ' > output
 grep -q 'Auth-Protocol: oidc' output
@@ -92,7 +92,7 @@ echo 'configuring extension for SAML...'
     --yes
 
 echo 'waiting for p4d to restart...'
-sleep 5
+sleep 10
 
 p4 -ztag extension --configure Auth::loginhook -o | tr -s '[:space:]' ' ' > output
 grep -q 'Auth-Protocol: saml' output
@@ -123,7 +123,7 @@ echo 'configuring extension for SSO users...'
     --yes
 
 echo 'waiting for p4d to restart...'
-sleep 5
+sleep 10
 
 p4 -ztag extension --configure Auth::loginhook -o | tr -s '[:space:]' ' ' > output
 grep -q 'Auth-Protocol: saml' output
@@ -154,7 +154,7 @@ echo 'configuring extension for SSO groups...'
     --yes
 
 echo 'waiting for p4d to restart...'
-sleep 5
+sleep 10
 
 p4 -ztag extension --configure Auth::loginhook -o | tr -s '[:space:]' ' ' > output
 grep -q 'Auth-Protocol: saml' output
@@ -192,7 +192,7 @@ unset P4USER
     --yes
 
 echo 'waiting for p4d to restart...'
-sleep 5
+sleep 10
 
 # Set up the p4 environment again for the sake of these tests. Also note that
 # the configure script already logged the super user into p4d, so we have a

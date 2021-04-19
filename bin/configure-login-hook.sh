@@ -388,6 +388,16 @@ function ensure_readiness() {
     fi
 }
 
+# Source selected P4 settings by use of the p4 set command.
+function source_enviro() {
+    if [ -n "$(p4 set -q P4PORT)" ]; then
+        eval "$(p4 set -q P4PORT)"
+    fi
+    if [ -n "$(p4 set -q P4USER)" ]; then
+        eval "$(p4 set -q P4USER)"
+    fi
+}
+
 function read_arguments() {
     # build up the list of arguments in pieces since there are so many
     local ARGS=(p4port: super: superpassword: service-url: default-protocol: enable-logging)
@@ -1073,6 +1083,7 @@ EOT
 
 function main() {
     ensure_readiness
+    source_enviro
     set -e
     read_arguments "$@"
     if $INTERACTIVE || $DEBUG; then
