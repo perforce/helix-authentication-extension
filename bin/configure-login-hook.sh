@@ -142,51 +142,30 @@ function prompt_for_password() {
 function prompt_for_yn() {
     local var="$1"
     local prompt="$2"
+    local default="$3"
 
-    while true; do
-        read -p "${prompt} [y/n] " input
-        case $input in
-            [yY][eE][sS]|[yY])
-                eval "$var='yes'"
-                break
-                ;;
-            [nN][oO]|[nN])
-                eval "$var='no'"
-                break
-                ;;
-            *)
-                echo 'Please answer yes or no.'
-                ;;
-        esac
-    done
-    return 0
-}
+    [[ "$default" =~ ^[[:space:]]+$ ]] && default=''
 
-# Display the given prompt and prompt for the Perforce user spec field.
-function prompt_for_user_field() {
-    local var="$1"
-    local prompt="$2"
+    # read the yes/no input like any other input
+    local input=''
+    if [[ -n "$default" ]]; then
+        read -e -p "$prompt [$default]: " input
+        if [[ ! -n "$input" ]]; then
+            input=$default
+        fi
+    else
+        read -e -p "$prompt: " input
+    fi
 
-    echo $prompt
-    select field in 'user' 'email' 'fullname'; do
-        case $field in
-            user)
-                eval "$var=user"
-                break
-                ;;
-            email)
-                eval "$var=email"
-                break
-                ;;
-            fullname)
-                eval "$var=fullname"
-                break
-                ;;
-            *)
-                echo 'Please select an option'
-                ;;
-        esac
-    done
+    # coerce the input value into either a 'yes' or a 'no'
+    case $input in
+        [yY][eE][sS]|[yY])
+            eval "$var='yes'"
+            ;;
+        *)
+            eval "$var='no'"
+            ;;
+    esac
     return 0
 }
 
@@ -588,7 +567,15 @@ EOT
 
 # Prompt for enabling debug logging in the extension.
 function prompt_for_enable_logging() {
-    prompt_for_yn ENABLE_LOGGING 'Do you want to enable debug logging?'
+    cat <<EOT
+
+
+The extension can write debugging information to a log file, which will
+be named log.json, and is found in the 1-data directory of the extension
+installation.
+
+EOT
+    prompt_for_yn ENABLE_LOGGING 'Do you want to enable debug logging?' "${ENABLE_LOGGING}"
 }
 
 # Prompt for a set of optional Perforce users that must use SSO auth.
@@ -676,10 +663,13 @@ function prompt_for_user_identifier() {
     cat <<EOT
 
 
-The name of the Perforce user field to compare to the name identifier.
+The user identifier is the name of the Perforce user field that will be
+used to compare to the name identifier. This can be one of 'name', 'email',
+or 'fullname', which refer to the 'User', 'Email', and 'FullName' fields
+of the Perforce user spec.
 
 EOT
-    prompt_for_user_field USER_IDENTIFIER 'Choose the user spec field'
+    prompt_for USER_IDENTIFIER 'Choose the user spec field' "${USER_IDENTIFIER}" validate_user_identifier
 }
 
 # Prompt for inputs.
