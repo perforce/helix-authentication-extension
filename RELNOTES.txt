@@ -52,11 +52,6 @@ Documentation
 
 Known Limitations
 
-    Commit/Edge Servers
-
-        Support for commit/edge server configurations has a known issue (job
-        #102020) in which the login URL either does not appear or appears twice.
-
     Perforce cannot guarantee and has not exhaustively tested the compatibility
     of 3rd Party Plugins with the Helix Authentication Service. It is up to each
     3rd party plugin owner to make his/her plugin compatible.
