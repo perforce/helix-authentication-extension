@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Extension
-                            Version 2020.2
+                            Version 2021.1
 
 
 Introduction
@@ -89,6 +89,22 @@ Known Limitations
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+Bugs fixed in 2021.1
+
+    HAS-188 (Change #2084514)
+        Configure script now reads extension configuration correctly.
+
+    HAS-189 (Change #2084411)
+        Extension correctly distinquishes P4V from P4VS during login.
+
+----------------------------------------------------------------------
+Other changes in 2021.1
+
+    HAS-139 (Change #2090744)
+        Extension automatically treats non-standard users as not using SSO
+        mechanism for authentication (i.e. operators and service users).
 
 ----------------------------------------------------------------------
 Bugs fixed in 2020.2
