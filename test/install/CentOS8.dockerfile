@@ -18,7 +18,7 @@ enabled=1\n\
 gpgcheck=1\n'\
 >> /etc/yum.repos.d/perforce.repo
 # temporary work-around for broken package dependencies
-RUN yum -q -y install helix-cli-2020.1-2107780.x86_64 helix-p4d
+RUN yum -q -y install helix-cli-2020.2-2112800.x86_64 helix-p4d
 
 # patch configure script to wait for p4d to start fully (P4-20611)
 COPY containers/configure.diff /tmp
