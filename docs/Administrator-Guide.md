@@ -405,6 +405,12 @@ The process of migrating the old configuration to the new extension is not yet a
 
 ## Troubleshooting
 
+### Client login reverts to password prompt
+
+In the event that the Perforce client begins prompting for a password, rather than directing the user's browser to the identity provider, check that the Helix Authentication Service is running at the address referenced in the extension configuration (`Service-URL`). If the extension is not able to connect to the service, it will defer back to the server to handle the user authentication.
+
+Ensure the debug logging is enabled in the extension, try the login again, and check the logs for any error messages. Based on the message in the log, check for a matching error in the issues described below.
+
 ### Login fails with 'P4LOGINSSO' not set
 
 If a Perforce client sees the `Single sign-on on client failed: 'P4LOGINSSO' not set` error when attempting to log in to a Helix Server with the authentication extension installed, then it is likely that the authentication service was not reachable from the extension. The nature of this error can be confirmed by enabling the logging in the extension, attempt the login again, and look for a log entry that resembles the following:
@@ -438,12 +444,23 @@ If the extension is failing to authenticate the user, and the extension log file
 
 Then the issue is that the client certificates used by the extension to request the user profile from the authentication service is not acceptable. Either the certificate issuer is not trusted by the certificate authority in use (as named by the `CA_CERT_FILE` or `CA_CERT_PATH` settings in the service), or the common name in the client certificate does not match the pattern provided in the `CLIENT_CERT_CN` service setting. It could also be the case that the client certificate expired. In most cases, updating the client certificates in extension will resolve the issue.
 
-### Curl related errors in extension log
+### HTTP error code 504 in extension log
 
 If the extension is failing to authenticate the user, and the extension log file contains something like this:
 
 ```json
-{"data":{"AuthCheckSSO":"auth validation failed for user kpalider","code":0,
+{"data":{"getData":"error: HTTP response: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn't respond in time.\n</body></html>\n"},"nanos":3968637,"pid":1850,"recType":0,"seconds":1620069117}
+{"data":{"AuthCheckSSO":"error: auth validation failed for user bruno","http-code":504,"http-error":"nil"},"nanos":4184180,"pid":1850,"recType":0,"seconds":1620069117}
+```
+
+Then the issue is that the reverse proxy in front of the authentication service is timing out before the service itself times out (e.g. after `LOGIN_TIMEOUT` seconds). The timeout defined in the reverse proxy should be longer than the login timeout defined in the authentication service.
+
+### Curl "got nothing" errors in extension log
+
+If the extension is failing to authenticate the user, and the extension log file contains something like this:
+
+```json
+{"data":{"AuthCheckSSO":"auth validation failed for user bruno","code":0,
  "error":"[CURL-EASY][GOT_NOTHING] Server returned nothing (no headers, no data) (52)"},
  "nanos":276255682,"pid":1661,"recType":0,"seconds":1578331572}
 ```
@@ -452,9 +469,15 @@ Then it may be that the service is experiencing an error. The `libcurl` error ha
 
 If the service log does not indicate an error, the fault may lie with the SSL certificates used by the extension to connect to the service. On some systems, Debian buster being one example, the self-signed certificates provided with the extension are not adequately signed. These systems may require a message digest computed using SHA256, instead of the default SHA1. Try replacing the certificates in the extension, as described in the [Certificates](#certificates) section.
 
-### Client login reverts to password prompt
+### Curl "Problem with the local SSL certificate (58)" in extension log
 
-In the event that the Perforce client begins prompting for a password, rather than directing the user's browser to the identity provider, check that the Helix Authentication Service is running at the address referenced in the extension configuration (`Service-URL`). If the extension is not able to connect to the service, it will defer back to the server to handle the user authentication.
+If the SSO login process is not triggering with `p4 login`, and the extension log contains something like the following:
+
+```json
+{"data":{"AuthPreSSO":"error: failed to get request identifier","http-code":0,"http-error":"[CURL-EASY][SSL_CERTPROBLEM] Problem with the local SSL certificate (58)"},"nanos":596087851,"pid":41,"recType":0,"seconds":1620082389}
+```
+
+Then the extension is not able to read the `client.crt` and `client.key` files. These files are located in the `server.extensions.dir/117E9283-732B-45A6-9993-AE64C354F1C5/1-arch` directory under the Perforce "root" directory. The files should be owned by the system user that is running the `p4d` process, readable by that user, and contain valid PEM-formatted public and private keys.
 
 ### Cannot change user password
 
