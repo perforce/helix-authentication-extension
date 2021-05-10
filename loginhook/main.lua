@@ -199,6 +199,11 @@ function AuthPreSSO()
     utils.debug( { [ "AuthPreSSO" ] = "info: 1-step mode for P4PHP client" } )
     return true, url
   end
+  -- For Helix TeamHub, use the 1-step login procedure.
+  if string.find( clientprog, "PilsnerHTHAdapter" ) then
+    utils.debug( { [ "AuthPreSSO" ] = "info: 1-step mode for PilsnerHTHAdapter client" } )
+    return true, url
+  end
   -- If the old SAML integration setting is present, use 1-step procedure.
   local ssoArgs = Helix.Core.Server.GetVar( "ssoArgs" )
   if string.find( ssoArgs, "--idpUrl" ) then
