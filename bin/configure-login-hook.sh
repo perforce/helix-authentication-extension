@@ -664,7 +664,7 @@ function prompt_for_user_identifier() {
 
 
 The user identifier is the name of the Perforce user field that will be
-used to compare to the name identifier. This can be one of 'name', 'email',
+used to compare to the name identifier. This can be one of 'user', 'email',
 or 'fullname', which refer to the 'User', 'Email', and 'FullName' fields
 of the Perforce user spec.
 
