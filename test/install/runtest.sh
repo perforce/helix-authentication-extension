@@ -16,7 +16,8 @@ p4dctl start -o '-p 0.0.0.0:1666' despot
 echo ${P4PASSWD} | p4 login
 
 # disable the signed extensions requirement for testing
-# p4 configure set server.extensions.allow.unsigned=1
+# (since at least version P4D/LINUX26X86_64/2021.1/2126753)
+p4 configure set server.extensions.allow.unsigned=1
 
 # create a group with long lived tickets, log in again
 p4 group -i <<EOT
