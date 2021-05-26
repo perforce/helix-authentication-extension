@@ -14,7 +14,7 @@ p4dctl start -o '-p 0.0.0.0:1666' despot
 echo ${P4PASSWD} | p4 login
 
 # disable the signed extensions requirement for testing
-# p4 configure set server.extensions.allow.unsigned=1
+p4 configure set server.extensions.allow.unsigned=1
 
 #
 # install and configure the extension

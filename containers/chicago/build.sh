@@ -69,7 +69,7 @@ p4 configure set any#auth.id=EXT_AUTH_ID
 echo ${P4PASSWD} | p4 login
 
 # disable the signed extensions requirement for testing
-# p4 configure set server.extensions.allow.unsigned=1
+p4 configure set server.extensions.allow.unsigned=1
 
 # stop the server so that the run script can start it again, and the
 # authentication changes will take effect
