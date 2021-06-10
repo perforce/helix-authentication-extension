@@ -16,6 +16,9 @@ return array(
         'sso' => 'optional',
     ),
     'security' => array(
+        'https_strict' => true,
+        'https_strict_redirect' => true,
+        'https_port' => null,
         'require_login' => false,
     ),
     'log' => array(
@@ -32,7 +35,7 @@ return array(
         'sp' => array(
             'entityId' => 'urn:swarm-example:sp',
             'assertionConsumerService' => array(
-                'url' => 'http://swarm.doc:8080',
+                'url' => 'https://swarm.doc:8043',
             ),
         ),
         'idp' => array(

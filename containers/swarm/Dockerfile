@@ -23,17 +23,24 @@ RUN mkdir -p /opt/perforce/swarm/data/queue/tokens && \
     touch /opt/perforce/swarm/data/queue/tokens/00000000-0000-0000-0000-000000000000 && \
     chown -R www-data:www-data /opt/perforce/swarm/data
 
+RUN a2enmod ssl
+RUN mkdir -p /etc/apache2/ssl && \
+    chmod 600 /etc/apache2/ssl && \
+    cd /etc/apache2/ssl && \
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout apache.key -out apache.crt -subj "/CN=ImSecure"
+
 WORKDIR /swarm
 
 #
 # perform the initial setup of the swarm instance
 #
 COPY $BASE_PATH/config.php /opt/perforce/swarm/data/config.php.template
+COPY $BASE_PATH/swarm-site.conf /etc/apache2/sites-available/perforce-swarm-site.conf
 
 USER root
 COPY $BASE_PATH/run.sh .
 EXPOSE 80
-EXPOSE 443
+EXPOSE 8043
 # allow for non-successful responses since Swarm typically responds with 401
 HEALTHCHECK CMD curl -s -I http://localhost:80/swarm/ || exit 1
 ENTRYPOINT [ "./run.sh" ]
