@@ -15,36 +15,6 @@ For information about Helix Core Server Extensions, see the [Helix Core Extensio
 
 The configuration of the Helix Authentication Service to work with both the Identity Provider (IdP) and the Perforce server product requires an experienced security administrator. This effort might require assistance from Perforce Support.
 
-## Certificates
-
-Included with the authentication extension files are sample self-signed certificates. For production systems, these files should be replaced with _client_ certificates signed by a valid certificate authority (CA).
-
-The Helix Server extension reads the CA certificate from `ca.crt` and the client certificates from `client.crt` and `client.key` within the directory named by the `arch-dir` attribute of the installed extension.
-
-To update these files, replace them with new content, keeping the names the same. To find the `arch-dir` directory, use the [p4 extension](https://www.perforce.com/manuals/cmdref/Content/CmdRef/p4_extension.html) command:
-
-```shell
-$ p4 extension --list --type=extensions
-... extension Auth::loginhook
-... [snip]
-... arch-dir server.extensions.dir/117E9283-732B-45A6-9993-AE64C354F1C5/1-arch
-... data-dir server.extensions.dir/117E9283-732B-45A6-9993-AE64C354F1C5/1-data
-```
-
-where `[snip]` means some information has been omitted.
-
-To verify that the certificates used by the extension are _client_ certificates, you can use the `openssl` tool provided with the [OpenSSL](https://www.openssl.org) toolkit; note the **SSL client : Yes** in the example output below:
-
-```shell
-$ openssl x509 -in certificate.txt -noout -purpose
-Certificate purposes:
-SSL client : Yes
-SSL client CA : No
-SSL server : Yes
-SSL server CA : No
-[snip]
-```
-
 ## Preparing for Installation
 
 Before installing the authentication extension there are a few steps to be taken.
@@ -119,6 +89,12 @@ ExtP4USER:     sampleExtensionsUser
 ExtConfig:
     Auth-Protocol:
         ... Authentication protocol, saml or oidc.
+    Authority-Cert:
+        ... Path to certificate authority public key, defaults to ./ca.crt
+    Client-Cert:
+        ... Path to client public key, defaults to ./client.crt
+    Client-Key:
+        ... Path to client private key, defaults to ./client.key
     Service-URL:
         ... The authentication service base URL.
 ```
@@ -130,6 +106,8 @@ The first field to change is `ExtP4USER` which should be the Perforce user that 
 The `Service-URL` field must be changed to the address of the authentication service by which the Helix Server can make a connection.
 
 The `Auth-Protocol` can be any value supported by the authentication service. This determines the authentication protocol for SSO users to authenticate. This setting is optional because the authentication service will use its own settings to determine the protocol.
+
+The `Authority-Cert`, `Client-Cert`, and `Client-Key` settings relate to the TLS/SSL certificates that the extension uses when connecting to the authentication service. See the [Certificates](#certificates) section for more information.
 
 ##### Example
 
@@ -143,6 +121,12 @@ ExtP4USER:     super
 ExtConfig:
     Auth-Protocol:
         saml
+    Authority-Cert:
+        /etc/ssl/trusted-ca.crt
+    Client-Cert:
+        /p4/1/ssl/loginhook-client.crt
+    Client-Key:
+        /p4/1/ssl/loginhook-client.key
     Service-URL:
         https://auth-svc.example.com:3000/
 ```
@@ -343,6 +327,36 @@ $ yes $(uuidgen) | p4 -u super passwd username
 #### Assign non-SSO Users
 
 In the server extension, indicate which users and/or groups are excluded from SSO authentication. See the `non-sso-groups` and `non-sso-users` settings described above.
+
+### Certificates
+
+Included with the authentication extension are sample self-signed certificates. For production systems, these files should be replaced with _client_ certificates signed by a trusted certificate authority (CA). There are a total of three files: the public key of the Certificate Authority (CA) in a file named `ca.crt`, and the public and private parts of the client certificate used to connect to the authentication service. The client certificate files are named `client.crt` and `client.key` for the public and private parts of the certificate, respectively. All three files are found within the directory named by the `arch-dir` attribute of the installed extension. To find the `arch-dir` directory, use the `p4 extension` command:
+
+```shell
+$ p4 extension --list --type=extensions
+... extension Auth::loginhook
+... [snip]
+... arch-dir server.extensions.dir/117E9283-732B-45A6-9993-AE64C354F1C5/1-arch
+... data-dir server.extensions.dir/117E9283-732B-45A6-9993-AE64C354F1C5/1-data
+```
+
+where `[snip]` means some information has been omitted for brevity.
+
+To change the certificates, you can replace the files with new content, keeping the names the same. Alternatively, you can change the _global_ configuration properties named `Authority-Cert`, `Client-Cert`, and `Client-Key` to point to files in a different location. The `Authority-Cert` setting specifies the path to the public key for the trusted certificate authority, which is used to verify that the authentication service is trustworthy. **Note:** the service validation is currently disabled in the extension as it relies on having valid certificates, which the service does not have by default. To enable this validation, contact Perforce Support.
+
+The `Client-Cert` and `Client-Key` settings specify the paths of the client certificate public and private keys, respectively. These files should be in the PEM format, with the `BEGIN` and `END` lines to clearly indicate the contents.
+
+To verify that the certificates used by the extension are _client_ certificates, you can use the `openssl` tool provided with the [OpenSSL](https://www.openssl.org) toolkit; note the **SSL client : Yes** in the example output below:
+
+```shell
+$ openssl x509 -in certificate.txt -noout -purpose
+Certificate purposes:
+SSL client : Yes
+SSL client CA : No
+SSL server : Yes
+SSL server CA : No
+[snip]
+```
 
 ## Removing the Extension
 

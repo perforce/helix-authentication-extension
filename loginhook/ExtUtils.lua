@@ -127,6 +127,30 @@ function ExtUtils.shouldUseSsl( url )
   return string.match( url, "^https://" )
 end
 
+function ExtUtils.clientCertificate()
+  local path = ExtUtils.gCfgData[ "Client-Cert" ]
+  if path ~= nil and string.match( path, "^%.%.%." ) == nil then
+    return path
+  end
+  return Helix.Core.Server.GetArchDirFileName( "client.crt" )
+end
+
+function ExtUtils.clientKey()
+  local path = ExtUtils.gCfgData[ "Client-Key" ]
+  if path ~= nil and string.match( path, "^%.%.%." ) == nil then
+    return path
+  end
+  return Helix.Core.Server.GetArchDirFileName( "client.key" )
+end
+
+function ExtUtils.authorityCertificate()
+  local path = ExtUtils.gCfgData[ "Authority-Cert" ]
+  if path ~= nil and string.match( path, "^%.%.%." ) == nil then
+    return path
+  end
+  return Helix.Core.Server.GetArchDirFileName( "ca.crt" )
+end
+
 function ExtUtils.isSkipUser( user )
   -- users in the sso-users list are required to authenticate using SSO
   local required = ExtUtils.iCfgData[ "sso-users" ]
