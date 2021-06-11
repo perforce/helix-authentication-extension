@@ -136,7 +136,10 @@ function AuthPreSSO()
   local user = Helix.Core.Server.GetVar( "user" )
   -- skip any individually named users
   if utils.isSkipUser( user ) then
-    utils.debug( { [ "AuthPreSSO" ] = "info: skipping user " .. user } )
+    utils.debug( {
+      [ "AuthPreSSO" ] = "info: skipping SSO for user",
+      [ "user" ] = user
+    } )
     return true, "unused", "http://example.com", true
   end
   -- skip any users belonging to a specific group
@@ -145,14 +148,18 @@ function AuthPreSSO()
     -- auth-pre-sso does not emit messages to the client
     -- Helix.Core.Server.SetClientMsg( 'error checking user group membership' )
     utils.debug( {
-      [ "AuthPreSSO" ] = "error: failed to check user group membership",
+      [ "AuthPreSSO" ] = "error: failed checking group membership",
+      [ "user" ] = user,
       -- in the event of an error, 'inGroup' is the formatted error
       [ "cause" ] = inGroup
     } )
     return false, "error"
   end
   if inGroup then
-    utils.debug( { [ "AuthPreSSO" ] = "info: group-based skipping user " .. user } )
+    utils.debug( {
+      [ "AuthPreSSO" ] = "info: group-based skipping user",
+      [ "user" ] = user
+    } )
     return true, "unused", "http://example.com", true
   end
   -- Skip any users whose AuthMethod is set to 'ldap', or have a Type that is
@@ -163,14 +170,18 @@ function AuthPreSSO()
     -- auth-pre-sso does not emit messages to the client
     -- Helix.Core.Server.SetClientMsg( 'error checking user AuthMethod' )
     utils.debug( {
-      [ "AuthPreSSO" ] = "error: failed to check user AuthMethod",
+      [ "AuthPreSSO" ] = "error: failed checking AuthMethod ",
+      [ "user" ] = user,
       -- in the event of an error, 'isLdap' is the formatted error
       [ "cause" ] = isLdap
     } )
     return false, "error"
   end
   if isLdap then
-    utils.debug( { [ "AuthPreSSO" ] = "info: skipping LDAP user " .. user } )
+    utils.debug( {
+      [ "AuthPreSSO" ] = "info: skipping LDAP user ",
+      [ "user" ] = user
+    } )
     return true, "unused", "http://example.com", true
   end
   -- Get a request id from the service, save it in requestId; do this every time
@@ -213,7 +224,10 @@ function AuthPreSSO()
     utils.debug( { [ "AuthPreSSO" ] = "info: 1-step mode for desktop agent" } )
     return true, url
   end
-  utils.debug( { [ "AuthPreSSO" ] = "info: invoking URL " .. url } )
+  utils.debug( {
+    [ "AuthPreSSO" ] = "info: invoking URL " .. url,
+    [ "user" ] = user
+  } )
   return true, "unused", url, false
 end
 
@@ -259,9 +273,15 @@ function AuthCheckSSO()
   -- so in that case, the "token" in AuthCheckSSO is set to the username.
   local user = Helix.Core.Server.GetVar( "user" )
   local token = Helix.Core.Server.GetVar( "token" )
-  utils.debug( { [ "AuthCheckSSO" ] = "info: checking user " .. user } )
+  utils.debug( {
+    [ "AuthCheckSSO" ] = "info: checking user",
+    [ "user" ] = user
+  } )
   if user ~= token then
-    utils.debug( { [ "AuthCheckSSO" ] = "info: 1-step mode login for user " .. user } )
+    utils.debug( {
+      [ "AuthCheckSSO" ] = "info: 1-step mode login",
+      [ "user" ] = user
+    } )
     -- If a password/token has been provided, then this is the 1-step procedure,
     -- and the token is the SAML response coming from the desktop agent or
     -- Swarm. In that case, try to extract the response and send it to the
@@ -271,12 +291,17 @@ function AuthCheckSSO()
     if response then
       local ok, url, sdata = validateResponse( utils.validateUrl(), response )
       if ok then
-        utils.debug( { [ "AuthCheckSSO" ] = "info: 1-step mode user data", [ "sdata" ] = sdata } )
+        utils.debug( {
+          [ "AuthCheckSSO" ] = "info: 1-step mode user data",
+          [ "user" ] = user,
+          [ "sdata" ] = sdata
+        } )
         local nameid = utils.nameIdentifier( sdata )
         return compareIdentifiers( userid, nameid )
       end
       utils.debug( {
-        [ "AuthCheckSSO" ] = "error: 1-step mode validation failed for user " .. user,
+        [ "AuthCheckSSO" ] = "error: 1-step mode validation failed",
+        [ "user" ] = user,
         [ "http-code" ] = url,
         [ "http-error" ] = tostring( sdata )
       } )
@@ -287,12 +312,17 @@ function AuthCheckSSO()
   -- time out if the user does not authenticate with the IdP in a timely manner.
   local ok, url, sdata = getData( utils.statusUrl() .. requestId )
   if ok then
-    utils.debug( { [ "AuthCheckSSO" ] = "info: received user data", [ "sdata" ] = sdata } )
+    utils.debug( {
+      [ "AuthCheckSSO" ] = "info: received user data",
+      [ "user" ] = user,
+      [ "sdata" ] = sdata
+    } )
     local nameid = utils.nameIdentifier( sdata )
     return compareIdentifiers( userid, nameid )
   end
   utils.debug( {
-    [ "AuthCheckSSO" ] = "error: auth validation failed for user " .. user,
+    [ "AuthCheckSSO" ] = "error: auth validation failed",
+    [ "user" ] = user,
     [ "http-code" ] = url,
     [ "http-error" ] = tostring( sdata )
   } )

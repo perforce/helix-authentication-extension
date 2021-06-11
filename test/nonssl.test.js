@@ -60,7 +60,7 @@ describe('Non-SSL', function () {
         const loginCmd = p4.cmdSync('login', 'p8ssword')
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
         const log = helpers.readExtensionLog(p4config)
-        assert.include(log, 'info: skipping user bruno')
+        assert.include(log, 'info: skipping SSO for user')
       })
     })
 
@@ -79,7 +79,7 @@ describe('Non-SSL', function () {
         const loginCmd = p4.cmdSync('login', 'secret123')
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
         const log = helpers.readExtensionLog(p4config)
-        assert.include(log, 'info: group-based skipping user nimda')
+        assert.include(log, 'info: group-based skipping user')
       })
     })
 
@@ -102,7 +102,7 @@ describe('Non-SSL', function () {
         const loginCmd = p4.cmdSync('login', 'secret123')
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
         const log = helpers.readExtensionLog(p4config)
-        assert.include(log, 'info: checking user repoman')
+        assert.include(log, 'info: checking user')
         assert.include(log, 'info: identifiers match')
       })
 
@@ -114,7 +114,7 @@ describe('Non-SSL', function () {
         const loginCmd = p4.cmdSync('login', 'p8ssword')
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
         const log = helpers.readExtensionLog(p4config)
-        assert.include(log, 'info: group-based skipping user bruno')
+        assert.include(log, 'info: group-based skipping user')
       })
     })
 
@@ -133,7 +133,7 @@ describe('Non-SSL', function () {
         const loginCmd = p4.cmdSync('login', 'secret123')
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
         const log = helpers.readExtensionLog(p4config)
-        assert.include(log, 'info: checking user repoman')
+        assert.include(log, 'info: checking user')
         assert.include(log, 'info: identifiers match')
       })
 
@@ -145,7 +145,7 @@ describe('Non-SSL', function () {
         const loginCmd = p4.cmdSync('login', 'p8ssword')
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
         const log = helpers.readExtensionLog(p4config)
-        assert.include(log, 'info: skipping user bruno')
+        assert.include(log, 'info: skipping SSO for user')
       })
     })
 
