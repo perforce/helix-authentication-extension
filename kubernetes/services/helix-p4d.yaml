@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helix-p4d
+  labels:
+    app: helix-p4d
+spec:
+  type: NodePort
+  ports:
+  - port: 1666
+    protocol: TCP
+  selector:
+    app: helix-p4d
+...
