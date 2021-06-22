@@ -6,12 +6,12 @@ Helix Authentication Service support for Helix Core server and Helix Core client
 
 For information about Helix Core Server Extensions, see the [Helix Core Extensions Developer Guide](https://www.perforce.com/manuals/extensions/Content/Extensions/Home-extensions.html).
 
-## Prerequisites
+### Prerequisites
 
 * This document assumes that you have read "Administrator's Guide for Helix Authentication Service", which is available in the docs directory of [https://github.com/perforce/helix-authentication-service](https://github.com/perforce/helix-authentication-service).
 * Helix Core Server, version 2019.1 or later.
 
-## Support
+### Support
 
 The configuration of the Helix Authentication Service to work with both the Identity Provider (IdP) and the Perforce server product requires an experienced security administrator. This effort might require assistance from Perforce Support.
 
@@ -43,9 +43,9 @@ The configuration script is a Linux-based bash script named `configure-login-hoo
 
 Invoke the script with the `--help` option to learn the details of the options and usage of the script.
 
-## Manual Installation
+### Manual Installation
 
-### Building the Extension
+#### Building the Extension
 
 If you already have the `loginhook.p4-extension` file, go to the **Install** section.
 
@@ -57,7 +57,7 @@ $ p4 extension --package loginhook
 
 The result will be a zip file named `loginhook.p4-extension`
 
-### Installing the Extension
+#### Installing the Extension
 
 To install the extension, run the following command in a terminal window:
 
@@ -68,15 +68,15 @@ Extension 'Auth::loginhook#1.0' installed successfully.
 
 If this is not the first time you are installing the extension, remove the existing extension before reinstalling it. See **Removing the Extension**.
 
-### Configuring the Extension
+## Configuring the Extension
 
-Configure the Extension at both the _global_ and _instance_ level. To learn about these levels, see the "Server extension configuration (global and instance specs)" topic in the [Helix Core Extensions Developer Guide](https://www.perforce.com/manuals/extensions/Content/Extensions/extensionspec.html). The extension has settings that are specific to the global and instance configuration, as described below.
+The extension is configured at both the _global_ and _instance_ level. To learn about these levels, see the "Server extension configuration (global and instance specs)" topic in the [Helix Core Extensions Developer Guide](https://www.perforce.com/manuals/extensions/Content/Extensions/extensionspec.html). The extension has settings that are specific to the global and instance configuration, as described below.
 
 Both the global and instance configuration are defined using Perforce forms, in which fields consist of a label, a colon, a tab character, and a value. Fields that allow multiple values will start on a new line, with each value on a separate line, and all lines are prefixed by a tab character. Within the `ExtConfig` section, field labels are prefixed by **one** tab character, and values start on a new line and are prefixed with **two** tab characters.
 
 Specific to this extension, any value that starts with `...` means the value is left undefined, and the default behavior will take effect, if any. When defining a value for a configuration setting, remove the `...` and everything that follows on that line, then enter the desired value.
 
-#### Global
+### Global
 
 Start by setting the global configuration of the extension:
 
@@ -103,13 +103,19 @@ where `[snip]` means some information has been omitted.
 
 The first field to change is `ExtP4USER` which should be the Perforce user that will own this extension, typically a "super" or administrative user.
 
-The `Service-URL` field must be changed to the address of the authentication service by which the Helix Server can make a connection.
+Of the settings in `ExtConfig`, only the `Service-URL` setting is required. The other settings have default values as described below.
 
-The `Auth-Protocol` can be any value supported by the authentication service. This determines the authentication protocol for SSO users to authenticate. This setting is optional because the authentication service will use its own settings to determine the protocol.
+#### Global Settings
 
-The `Authority-Cert`, `Client-Cert`, and `Client-Key` settings relate to the TLS/SSL certificates that the extension uses when connecting to the authentication service. See the [Certificates](#certificates) section for more information.
+| Name | Description | Default |
+| ---- | ----------- | ------- |
+| `Auth-Protocol` | Can be any value supported by the authentication service. This determines the authentication protocol for SSO users to authenticate. This setting is optional because the authentication service will use its own settings to determine the protocol. | Defaults to whatever the authentication service decides. |
+| `Authority-Cert` | Path to the public key of the certificate authority. See the [Certificates](#certificates) section for more information. | Defaults to the `ca.crt` file in the extension directory. |
+| `Client-Cert` | Path to the public key of the extension client certificate. See the [Certificates](#certificates) section for more information. | Defaults to the `client.crt` file in the extension directory. |
+| `Client-Key` | Path to the private key of the extension client certificate. See the [Certificates](#certificates) section for more information. | Defaults to the `client.key` file in the extension directory. |
+| `Service-URL` | The address of the authentication service by which the Helix Server can make a connection | _none_ |
 
-##### Example
+#### Example
 
 In this following example, each level of indentation represents a single tab character. The labels are prefixed with **one** tab character and the values are all prefixed with **two** tab characters.
 
@@ -131,7 +137,7 @@ ExtConfig:
         https://auth-svc.example.com:3000/
 ```
 
-#### Instance
+### Instance
 
 To configure a single _instance_ of the extension, include the `--name` option along with the `--configure` option. This example uses `loginhook-a1` just as an example; you are free to use a more descriptive name.
 
@@ -159,13 +165,7 @@ where `[snip]` means some information has been omitted.
 
 All of these settings have sensible defaults. However, for the extension to be enabled, we must configure it. You might want to change either the `non-sso-groups` or `non-sso-users` fields to a list of Perforce groups and users that are _not_ participating in the SSO authentication integration.
 
-##### Testing
-
-For the purpose of testing the authentication integration with a limited number of users, you may change the `sso-users` field to a list of Perforce users that _must_ authenticate using the SSO authentication integration. When this value is configured with one or more users, then the `non-sso-users` list will be ignored by the extension. Likewise, any users _not_ included in this list will _not_ authenticate using the extension. To clear the `sso-users` field, replace the list of users with `...` to indicate that the field is to be ignored. When the `sso-users` field starts with `...` then the `non-sso-users` field will be considered by the extension during user authentication.
-
-Similar to the `sso-users` field is the `sso-groups` field, in which names of Perforce groups are given. Any users that are members of any of the named groups will be required to authenticate using the SSO authentication integration. When this value is configured with one or more groups, then the `non-sso-groups` list will be ignored by the extension. Likewise, any users that are _not_ members of any of the groups will _not_ authenticate using the extension. To clear the `sso-groups` field, replace the list of groups with `...` to indicate that the field is to be ignored. When the `sso-groups` field starts with `...` then the `non-sso-groups` field will be considered by the extension during user authentication.
-
-##### Instance Settings
+#### Instance Settings
 
 | Name | Description | Default |
 | ---- | ----------- | ------- |
@@ -177,7 +177,7 @@ Similar to the `sso-users` field is the `sso-groups` field, in which names of Pe
 | `user-identifier` | Trigger variable used as unique user identifier, one of: `fullname`, `email`, or `user`. | `email` |
 | `name-identifier` | Field within identity provider user profile containing unique user identifer. | `email` |
 
-##### Example
+#### Example
 
 In this following example, each level of indentation represents a single tab character. The labels are prefixed with **one** tab character and the values are all prefixed with **two** tab characters.
 
@@ -272,6 +272,12 @@ $ p4 admin restart
 The `restart` is necessary because Helix Core prepares the authentication mechanisms during startup. This is true when adding or removing `auth-` related triggers, as well as when installing or removing the loginhook extension.
 
 ## Next Steps
+
+### Testing
+
+For the purpose of testing the authentication integration with a limited number of users, you may change the `sso-users` field to a list of Perforce users that _must_ authenticate using the SSO authentication integration. When this value is configured with one or more users, then the `non-sso-users` list will be ignored by the extension. Likewise, any users _not_ included in this list will _not_ authenticate using the extension. To clear the `sso-users` field, replace the list of users with `...` to indicate that the field is to be ignored. When the `sso-users` field starts with `...` then the `non-sso-users` field will be considered by the extension during user authentication.
+
+Similar to the `sso-users` field is the `sso-groups` field, in which names of Perforce groups are given. Any users that are members of any of the named groups will be required to authenticate using the SSO authentication integration. When this value is configured with one or more groups, then the `non-sso-groups` list will be ignored by the extension. Likewise, any users that are _not_ members of any of the groups will _not_ authenticate using the extension. To clear the `sso-groups` field, replace the list of groups with `...` to indicate that the field is to be ignored. When the `sso-groups` field starts with `...` then the `non-sso-groups` field will be considered by the extension during user authentication.
 
 ### Debug logging
 
@@ -416,6 +422,16 @@ The procedure for upgrading the extension to a newer release consists of these s
 1. Restart the Helix Server (`p4 admin restart`)
 
 The process of migrating the old configuration to the new extension is not yet automated, so care must be taken to copy the values to the new extension configuration.
+
+## Notes on Extension Behavior
+
+### When the authentication service is unreachable
+
+If a user attempts to authenticate with Helix Server while the authentication service is not accessible, the authentication extension will "error out" immediately, causing Helix Server to defer to another authentication mechanism (e.g. LDAP, database password). In this case the client will present a password prompt, as described in the [Troubleshooting](#troubleshooting) section.
+
+### When user credentials are not accepted
+
+If the user attempts to authenticate with the identity provider and enters invalid credentials, the extension will reject the login attempt completely, and in turn Helix Server will reject the user authentication. There is **no** fallback of any kind _if_ the authentication service is accessible and functioning properly.
 
 ## Troubleshooting
 
