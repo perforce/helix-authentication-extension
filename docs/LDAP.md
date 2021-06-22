@@ -4,10 +4,23 @@
 
 Helix Server has long supported LDAP for user authentication, and that does not
 change when used in concert with the authentication extension. The server can
-support users that authenticate with either a database password (default
-Perforce authentication), an LDAP-based password (as defined with `p4 ldap`), as
-well as SSO authentication by means of the `auth-check-sso` trigger (which the
-authentication extension implements).
+support users that authenticate with a database password (default Perforce
+authentication), or an LDAP-based password (as defined with `p4 ldap`), or via
+SSO authentication by means of the `auth-check-sso` trigger. In fact, a user can
+be authenticated by both an `auth-check-sso` trigger _and_ LDAP.
+
+However, the authentication extension differs from an `auth-check-sso` trigger
+in that it uses the "invoke URL" feature to open a web browser to delegate user
+authentication to an external web site (i.e. identity provider). As a result,
+the Perforce client and server never receive the user's credentials, and thus
+the server cannot pass the credentials to an LDAP directory. In this scenario, a
+user can either authenticate with the authentication extension, or they can
+authenticate by some other means (i.e. LDAP), but not both.
+
+The remainder of this guide offers one of several possible combinations of
+authentication methods, allowing some users to authenticate with database
+passwords, some to authenticate using an LDAP directory, and yet another set of
+users that authenticate using browser-based SSO.
 
 ## Perforce Configuration
 

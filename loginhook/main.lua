@@ -162,9 +162,12 @@ function AuthPreSSO()
     } )
     return true, "unused", "http://example.com", true
   end
-  -- Skip any users whose AuthMethod is set to 'ldap', or have a Type that is
-  -- not 'standard' (i.e. service or operator), as they are very unlikely to
-  -- authenticate using single-sign-on.
+  -- We must skip any users whose AuthMethod is set to 'ldap' since we cannot
+  -- authenticate them with both SSO and LDAP when using the invokeURL feature
+  -- (in which the "token" is the username and not a password).
+  --
+  -- Skip any users who have a Type that is not 'standard' (i.e. service or
+  -- operator), as they are very unlikely to authenticate using single-sign-on.
   local ok, isLdap = utils.isLdapOrNonStandard( user )
   if not ok then
     -- auth-pre-sso does not emit messages to the client
