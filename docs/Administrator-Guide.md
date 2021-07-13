@@ -464,6 +464,10 @@ The most likely scenario is that the user profile data returned by the identity 
 
 Note that the `nameID` value does not match the `userid`, although they are similar. The extension will only accept values that match **exactly**. In this example, it would seem that the `userid` is an email address (the `Email` field of the Perforce user spec), while the SAML Name ID is a username. There are two choices for resolving this mismatch: 1) change the SAML IdP configuration to return an email address for the Name ID, 2) change the `user-identifier` *instance* configuration of the extension to `user` and hope that the Perforce user name matches the SAML Name ID.
 
+### Login successful only after multiple attempts
+
+When logging in, the `p4 login` is seemingly not satisfied until the user visits the same login URL two or three times, and only then will a ticket be issued. Otherwise, the login attempt fails after a timeout. This will happen if there are multiple extension **instance** configurations present. See the [Multiple Instance Configurations](#multiple-instance-configurations) section above for the commands to diagnose and correct the behavior.
+
 ### HTTP error code 403 in extension log
 
 If the extension is failing to authenticate the user, and the extension log file contains something like this:
