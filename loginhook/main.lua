@@ -309,6 +309,10 @@ function AuthCheckSSO()
         [ "http-error" ] = tostring( sdata )
       } )
     end
+    -- Do not fall through even though that may be an acceptable solution, it
+    -- hides the fact that something is wrong with the Swarm setup and results
+    -- in intermittent login failures.
+    return false
   end
   -- Commence the usual 2-step procedure, in which we request the authenticated
   -- user data using a long-poll on the auth service. The service request will
