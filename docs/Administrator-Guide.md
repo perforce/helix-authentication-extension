@@ -172,8 +172,8 @@ All of these settings have sensible defaults. However, for the extension to be e
 | `enable-logging` | Extension will write debug messages to a log if `true` | `false` |
 | `non-sso-groups` | Those groups who will not be using SSO. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
 | `non-sso-users` | Those users who will not be using SSO. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
-| `sso-groups` | Those groups whose members must authenticate using SSO. If this field is set to the name one or more groups, then the `non-sso-groups` field will be ignored. See the note above. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
-| `sso-users` | Those users who must authenticate using SSO. If this field is set to the name one or more users, then the `non-sso-users` field will be ignored. See the note above. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
+| `sso-groups` | Those groups whose members must authenticate using SSO. If this field is set to the name one or more groups, then the `non-sso-groups` field will be ignored. See the [Testing](#testing) section below. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
+| `sso-users` | Those users who must authenticate using SSO. If this field is set to the name one or more users, then the `non-sso-users` field will be ignored. See the [Testing](#testing) section below. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
 | `user-identifier` | Trigger variable used as unique user identifier, one of: `fullname`, `email`, or `user`. | `email` |
 | `name-identifier` | Field within identity provider user profile containing unique user identifer. | `email` |
 
@@ -275,9 +275,9 @@ The `restart` is necessary because Helix Core prepares the authentication mechan
 
 ### Testing
 
-For the purpose of testing the authentication integration with a limited number of users, you may change the `sso-users` field to a list of Perforce users that _must_ authenticate using the SSO authentication integration. When this value is configured with one or more users, then the `non-sso-users` list will be ignored by the extension. Likewise, any users _not_ included in this list will _not_ authenticate using the extension. To clear the `sso-users` field, replace the list of users with `...` to indicate that the field is to be ignored. When the `sso-users` field starts with `...` then the `non-sso-users` field will be considered by the extension during user authentication.
+For the purpose of testing the authentication integration with a limited number of users, you may change the `sso-users` field to a list of Perforce users that _must_ authenticate using the SSO authentication integration. When this value is configured with one or more users, then the `non-sso-users` and `non-sso-groups` lists will be ignored by the extension. Likewise, any users _not_ included in this list will _not_ authenticate using the extension. To clear the `sso-users` field, replace the list of users with `...` to indicate that the field is to be ignored. When the `sso-users` field starts with `...` then the `non-sso-users` and `non-sso-groups` fields will be considered by the extension during user authentication.
 
-Similar to the `sso-users` field is the `sso-groups` field, in which names of Perforce groups are given. Any users that are members of any of the named groups will be required to authenticate using the SSO authentication integration. When this value is configured with one or more groups, then the `non-sso-groups` list will be ignored by the extension. Likewise, any users that are _not_ members of any of the groups will _not_ authenticate using the extension. To clear the `sso-groups` field, replace the list of groups with `...` to indicate that the field is to be ignored. When the `sso-groups` field starts with `...` then the `non-sso-groups` field will be considered by the extension during user authentication.
+Similar to the `sso-users` field is the `sso-groups` field, in which names of Perforce groups are given. Any users that are members of any of the named groups will be required to authenticate using the SSO authentication integration. When this value is configured with one or more groups, then the `non-sso-groups` and `non-sso-users` lists will be ignored by the extension. Likewise, any users that are _not_ members of any of the groups will _not_ authenticate using the extension. To clear the `sso-groups` field, replace the list of groups with `...` to indicate that the field is to be ignored. When the `sso-groups` field starts with `...` then the `non-sso-groups` and `non-sso-users` fields will be considered by the extension during user authentication.
 
 ### Debug logging
 
@@ -425,13 +425,21 @@ The process of migrating the old configuration to the new extension is not yet a
 
 ## Notes on Extension Behavior
 
+### Authentication logic in detail
+
+When the extension is installed, the **default** behavior is for **all** users to authenticate with SSO, with the exception of two categories of users: a) those users whose `AuthMethod` is set to `ldap`, and b) those users whose `Type` is not `standard` (i.e. operators and service users). LDAP users are expected to authenticate against an LDAP directory, and non-standard users typically cannot authenticate via a web browser.
+
+If either the `sso-users` or `sso-groups` contains one or more entries (i.e. does not start with `...`), then any _matching_ users will **always** use SSO. This is regardless of the `AuthMethod` or `Type` of the user. Any users that do _not match_ will **not** authenticate with SSO.
+
+If `sso-users` and `sso-groups` are not defined (i.e. start with `...`), then the `non-sso-users` and `non-sso-groups` settings are taken into consideration, as well as the default behavior for the `AuthMethod` and `Type` as described above. 
+
 ### When the authentication service is unreachable
 
 If a user attempts to authenticate with Helix Server while the authentication service is not accessible, the authentication extension will "error out" immediately, causing Helix Server to defer to another authentication mechanism (e.g. LDAP, database password). In this case the client will present a password prompt, as described in the [Troubleshooting](#troubleshooting) section.
 
 ### When user credentials are not accepted
 
-If the user attempts to authenticate with the identity provider and enters invalid credentials, the extension will reject the login attempt completely, and in turn Helix Server will reject the user authentication. There is **no** fallback of any kind _if_ the authentication service is accessible and functioning properly.
+If the user attempts to authenticate with the identity provider and enters invalid credentials, the extension will reject the login attempt completely, and in turn Helix Server will reject the user authentication. There is **no fallback** of any kind _if_ the authentication service is accessible and functioning properly.
 
 ## Troubleshooting
 

@@ -79,7 +79,7 @@ describe('Non-SSL', function () {
         const loginCmd = p4.cmdSync('login', 'secret123')
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
         const log = helpers.readExtensionLog(p4config)
-        assert.include(log, 'info: group-based skipping user')
+        assert.include(log, 'info: skipping SSO for user')
       })
     })
 
@@ -106,7 +106,7 @@ describe('Non-SSL', function () {
         assert.include(log, 'info: identifiers match')
       })
 
-      it('should login non-SSO groups successfully', function () {
+      it('should login non-SSO users successfully', function () {
         const p4 = new P4({
           P4PORT: p4config.port,
           P4USER: p4config.user
@@ -114,7 +114,7 @@ describe('Non-SSL', function () {
         const loginCmd = p4.cmdSync('login', 'p8ssword')
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
         const log = helpers.readExtensionLog(p4config)
-        assert.include(log, 'info: group-based skipping user')
+        assert.include(log, 'info: skipping user, SSO not required')
       })
     })
 
@@ -145,7 +145,7 @@ describe('Non-SSL', function () {
         const loginCmd = p4.cmdSync('login', 'p8ssword')
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
         const log = helpers.readExtensionLog(p4config)
-        assert.include(log, 'info: skipping SSO for user')
+        assert.include(log, 'info: skipping user, SSO not required')
       })
     })
 

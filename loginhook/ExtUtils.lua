@@ -1,5 +1,5 @@
 --[[
-  Copyright 2020 Perforce Software
+  Copyright 2021 Perforce Software
 ]]--
 local ExtUtils = {}
 local cjson = require "cjson"
@@ -151,40 +151,65 @@ function ExtUtils.authorityCertificate()
   return Helix.Core.Server.GetArchDirFileName( "ca.crt" )
 end
 
-function ExtUtils.isSkipUser( user )
-  -- users in the sso-users list are required to authenticate using SSO
+function ExtUtils.isRequiredUser( user )
+  -- users in the sso-users list are required to use SSO
   local required = ExtUtils.iCfgData[ "sso-users" ]
+  local hasRequired = false
   if required ~= nil and string.match( required, "^%.%.%." ) == nil then
+    hasRequired = true
     local items = ExtUtils.splitWords( required )
     for _, v in pairs( items ) do
       if v == user then
-        -- not skipping because user is required
-        return false
+        return true, true, hasRequired
       end
     end
-    -- skipping because user was _not_ in the required list
-    return true
   end
-  -- users in the non-sso-users list are excluded from SSO authentication
+  -- users in groups in the sso-groups list are required to use SSO
+  local ngroups = ExtUtils.iCfgData[ "num_sso_groups" ]
+  if ngroups > 0 then
+    hasRequired = true
+    local groups = ExtUtils.iCfgData[ "sso_groups_tbl" ]
+    local ok, contains = isUserInGroups( user, groups )
+    return ok, contains, hasRequired
+  end
+  return true, false, hasRequired
+end
+
+function ExtUtils.isSkipUser( user )
+  -- users in the non-sso-users list are excluded from SSO
   local excluded = ExtUtils.iCfgData[ "non-sso-users" ]
+  local hasSkipped = false
   if excluded ~= nil and string.match( excluded, "^%.%.%." ) == nil then
+    hasSkipped = true
     local items = ExtUtils.splitWords( excluded )
     for _, v in pairs( items ) do
       if v == user then
         -- skipping because user was excluded
-        return true
+        return true, true, hasSkipped
       end
     end
   end
-  -- in all other cases authenticate using SSO
-  return false
+  -- users in groups in the non-sso-groups list are excluded from SSO
+  local ngroups = ExtUtils.iCfgData[ "num_non_sso_groups" ]
+  if ngroups > 0 then
+    hasSkipped = true
+    local groups = ExtUtils.iCfgData[ "non_sso_groups_tbl" ]
+    local ok, contains = isUserInGroups( user, groups )
+    return ok, contains, hasSkipped
+  end
+  return true, false, hasSkipped
 end
 
-function ExtUtils.isLdapOrNonStandard( user )
+function ExtUtils.getAuthMethodAndType( user )
   -- get ClientApi configured for login-less access to the current server
   local ca, err = Helix.Core.Server.GetAutoClientApi()
   if err ~= nil then
-    return false, tostring( err )
+    ExtUtils.debug( {
+      [ "getAuthMethodAndType" ] = "error: failed getting auto-client",
+      [ "user" ] = user,
+      [ "cause" ] = tostring( err )
+    } )
+    return false, nil, nil
   end
   local e = Helix.Core.P4API.Error.new()
   local cu = Helix.Core.P4API.ClientUser.new()
@@ -195,16 +220,27 @@ function ExtUtils.isLdapOrNonStandard( user )
 
   if e:Test() then
     ca:Final()
-    return false, e:Fmt()
+    ExtUtils.debug( {
+      [ "getAuthMethodAndType" ] = "error: failed getting user spec",
+      [ "user" ] = user,
+      [ "cause" ] = e:Fmt()
+    } )
+    return false, nil, nil
   end
 
   local method = "perforce"
   local type = "standard"
   cu.Message = function( self, m )
-    ExtUtils.debug( { [ "isLdapOrNonStandard" ] = "info: " .. m:Fmt() } )
+    ExtUtils.debug( {
+      [ "getAuthMethodAndType" ] = "info: " .. m:Fmt(),
+      [ "user" ] = user
+    } )
   end
   cu.HandleError = function( self, m )
-    ExtUtils.debug( { [ "isLdapOrNonStandard" ] = "error: " .. m:Fmt() } )
+    ExtUtils.debug( {
+      [ "getAuthMethodAndType" ] = "error: " .. m:Fmt(),
+      [ "user" ] = user
+    } )
   end
   cu.OutputStat = function ( self, dict )
     for k, v in dict:pairs() do
@@ -221,14 +257,19 @@ function ExtUtils.isLdapOrNonStandard( user )
   ca:Run( "user", cu )
   ca:Final()
 
-  return true, method == "ldap" or type ~= "standard"
+  return true, method, type
 end
 
 function isUserInGroups( user, groups )
   -- get ClientApi configured for login-less access to the current server
   local ca, err = Helix.Core.Server.GetAutoClientApi()
   if err ~= nil then
-    return false, tostring( err )
+    ExtUtils.debug( {
+      [ "isUserInGroups" ] = "error: failed getting auto-client",
+      [ "user" ] = user,
+      [ "cause" ] = tostring( err )
+    } )
+    return false, nil
   end
   local e = Helix.Core.P4API.Error.new()
   local cu = Helix.Core.P4API.ClientUser.new()
@@ -239,15 +280,26 @@ function isUserInGroups( user, groups )
 
   if e:Test() then
     ca:Final()
-    return false, e:Fmt()
+    ExtUtils.debug( {
+      [ "isUserInGroups" ] = "error: failed checking group membership",
+      [ "user" ] = user,
+      [ "cause" ] = e:Fmt()
+    } )
+    return false, nil
   end
 
   local gs = {}
   cu.Message = function( self, m )
-    ExtUtils.debug( { [ "isUserInGroups" ] = "info: " .. m:Fmt() } )
+    ExtUtils.debug( {
+      [ "isUserInGroups" ] = "info: " .. m:Fmt(),
+      [ "user" ] = user
+    } )
   end
   cu.HandleError = function( self, m )
-    ExtUtils.debug( { [ "isUserInGroups" ] = "error: " .. m:Fmt() } )
+    ExtUtils.debug( {
+      [ "isUserInGroups" ] = "error: " .. m:Fmt(),
+      [ "user" ] = user
+    } )
   end
   cu.OutputStat = function( self, dict )
     gs[ dict[ "group" ] ] = 1
@@ -265,35 +317,6 @@ function isUserInGroups( user, groups )
     end
   end
 
-  return true, false
-end
-
-function ExtUtils.isUserInSkipGroup( user )
-  -- users in groups in the sso-groups list are required to use SSO
-  local ngroups = ExtUtils.iCfgData[ "num_sso_groups" ]
-  if ngroups > 0 then
-    local groups = ExtUtils.iCfgData[ "sso_groups_tbl" ]
-    -- skipping because user was excluded by group
-    local ok, inGroup = isUserInGroups( user, groups )
-    if not ok then
-      -- there was an error checking the group membership
-      return false, inGroup
-    end
-    if inGroup then
-      -- not skipping because user is required
-      return true, false
-    end
-    -- skipping because user was _not_ in the required groups list
-    return true, true
-  end
-  -- users in groups in the non-sso-groups list are excluded
-  local ngroups = ExtUtils.iCfgData[ "num_non_sso_groups" ]
-  if ngroups > 0 then
-    local groups = ExtUtils.iCfgData[ "non_sso_groups_tbl" ]
-    -- skipping because user was excluded by group
-    return isUserInGroups( user, groups )
-  end
-  -- in all other cases authenticate using SSO
   return true, false
 end
 

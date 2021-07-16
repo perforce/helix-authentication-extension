@@ -1,7 +1,7 @@
 --[[
   Authentication extensions for OpenID Connect and SAML 2.0
 
-  Copyright 2020 Perforce Software
+  Copyright 2021 Perforce Software
 ]]--
 local cjson = require "cjson"
 local curl = require "cURL.safe"
@@ -132,60 +132,54 @@ end
 local requestId = nil
 
 function AuthPreSSO()
+  -- N.B. auth-pre-sso does not emit messages to the client so calling
+  -- Helix.Core.Server.SetClientMsg() does nothing.
   utils.init()
   local user = Helix.Core.Server.GetVar( "user" )
-  -- skip any individually named users
-  if utils.isSkipUser( user ) then
-    utils.debug( {
-      [ "AuthPreSSO" ] = "info: skipping SSO for user",
-      [ "user" ] = user
-    } )
-    return true, "unused", "http://example.com", true
-  end
-  -- skip any users belonging to a specific group
-  local ok, inGroup = utils.isUserInSkipGroup( user )
+  local ok, isRequired, hasRequired = utils.isRequiredUser( user )
   if not ok then
-    -- auth-pre-sso does not emit messages to the client
-    -- Helix.Core.Server.SetClientMsg( 'error checking user group membership' )
-    utils.debug( {
-      [ "AuthPreSSO" ] = "error: failed checking group membership",
-      [ "user" ] = user,
-      -- in the event of an error, 'inGroup' is the formatted error
-      [ "cause" ] = inGroup
-    } )
     return false, "error"
   end
-  if inGroup then
+  if hasRequired and not isRequired then
+    -- required list exists and this user is not in it, no SSO
     utils.debug( {
-      [ "AuthPreSSO" ] = "info: group-based skipping user",
+      [ "AuthPreSSO" ] = "info: skipping user, SSO not required",
       [ "user" ] = user
     } )
     return true, "unused", "http://example.com", true
-  end
-  -- We must skip any users whose AuthMethod is set to 'ldap' since we cannot
-  -- authenticate them with both SSO and LDAP when using the invokeURL feature
-  -- (in which the "token" is the username and not a password).
-  --
-  -- Skip any users who have a Type that is not 'standard' (i.e. service or
-  -- operator), as they are very unlikely to authenticate using single-sign-on.
-  local ok, isLdap = utils.isLdapOrNonStandard( user )
-  if not ok then
-    -- auth-pre-sso does not emit messages to the client
-    -- Helix.Core.Server.SetClientMsg( 'error checking user AuthMethod' )
-    utils.debug( {
-      [ "AuthPreSSO" ] = "error: failed checking AuthMethod ",
-      [ "user" ] = user,
-      -- in the event of an error, 'isLdap' is the formatted error
-      [ "cause" ] = isLdap
-    } )
-    return false, "error"
-  end
-  if isLdap then
-    utils.debug( {
-      [ "AuthPreSSO" ] = "info: skipping LDAP user ",
-      [ "user" ] = user
-    } )
-    return true, "unused", "http://example.com", true
+  elseif not hasRequired then
+    -- without required list, consider skipped list and other special cases
+    local ok, isSkipped, _hasSkipped = utils.isSkipUser( user )
+    if not ok then
+      return false, "error"
+    end
+    if isSkipped then
+      utils.debug( {
+        [ "AuthPreSSO" ] = "info: skipping SSO for user",
+        [ "user" ] = user
+      } )
+      return true, "unused", "http://example.com", true
+    end
+    local ok, authMethod, userType = utils.getAuthMethodAndType( user )
+    if not ok then
+      return false, "error"
+    end
+    -- non-'standard' users typically cannot use browser-based auth
+    if userType ~= "standard" then
+      utils.debug( {
+        [ "AuthPreSSO" ] = "info: skipping non-standard user ",
+        [ "user" ] = user
+      } )
+      return true, "unused", "http://example.com", true
+    end
+    -- LDAP users are expected to authenticate using LDAP
+    if authMethod == "ldap" then
+      utils.debug( {
+        [ "AuthPreSSO" ] = "info: skipping LDAP user ",
+        [ "user" ] = user
+      } )
+      return true, "unused", "http://example.com", true
+    end
   end
   -- Get a request id from the service, save it in requestId; do this every time
   -- for every user, in case the same user logs in from multiple systems. We
