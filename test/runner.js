@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Perforce Software
+// Copyright 2020-2021 Perforce Software
 //
 const fs = require('fs-extra')
 const path = require('path')

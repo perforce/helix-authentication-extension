@@ -1,5 +1,5 @@
 //
-// Copyright 2020 Perforce Software
+// Copyright 2020-2021 Perforce Software
 //
 const { fork } = require('child_process')
 const fs = require('fs')
