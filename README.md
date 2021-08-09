@@ -46,7 +46,8 @@ Helix Core Server running the extension.
 
 ### Perforce Clients
 
-The authentication extension has been tested with the following clients:
+The authentication extension has been tested with the following clients. The
+extension will work with the versions shown, as well as later versions.
 
 * P4 2019.1
     + Earlier versions will also work, but the user will have to copy the URL
