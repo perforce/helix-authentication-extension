@@ -151,6 +151,16 @@ function ExtUtils.authorityCertificate()
   return Helix.Core.Server.GetArchDirFileName( "ca.crt" )
 end
 
+function ExtUtils.verifyPeer()
+  local verify_peer = ExtUtils.gCfgData[ "Verify-Peer" ]
+  return verify_peer == "true"
+end
+
+function ExtUtils.verifyHost()
+  local verify_host = ExtUtils.gCfgData[ "Verify-Host" ]
+  return verify_host == "true"
+end
+
 function ExtUtils.isRequiredUser( user )
   -- users in the sso-users list are required to use SSO
   local required = ExtUtils.iCfgData[ "sso-users" ]

@@ -97,6 +97,10 @@ ExtConfig:
         ... Path to client private key, defaults to ./client.key
     Service-URL:
         ... The authentication service base URL.
+    Verify-Peer:
+        ... Ensure service certificate is valid, if 'true'.
+    Verify-Host:
+        ... Ensure service host name matches certificate, if 'true'.
 ```
 
 where `[snip]` means some information has been omitted.
@@ -114,6 +118,8 @@ Of the settings in `ExtConfig`, only the `Service-URL` setting is required. The 
 | `Client-Cert` | Path to the public key of the extension client certificate. See the [Certificates](#certificates) section for more information. | Defaults to the `client.crt` file in the extension directory. |
 | `Client-Key` | Path to the private key of the extension client certificate. See the [Certificates](#certificates) section for more information. | Defaults to the `client.key` file in the extension directory. |
 | `Service-URL` | The address of the authentication service by which the Helix Server can make a connection | _none_ |
+| `Verify-Peer` | If set to `true` then the extension will verify that the authentication service is using a valid SSL/TLS certficate. | _false_ |
+| `Verify-Host` | If set to `true` then the extension will verify that the hostname of the authentication service matches the SSL/TLS certificate returned by the service. | _false_ |
 
 #### Example
 
@@ -135,6 +141,10 @@ ExtConfig:
         /p4/1/ssl/loginhook-client.key
     Service-URL:
         https://auth-svc.example.com:3000/
+    Verify-Peer:
+        ... Ensure service certificate is valid, if 'true'.
+    Verify-Host:
+        ... Ensure service host name matches certificate, if 'true'.
 ```
 
 ### Instance

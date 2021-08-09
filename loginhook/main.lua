@@ -17,7 +17,9 @@ function GlobalConfigFields()
     [ "Auth-Protocol" ] = "... Authentication protocol, such as 'saml' or 'oidc'.",
     [ "Client-Cert" ] = "... Path to client public key, defaults to ./client.crt",
     [ "Client-Key" ] = "... Path to client private key, defaults to ./client.key",
-    [ "Authority-Cert" ] = "... Path to certificate authority public key, defaults to ./ca.crt"
+    [ "Authority-Cert" ] = "... Path to certificate authority public key, defaults to ./ca.crt",
+    [ "Verify-Peer" ] = "... Ensure service certificate is valid, if 'true'.",
+    [ "Verify-Host" ] = "... Ensure service host name matches certificate, if 'true'."
   }
 end
 
@@ -54,9 +56,9 @@ local function curlSecureOptions( c )
   c:setopt_cainfo( utils.authorityCertificate() )
   -- Ensure the server certificate is valid by checking certificate authority;
   -- verification can be set to true only if the certs are not self-signed.
-  c:setopt( curl.OPT_SSL_VERIFYPEER, false )
+  c:setopt( curl.OPT_SSL_VERIFYPEER, utils.verifyPeer() )
   -- Ensure host name matches common name in server certificate.
-  c:setopt( curl.OPT_SSL_VERIFYHOST, false )
+  c:setopt( curl.OPT_SSL_VERIFYHOST, utils.verifyHost() )
 end
 
 local function curlResponseFmt( url, ok, data )
