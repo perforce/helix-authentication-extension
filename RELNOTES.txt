@@ -91,6 +91,12 @@ Known Limitations
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
+New functionality in 2021.2
+
+    HAS-48 (Change #2143954)
+        Allow changing the TLS certificate file paths.
+
+----------------------------------------------------------------------
 Bugs fixed in 2021.1
 
     HAS-188 (Change #2084514)
