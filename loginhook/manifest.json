@@ -8,8 +8,8 @@
   "key": "117E9283-732B-45A6-9993-AE64C354F1C5",
   "name": "loginhook",
   "namespace": "Auth",
-  "version": "2021.1",
-  "version_name": "2021.1",
+  "version": "2021.2",
+  "version_name": "2021.2",
   "description": "SSO auth integration",
   "compatible_products": [
     "p4d"
