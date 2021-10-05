@@ -881,8 +881,14 @@ The operations involved are as follows:
 
 EOT
     echo "  * Set global Service-URL to ${SERVICE_URL}"
-    echo "  * Set global Auth-Protocol to '${DEFAULT_PROTOCOL}'"
-    echo "  * Set instance enable-logging to ${ENABLE_LOGGING:-off}"
+    if [[ -n "${DEFAULT_PROTOCOL}" ]] && [[ ! "${DEFAULT_PROTOCOL}" =~ '... ' ]]; then
+        echo "  * Set global Auth-Protocol to '${DEFAULT_PROTOCOL}'"
+    fi
+    if [[ "${ENABLE_LOGGING}" == 'yes' ]]; then
+        echo "  * Set instance enable-logging to 'on'"
+    else
+        echo "  * Set instance enable-logging to 'off'"
+    fi
     if [[ -n "${SSO_USERS}" ]]; then
         echo "  * Set instance sso-users to ${SSO_USERS}"
     fi
