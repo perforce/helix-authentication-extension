@@ -20,6 +20,7 @@ NAME_IDENTIFIER=''
 USER_IDENTIFIER=''
 SSO_USERS=''
 SSO_GROUPS=''
+ALLOW_NON_SSO=false
 P4D_MIN_CHANGE='1797576'
 P4D_MIN_VERSION='2019.1'
 
@@ -214,6 +215,10 @@ Description:
     --non-sso-groups <list>
         Comma-separated list of Perforce groups excluded from SSO support.
 
+    --allow-non-sso
+        If this argument is given, set the server configurable to allow
+        non-SSO authentication, such as database password and LDAP.
+
     --name-identifier <property>
         Property name of uniquely identifying value in IdP response. This is
         often the user email, typically named 'email', for OpenID Connect,
@@ -381,7 +386,7 @@ function read_arguments() {
     # build up the list of arguments in pieces since there are so many
     local ARGS=(p4port: super: superpassword: service-url: default-protocol: enable-logging)
     ARGS+=(non-sso-users: non-sso-groups: sso-users: sso-groups: name-identifier: user-identifier:)
-    ARGS+=(yes debug help)
+    ARGS+=(allow-non-sso yes debug help)
     local TEMP=$(getopt -n 'configure-auth-service.sh' \
         -o 'hmn' \
         -l "$(join_by , ${ARGS[@]})" -- "$@")
@@ -438,6 +443,10 @@ function read_arguments() {
             --non-sso-groups)
                 NON_SSO_GROUPS=$2
                 shift 2
+                ;;
+            --allow-non-sso)
+                ALLOW_NON_SSO=true
+                shift
                 ;;
             --sso-users)
                 SSO_USERS=$2
@@ -871,6 +880,27 @@ function clean_inputs() {
     fi
 }
 
+# Prompt user concerning other server configurables that may be appropriate
+# based on the selections made so far (interactive only).
+function conditional_prompts() {
+    cat <<EOT
+
+To allow the non-SSO users to authenticate with a database password or
+LDAP, the server configurable auth.sso.allow.passwd must be set to '1'.
+Would you like the script to make that change?
+
+EOT
+    select yn in 'Yes' 'No'; do
+        case $yn in
+            Yes)
+                ALLOW_NON_SSO=true
+                break
+                ;;
+            No) break ;;
+        esac
+    done
+}
+
 # Print what this script will do.
 function print_preamble() {
     cat <<EOT
@@ -903,6 +933,9 @@ EOT
     fi
     echo "  * Set instance name-identifier to ${NAME_IDENTIFIER}"
     echo "  * Set instance user-identifier to ${USER_IDENTIFIER}"
+    if $ALLOW_NON_SSO; then
+        echo "  * Configure server to allow non-SSO authentication."
+    fi
     echo ''
 }
 
@@ -1005,6 +1038,13 @@ function configure_extension() {
     return 0
 }
 
+# Set server configurables according to user selections.
+function configure_server() {
+    if $ALLOW_NON_SSO; then
+        p4 configure set auth.sso.allow.passwd=1 >/dev/null 2>&1
+    fi
+}
+
 # Restart the server for the trigger changes to take effect.
 function restart_server() {
     if $INTERACTIVE; then
@@ -1052,6 +1092,9 @@ EOT
     if $INTERACTIVE || $RESTART_OK; then
         echo '  * The Helix Core server was restarted.'
     fi
+    if $ALLOW_NON_SSO; then
+        echo '  * The server was configured to allow non-SSO logins.'
+    fi
     cat <<EOT
 
 What should be done now:
@@ -1059,9 +1102,11 @@ EOT
     if ! $INTERACTIVE && ! $RESTART_OK; then
         echo '  * Restart the Helix Core server at an appropriate time.'
     fi
-    if [[ -n "${NON_SSO_USERS}" ]] || [[ -n "${NON_SSO_GROUPS}" ]]; then
+    test -n "${NON_SSO_USERS}" || test -n "${NON_SSO_GROUPS}"
+    local NON_SSO_EXISTS=$?
+    if ! $ALLOW_NON_SSO && [[ $NON_SSO_EXISTS -eq 0 ]]; then
         echo '  * Set the Perforce configurable auth.sso.allow.passwd to 1 to allow'
-        echo '    non-SSO user access via a database password, LDAP, or triggers.'
+        echo '    non-SSO user authentication via a database password, LDAP, etc.'
     fi
     cat <<EOT
   * If not already completed, please install and configure the Helix
@@ -1095,6 +1140,9 @@ function main() {
         exit 1
     fi
     clean_inputs
+    if $INTERACTIVE; then
+        conditional_prompts
+    fi
     print_preamble
     if $INTERACTIVE; then
         prompt_to_proceed
@@ -1102,6 +1150,7 @@ function main() {
     cd "$( cd "$(dirname "$0")" ; pwd -P )/.."
     install_extension
     configure_extension
+    configure_server
     restart_server
     print_summary
 }
