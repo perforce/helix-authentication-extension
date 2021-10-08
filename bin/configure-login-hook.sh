@@ -1117,7 +1117,7 @@ EOT
     if ! $INTERACTIVE && ! $RESTART_OK; then
         echo '  * Restart the Helix Core server at an appropriate time.'
     fi
-    test -n "${NON_SSO_USERS}" || test -n "${NON_SSO_GROUPS}"
+    local ignore=$(test -n "${NON_SSO_USERS}" || test -n "${NON_SSO_GROUPS}")
     local NON_SSO_EXISTS=$?
     if ! $ALLOW_NON_SSO && [[ $NON_SSO_EXISTS -eq 0 ]]; then
         echo '  * Set the Perforce configurable auth.sso.allow.passwd to 1 to allow'
