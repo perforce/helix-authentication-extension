@@ -2,7 +2,7 @@
 #
 # Configuration script for Helix Authentication Extension.
 #
-# Copyright 2020, Perforce Software Inc. All rights reserved.
+# Copyright 2021, Perforce Software Inc. All rights reserved.
 #
 INTERACTIVE=true
 MONOCHROME=false
@@ -21,8 +21,11 @@ USER_IDENTIFIER=''
 SSO_USERS=''
 SSO_GROUPS=''
 ALLOW_NON_SSO=false
+SIGNED_SUPPORT=false
 P4D_MIN_CHANGE='1797576'
 P4D_MIN_VERSION='2019.1'
+P4D_SIGNED_CHANGE='1943129'
+P4D_SIGNED_VERSION='2020.2'
 
 # Print arguments to STDERR and exit.
 function die() {
@@ -740,10 +743,16 @@ function check_perforce_server() {
     local P4D_REL="${PIECES[2]}"
     local P4D_CHANGE="${PIECES[3]}"
     if [ "$(awk 'BEGIN{ if ("'$P4D_REL'" < "'$P4D_MIN_VERSION'") print(1); else print(0) }')" -eq 1 ] || \
-       [ -n "$P4D_MIN_CHANGE" -a "$P4D_CHANGE" -lt "${P4D_MIN_CHANGE:-0}" ]; then
+       [ -n "$P4D_MIN_CHANGE" -a "$P4D_CHANGE" -lt "${P4D_MIN_CHANGE}" ]; then
         error "This Helix server $P4D_REL/$P4D_CHANGE is not supported by Auth Extension."
         error "Auth Extension supports Helix servers starting with [$P4D_MIN_VERSION]/[${P4D_MIN_CHANGE}]"
         return 1
+    fi
+
+    # Check for signed extension support in the server.
+    if [ "$(awk 'BEGIN{ if ("'$P4D_REL'" >= "'$P4D_SIGNED_VERSION'") print(1); else print(0) }')" -eq 1 ] && \
+        [ -n "$P4D_SIGNED_CHANGE" -a "$P4D_CHANGE" -ge "${P4D_SIGNED_CHANGE}" ]; then
+        SIGNED_SUPPORT=true
     fi
 }
 
@@ -971,10 +980,16 @@ function install_extension() {
         return 1
     fi
     debug 'installing new extension...'
-    local INSTALL=$(p4 -p "$P4PORT" -u "$P4USER" extension --install loginhook.p4-extension -y)
+    local INSTALL=$(p4 -p "$P4PORT" -u "$P4USER" extension --install loginhook.p4-extension --yes --allow-unsigned)
     if [[ ! "${INSTALL}" =~ 'installed successfully' ]]; then
-        error 'Failed to install the extension on the server'
-        return 1
+        # try again without the newer --allow-signed option
+        INSTALL=$(p4 -p "$P4PORT" -u "$P4USER" extension --install loginhook.p4-extension --yes)
+        if [[ ! "${INSTALL}" =~ 'installed successfully' ]]; then
+            error 'Failed to install the extension on the server'
+            error 'Try setting the server configurable server.extensions.allow.unsigned to 1'
+            error 'and running this script again.'
+            return 1
+        fi
     fi
     return 0
 }
