@@ -358,7 +358,7 @@ $ p4 extension --list --type=extensions
 
 where `[snip]` means some information has been omitted for brevity.
 
-To change the certificates, you can replace the files with new content, keeping the names the same. Alternatively, you can change the _global_ configuration properties named `Authority-Cert`, `Client-Cert`, and `Client-Key` to point to files in a different location. The `Authority-Cert` setting specifies the path to the public key for the trusted certificate authority, which is used to verify that the authentication service is trustworthy. **Note:** the service validation is currently disabled in the extension as it relies on having valid certificates, which the service does not have by default. To enable this validation, contact Perforce Support.
+To change the certificates, you can replace the files with new content, keeping the names the same. Alternatively, you can change the _global_ configuration properties named `Authority-Cert`, `Client-Cert`, and `Client-Key` to point to files in a different location. The `Authority-Cert` setting specifies the path to the public key for the trusted certificate authority, which is used to verify that the authentication service is trustworthy. Note that the service validation is disabled by default, but can be enabled by setting `Verify-Peer` and `Verify-Host` to `true` in the global extension configuration.
 
 The `Client-Cert` and `Client-Key` settings specify the paths of the client certificate public and private keys, respectively. These files should be in the PEM format, with the `BEGIN` and `END` lines to clearly indicate the contents.
 
@@ -373,6 +373,29 @@ SSL server : Yes
 SSL server CA : No
 [snip]
 ```
+
+#### Testing the Certificates
+
+To test the client certificates used by the extension, you can start by initiating a login request using the `curl` command against a running HAS instance, to retrieve a request identifier. Note that we are using the certificates in the `loginhook` directory as an example, be sure to use the actual client certificate files in your installation when testing.
+
+```shell
+$ curl --cacert loginhook/ca.crt https://has.example.com/requests/new/foobar
+{"request":"01FKENCKS7F3A9YJV2Y71WZ6YZ", ...}
+```
+
+Using the `request` value above, we can now request the protected user profile data:
+
+```shell
+$ curl --cert loginhook/client.crt --key loginhook/client.key --cacert loginhook/ca.crt https://has.example.com/requests/status/01FKENCKS7F3A9YJV2Y71WZ6YZ
+```
+
+If successful, this request will pause for 1 minute before timing out with a '408' response since there is no user that will be performing a login on this request. Otherwise, if the client certificate is not accepted by the service, you will see the following error message:
+
+```
+certificates for <Nnn> from <Mmm> are not permitted
+```
+
+If that is the case, then verify that the HAS configuration specifies a certificate for CA that vouches for the validity of the client certificate.
 
 ## Removing the Extension
 
