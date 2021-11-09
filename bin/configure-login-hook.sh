@@ -972,18 +972,22 @@ function install_extension() {
             return 1
         fi
     fi
-    debug 'building new extension...'
-    rm -f loginhook.p4-extension
-    local BUILD=$(p4 -p "$P4PORT" -u "$P4USER" extension --package loginhook)
-    if [[ ! "${BUILD}" =~ 'packaged successfully' ]]; then
-        error 'Failed to build extension package file'
-        return 1
+    # do not clobber an existing (signed) package that is ready to install
+    if [[ ! -f loginhook.p4-extension ]]; then
+        debug 'building new extension...'
+        local BUILD=$(p4 -p "$P4PORT" -u "$P4USER" extension --package loginhook)
+        if [[ ! "${BUILD}" =~ 'packaged successfully' ]]; then
+            error 'Failed to build extension package file'
+            return 1
+        fi
     fi
+    # Start by assuming the extension was already built and signed, or that the
+    # server is an older version that does not require signing. If that attempt
+    # fails, then try again with the "pretty please" option.
     debug 'installing new extension...'
-    local INSTALL=$(p4 -p "$P4PORT" -u "$P4USER" extension --install loginhook.p4-extension --yes --allow-unsigned)
+    local INSTALL=$(p4 -p "$P4PORT" -u "$P4USER" extension --install loginhook.p4-extension --yes)
     if [[ ! "${INSTALL}" =~ 'installed successfully' ]]; then
-        # try again without the newer --allow-signed option
-        INSTALL=$(p4 -p "$P4PORT" -u "$P4USER" extension --install loginhook.p4-extension --yes)
+        INSTALL=$(p4 -p "$P4PORT" -u "$P4USER" extension --install loginhook.p4-extension --yes --allow-unsigned)
         if [[ ! "${INSTALL}" =~ 'installed successfully' ]]; then
             error 'Failed to install the extension on the server'
             error 'Try setting the server configurable server.extensions.allow.unsigned to 1'
