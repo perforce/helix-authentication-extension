@@ -20,4 +20,4 @@ Other benefits of using extensions include the ease-of-use, primarily around ins
 
 The choice of extensions has worked well for the most part. Customers are fine with upgrading Helix Core, and since that is the only prerequisite, it means that installing the extensions is easy compared to installing Python and any necessary libraries.
 
-One drawback is that extensions are (still) not available on Windows systems. Some customers are running Helix Core on Windows which means they cannot leverage our authentication integration at this time.
+One drawback with extensions was that support for them was not available on Windows systems until the 2021.2 release. This limited some opportunites with Windows-only customers.

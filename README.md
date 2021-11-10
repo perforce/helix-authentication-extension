@@ -32,9 +32,8 @@ user can interact with Helix Server.
 ## Requirements
 
 The extension requires a Helix Server version that supports extensions. This is
-2019.1 or later for Linux systems. Windows support for extensions is still
-pending. When tested with a pre-release version of the server on Windows, the
-extension worked as expected.
+**2019.1** or later for **Linux** systems, and **2021.2** or later for
+**Windows** systems.
 
 ### Helix Authentication Service
 
