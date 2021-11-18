@@ -27,7 +27,7 @@ RUN a2enmod ssl
 RUN mkdir -p /etc/apache2/ssl && \
     chmod 600 /etc/apache2/ssl && \
     cd /etc/apache2/ssl && \
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout apache.key -out apache.crt -subj "/CN=ImSecure"
+    openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:4096 -keyout apache.key -out apache.crt -subj "/CN=swarm.doc"
 
 WORKDIR /swarm
 
