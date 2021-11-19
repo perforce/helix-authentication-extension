@@ -104,7 +104,7 @@ function installExtension (config) {
   }
   const packageCmd = p4.cmdSync('extension --package loginhook')
   assert.isTrue(findData(packageCmd, 'Extension packaged successfully.'))
-  const installCmd = p4.cmdSync('extension --install loginhook.p4-extension -y')
+  const installCmd = p4.cmdSync('extension --install loginhook.p4-extension -y --allow-unsigned')
   assert.include(installCmd.info[0].data, 'installed successfully')
 }
 
