@@ -51,7 +51,7 @@ function startServerGeneric (config, ssldir) {
       }
     })
     p4d.stderr.on('data', (data) => {
-      console.error('p4d:', data)
+      console.error('p4d:', data.toString())
     })
   })
 }
