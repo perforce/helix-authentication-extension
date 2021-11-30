@@ -1,8 +1,8 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const createError = require('http-errors')
-const express = require('express')
+import createError from 'http-errors'
+import express from 'express'
 
 //
 // This very basic Express.js application is used for testing the login
@@ -166,4 +166,4 @@ function isClientAuthorized (req, cert) {
   }
 }
 
-module.exports = app
+export default app

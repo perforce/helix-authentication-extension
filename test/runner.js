@@ -1,18 +1,17 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const fs = require('fs-extra')
-const path = require('path')
-const process = require('process')
-const { exec, spawn } = require('child_process')
-const getPort = require('get-port')
-const { version } = require('../package.json')
+import fs from 'fs-extra'
+import * as path from 'node:path'
+import * as process from 'node:process'
+import { exec, spawn } from 'node:child_process'
+import getPort from 'get-port'
 
 const defaultConfig = {
   user: 'bruno',
   password: 'p8ssword',
   prog: 'p4api',
-  progv: version,
+  progv: '2021.2.0',
   p4root: './tmp/p4d-nonssl'
 }
 
@@ -20,7 +19,7 @@ const defaultSslConfig = {
   user: 'bruno',
   password: 'p8ssword',
   prog: 'p4api',
-  progv: version,
+  progv: '2021.2.0',
   p4root: './tmp/p4d-ssl'
 }
 
@@ -56,7 +55,7 @@ function startServerGeneric (config, ssldir) {
   })
 }
 
-async function startServer () {
+export async function startServer () {
   const portnum = await getPort()
   const port = `localhost:${portnum}`
   const config = Object.assign({}, defaultConfig, { port })
@@ -65,7 +64,7 @@ async function startServer () {
   return startServerGeneric(config, null)
 }
 
-async function startSslServer () {
+export async function startSslServer () {
   const portnum = await getPort()
   const port = `ssl:localhost:${portnum}`
   const config = Object.assign({}, defaultSslConfig, { port })
@@ -108,12 +107,6 @@ function stopServerGeneric (config) {
   })
 }
 
-function stopServer (config) {
+export function stopServer (config) {
   return stopServerGeneric(config)
-}
-
-module.exports = {
-  startServer,
-  startSslServer,
-  stopServer
 }

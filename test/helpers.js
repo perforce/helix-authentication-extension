@@ -1,11 +1,12 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const { fork } = require('child_process')
-const fs = require('fs')
-const path = require('path')
-const { assert } = require('chai')
-const { P4 } = require('p4api')
+import { fork } from 'node:child_process'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
+import { assert } from 'chai'
+import p4pkg from 'p4api'
+const { P4 } = p4pkg
 
 function makeP4 (config) {
   const p4 = new P4({
@@ -17,7 +18,7 @@ function makeP4 (config) {
 }
 
 // Search all the things to find a string of output that contains query.
-function findData (command, query) {
+export function findData (command, query) {
   if (command.prompt && typeof command.prompt === 'string') {
     if (command.prompt.includes(query)) {
       return true
@@ -40,13 +41,13 @@ function findData (command, query) {
   return false
 }
 
-function establishTrust (config) {
+export function establishTrust (config) {
   const p4 = makeP4(config)
   const trustCmd = p4.cmdSync('trust -y -f')
   assert.include(trustCmd.data, 'Added trust for P4PORT')
 }
 
-function establishSuper (config) {
+export function establishSuper (config) {
   const p4 = makeP4(config)
   const userOut = p4.cmdSync('user -o')
   const userSpec = userOut.stat[0]
@@ -62,7 +63,7 @@ function establishSuper (config) {
   assert.equal(configCmd.stat[0].Action, 'set')
 }
 
-function createUser (user, password, config) {
+export function createUser (user, password, config) {
   const p4 = makeP4(config)
   const userIn = p4.cmdSync('user -i -f', user)
   assert.equal(userIn.info[0].data, `User ${user.User} saved.`)
@@ -70,7 +71,7 @@ function createUser (user, password, config) {
   assert.equal(passwdCmd.info[0].data, 'Password updated.')
 }
 
-function createGroup (group, config) {
+export function createGroup (group, config) {
   const p4 = makeP4(config)
   const groupOut = p4.cmdSync(`group -o ${group.Group}`)
   const input = Object.assign({}, groupOut.stat[0], group)
@@ -84,15 +85,15 @@ function startService (env) {
   return fork('./test/www', [], { env, stdio: 'ignore' })
 }
 
-function startNonSslService (port) {
+export function startNonSslService (port) {
   return startService({ PORT: port })
 }
 
-function startSslService (port) {
+export function startSslService (port) {
   return startService({ PORT: port, USE_SSL: true })
 }
 
-function installExtension (config) {
+export function installExtension (config) {
   const p4 = makeP4(config)
   const listCmd = p4.cmdSync('extension --list --type=extensions')
   if ('stat' in listCmd && listCmd.stat[0].extension === 'Auth::loginhook') {
@@ -108,7 +109,7 @@ function installExtension (config) {
   assert.include(installCmd.info[0].data, 'installed successfully')
 }
 
-function configureExtension (config, protocol, serviceUrl) {
+export function configureExtension (config, protocol, serviceUrl) {
   const p4 = makeP4(config)
   // configure global
   const globalOut = p4.cmdSync('extension --configure Auth::loginhook -o')
@@ -131,7 +132,7 @@ function configureExtension (config, protocol, serviceUrl) {
 }
 
 // like configureExtension, but with only sso-users defined
-function configureSsoUsers (config, protocol, serviceUrl) {
+export function configureSsoUsers (config, protocol, serviceUrl) {
   const p4 = makeP4(config)
   // configure global
   const globalOut = p4.cmdSync('extension --configure Auth::loginhook -o')
@@ -155,7 +156,7 @@ function configureSsoUsers (config, protocol, serviceUrl) {
 }
 
 // like configureExtension, but with only sso-groups defined
-function configureSsoGroups (config, protocol, serviceUrl) {
+export function configureSsoGroups (config, protocol, serviceUrl) {
   const p4 = makeP4(config)
   // configure global
   const globalOut = p4.cmdSync('extension --configure Auth::loginhook -o')
@@ -179,34 +180,18 @@ function configureSsoGroups (config, protocol, serviceUrl) {
   assert.equal(instanceIn.info[0].data, 'Extension config testing saved.')
 }
 
-function restartServer (config) {
+export function restartServer (config) {
   return new Promise((resolve, reject) => {
     const p4 = makeP4(config)
     p4.cmdSync('admin restart')
     // give the server time to start up again
-    setTimeout(resolve, 100)
+    setTimeout(resolve, 1000)
   })
 }
 
 const dataDirPath = ['server.extensions.dir', '117E9283-732B-45A6-9993-AE64C354F1C5', '1-data']
 
-function readExtensionLog (config) {
+export function readExtensionLog (config) {
   const logPath = path.join(config.p4root, ...dataDirPath, 'log.json')
   return fs.readFileSync(logPath, 'utf8')
-}
-
-module.exports = {
-  findData,
-  establishTrust,
-  establishSuper,
-  createUser,
-  createGroup,
-  startNonSslService,
-  startSslService,
-  installExtension,
-  configureExtension,
-  configureSsoUsers,
-  configureSsoGroups,
-  restartServer,
-  readExtensionLog
 }

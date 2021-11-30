@@ -1,10 +1,10 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const fs = require('fs')
-const http = require('http')
-const https = require('https')
-const app = require('./app')
+import * as fs from 'node:fs'
+import * as http from 'node:http'
+import * as https from 'node:https'
+import app from 'helix-auth-extension/test/app.js'
 
 const port = normalizePort(getPort())
 app.set('port', port)

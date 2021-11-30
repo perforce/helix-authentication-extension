@@ -1,12 +1,13 @@
 //
 // Copyright 2020-2021 Perforce Software
 //
-const { assert } = require('chai')
-const { after, before, describe, it } = require('mocha')
-const { P4 } = require('p4api')
-const getPort = require('get-port')
-const helpers = require('./helpers')
-const runner = require('./runner')
+import { assert } from 'chai'
+import { after, before, describe, it } from 'mocha'
+import getPort from 'get-port'
+import * as helpers from 'helix-auth-extension/test/helpers.js'
+import * as runner from 'helix-auth-extension/test/runner.js'
+import p4pkg from 'p4api'
+const { P4 } = p4pkg
 
 describe('SSL', function () {
   let serviceProcess
