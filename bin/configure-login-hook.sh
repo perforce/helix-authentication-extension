@@ -21,11 +21,8 @@ USER_IDENTIFIER=''
 SSO_USERS=''
 SSO_GROUPS=''
 ALLOW_NON_SSO=false
-SIGNED_SUPPORT=false
 P4D_MIN_CHANGE='1797576'
 P4D_MIN_VERSION='2019.1'
-P4D_SIGNED_CHANGE='1943129'
-P4D_SIGNED_VERSION='2020.2'
 
 # Print arguments to STDERR and exit.
 function die() {
@@ -505,7 +502,6 @@ Summary of arguments passed:
 
 Helix server P4PORT            [${P4PORT:-(not specified)}]
 Helix super-user               [${P4USER:-(not specified)}]
-Helix super-user password      [${P4PASSWD:-(not specified)}]
 Service base URL               [${SERVICE_URL:-(not specified)}]
 Preferred auth protocol        [${DEFAULT_PROTOCOL:-(not specified)}]
 Debug logging enabled          [${ENABLE_LOGGING:-(not specified)}]
@@ -747,12 +743,6 @@ function check_perforce_server() {
         error "This Helix server $P4D_REL/$P4D_CHANGE is not supported by Auth Extension."
         error "Auth Extension supports Helix servers starting with [$P4D_MIN_VERSION]/[${P4D_MIN_CHANGE}]"
         return 1
-    fi
-
-    # Check for signed extension support in the server.
-    if [ "$(awk 'BEGIN{ if ("'$P4D_REL'" >= "'$P4D_SIGNED_VERSION'") print(1); else print(0) }')" -eq 1 ] && \
-        [ -n "$P4D_SIGNED_CHANGE" -a "$P4D_CHANGE" -ge "${P4D_SIGNED_CHANGE}" ]; then
-        SIGNED_SUPPORT=true
     fi
 }
 
