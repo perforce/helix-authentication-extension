@@ -367,6 +367,13 @@ function validate_user_identifier() {
 
 # Ensure OS is compatible and dependencies are already installed.
 function ensure_readiness() {
+    # Test write access by modifying something that is neither tracked by
+    # version control nor created by this script, which might foil any logic
+    # that decides whether to create the file or not.
+    mkdir -p node_modules > /dev/null 2>&1
+    if [ $? != 0 ]; then
+        die 'You do not have permission to write to this directory.'
+    fi
     if ! which p4 >/dev/null 2>&1; then
         die 'Perforce client "p4" is required. Please ensure "p4" is in the PATH.'
     fi
