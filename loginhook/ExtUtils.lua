@@ -26,6 +26,11 @@ function getGCfg()
     cfg[ k ] = trim( v )
   end
   -- assert certain settings at least appear to be valid
+  if cfg[ "Service-URL" ] == nil then
+    -- While localhost is unlikely to work, all other settings have defaults, so
+    -- for consistency we should provide a default for this setting as well.
+    cfg[ "Service-URL" ] = "http://localhost:3000"
+  end
   assert( string.match( cfg[ "Service-URL" ], "^http" ), "Service-URL must start with 'http'" )
   -- remove any trailing slash from the URL
   cfg[ "Service-URL" ] = (cfg[ "Service-URL" ]:gsub("^(.-)/?$", "%1"))
