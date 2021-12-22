@@ -34,6 +34,7 @@ COPY $BASE_PATH/user_george.txt .
 COPY $BASE_PATH/user_jackson.txt .
 COPY $BASE_PATH/user_janedoe.txt .
 COPY $BASE_PATH/user_johndoe.txt .
+COPY $BASE_PATH/user_fa2067ca.txt .
 COPY $BASE_PATH/user_swarm.txt .
 COPY $BASE_PATH/group_notimeout.txt .
 COPY $BASE_PATH/ldap_simple.txt .

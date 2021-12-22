@@ -32,6 +32,10 @@ function InstanceConfigFields()
     [ "sso-groups" ] = "... Those groups whose members must authenticate using SSO.",
     [ "non-sso-users" ] = "... Those users who will not be using SSO.",
     [ "non-sso-groups" ] = "... Those groups whose members will not be using SSO.",
+    [ "client-sso-users" ] = "... Those users who must authenticate using P4LOGINSSO.",
+    [ "client-sso-groups" ] = "... Those groups whose members must authenticate using P4LOGINSSO.",
+    [ "client-user-identifier" ] = "... Trigger variable used as unique P4LOGINSSO user identifier.",
+    [ "client-name-identifier" ] = "... Field within JSON web token containing unique user identifer.",
     [ "user-identifier" ] = "... Trigger variable used as unique user identifier.",
     [ "name-identifier" ] = "... Field within IdP response containing unique user identifer.",
     [ "enable-logging" ] = "... Extension will write debug messages to a log if 'true'."
@@ -99,7 +103,8 @@ local function getData( url )
   return false, code, err
 end
 
-local function validateResponse( url, response )
+local function validateSamlResponse( response )
+  local url = utils.samlValidateUrl()
   local easy = curl.easy()
   local encoded_response = easy:escape( response )
   local c = curl.easy{
@@ -125,6 +130,30 @@ local function validateResponse( url, response )
   return false, code, err
 end
 
+local function validateOAuthResponse( token )
+  local url = utils.oauthValidateUrl()
+  local easy = curl.easy()
+  local c = curl.easy{
+    url        = url,
+    httpheader = {
+      "Authorization: Bearer " .. token,
+    },
+  }
+  c:setopt_useragent( utils.getID() )
+  local rsp = ""
+  c:setopt( curl.OPT_WRITEFUNCTION, function( chunk ) rsp = rsp .. chunk end )
+  if utils.shouldUseSsl( url ) then
+    curlSecureOptions( c )
+  end
+  local ok, err = c:perform()
+  local code = c:getinfo( curl.INFO_RESPONSE_CODE )
+  c:close()
+  if code == 200 then
+    return curlResponseFmt( url, ok, ok and cjson.decode( rsp ) or err )
+  end
+  return false, code, err
+end
+
 --[[
   An Extension once loaded, has its runtime persist for the life of the
   RhExtension instance. This means that if you have some variable declared
@@ -132,12 +161,27 @@ end
   is invoked.
 ]]--
 local requestId = nil
+local usingClient = false
 
 function AuthPreSSO()
   -- N.B. auth-pre-sso does not emit messages to the client so calling
   -- Helix.Core.Server.SetClientMsg() does nothing.
   utils.init()
   local user = Helix.Core.Server.GetVar( "user" )
+  local ok, isClientUser, hasClientUsers = utils.isClientUser( user )
+  if not ok then
+    return false, "error"
+  end
+  if hasClientUsers and isClientUser then
+    -- This user must authenticate via a P4LOGINSSO program that returns
+    -- some form of "access token" (JWT) that the service will validate.
+    utils.debug( {
+      [ "AuthPreSSO" ] = "info: authenticating using P4LOGINSSO",
+      [ "user" ] = user
+    } )
+    usingClient = true
+    return true, "unused"
+  end
   local ok, isRequired, hasRequired = utils.isRequiredUser( user )
   if not ok then
     return false, "error"
@@ -186,7 +230,7 @@ function AuthPreSSO()
   -- Get a request id from the service, save it in requestId; do this every time
   -- for every user, in case the same user logs in from multiple systems. We
   -- will use this request identifier to get the status of the user later.
-  local userid = utils.userIdentifier()
+  local userid = utils.userIdentifier( false )
   local easy = curl.easy()
   local safe_id = easy:escape( userid )
   local ok, url, sdata = getData( utils.requestUrl() .. safe_id )
@@ -217,17 +261,19 @@ function AuthPreSSO()
     utils.debug( { [ "AuthPreSSO" ] = "info: 1-step mode for PilsnerHTHAdapter client" } )
     return true, url
   end
-  -- If the old SAML integration setting is present, use 1-step procedure.
-  local ssoArgs = Helix.Core.Server.GetVar( "ssoArgs" )
-  if string.find( ssoArgs, "--idpUrl" ) then
-    utils.debug( { [ "AuthPreSSO" ] = "info: 1-step mode for desktop agent" } )
-    return true, url
-  end
   utils.debug( {
     [ "AuthPreSSO" ] = "info: invoking URL " .. url,
     [ "user" ] = user
   } )
   return true, "unused", url, false
+end
+
+local function validateResponse( response )
+  if usingClient then
+    return validateOAuthResponse( response )
+  else
+    return validateSamlResponse( response )
+  end
 end
 
 local function compareIdentifiers( userid, nameid )
@@ -267,7 +313,7 @@ function AuthCheckSSO()
     Helix.Core.Server.SetClientMsg( 'please upgrade P4V for login2 support' )
     return false
   end
-  local userid = utils.userIdentifier()
+  local userid = utils.userIdentifier( usingClient )
   -- When using the invoke-URL feature, the client never passes anything back,
   -- so in that case, the "token" in AuthCheckSSO is set to the username.
   local user = Helix.Core.Server.GetVar( "user" )
@@ -282,20 +328,24 @@ function AuthCheckSSO()
       [ "user" ] = user
     } )
     -- If a password/token has been provided, then this is the 1-step procedure,
-    -- and the token is the SAML response coming from the desktop agent or
-    -- Swarm. In that case, try to extract the response and send it to the
-    -- service for validation. If that does not work, fall back to the normal
-    -- behavior.
+    -- and the token is the SAML response coming from Swarm. In that case, try
+    -- to extract the response and send it to the service for validation. If
+    -- that does not work, fall back to the normal behavior.
     local response = utils.getResponse( token )
     if response then
-      local ok, url, sdata = validateResponse( utils.validateUrl(), response )
+      utils.debug( {
+        [ "AuthCheckSSO" ] = "info: validating token",
+        [ "token-prefix" ] = string.sub( response, 1, 32 ),
+        [ "user" ] = user
+      } )
+      local ok, url, sdata = validateResponse( response )
       if ok then
         utils.debug( {
           [ "AuthCheckSSO" ] = "info: 1-step mode user data",
           [ "user" ] = user,
           [ "sdata" ] = sdata
         } )
-        local nameid = utils.nameIdentifier( sdata )
+        local nameid = utils.nameIdentifier( usingClient, sdata )
         return compareIdentifiers( userid, nameid )
       end
       utils.debug( {
@@ -320,7 +370,7 @@ function AuthCheckSSO()
       [ "user" ] = user,
       [ "sdata" ] = sdata
     } )
-    local nameid = utils.nameIdentifier( sdata )
+    local nameid = utils.nameIdentifier( usingClient, sdata )
     return compareIdentifiers( userid, nameid )
   end
   utils.debug( {

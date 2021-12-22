@@ -22,16 +22,37 @@
     next;
 }
 
-/name-identifier:/ {
+/\tname-identifier:/ {
     print;
     print "\t\tnameID";
     getline;
     next;
 }
 
-/user-identifier:/ {
+/\tuser-identifier:/ {
     print;
     print "\t\temail";
+    getline;
+    next;
+}
+
+/client-name-identifier:/ {
+    print;
+    print "\t\toid";
+    getline;
+    next;
+}
+
+/client-user-identifier:/ {
+    print;
+    print "\t\tuser";
+    getline;
+    next;
+}
+
+/client-sso-users:/ {
+    print;
+    print "\t\tfa2067ca-9797-4c3a-95b8-c6c2e87f615a";
     getline;
     next;
 }

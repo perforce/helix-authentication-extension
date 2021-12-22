@@ -39,6 +39,8 @@ p4 user -f -i < user_johndoe.txt
 yes 18873fa3-1918-43ca-a518-c706def5e07f | p4 passwd johndoe
 p4 user -f -i < user_janedoe.txt
 yes c96144c1-116b-4ed2-bedf-7455174eac0e | p4 passwd janedoe
+p4 user -f -i < user_fa2067ca.txt
+yes 37ef35e4-50c4-49a2-b0b5-1b0e20d613e7 | p4 passwd fa2067ca-9797-4c3a-95b8-c6c2e87f615a
 p4 user -f -i < user_swarm.txt
 yes ${P4PASSWD} | p4 passwd swarm
 

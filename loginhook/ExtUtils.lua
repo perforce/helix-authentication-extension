@@ -74,6 +74,22 @@ function getICfg()
       cfg[ "num_non_sso_groups" ] = n
     end
   end
+  -- massage the client groups into easier to evaluate data
+  cfg[ "num_client_sso_groups" ] = 0
+  if cfg[ "client-sso-groups" ] ~= nil then
+    -- only set num_client_sso_groups if we have an explicitly defined set of groups
+    if string.match( cfg[ "client-sso-groups" ], "^%.%.%." ) == nil then
+      local groups = {}
+      local n = 0
+      -- Create a table of groups whose members we target.
+      for g in string.gmatch( cfg[ "client-sso-groups" ], "%S+" ) do
+        groups[ g ] = 1
+        n = n + 1
+      end
+      cfg[ "client_sso_groups_tbl" ] = groups
+      cfg[ "num_client_sso_groups" ] = n
+    end
+  end
   return cfg
 end
 
@@ -123,7 +139,12 @@ function ExtUtils.statusUrl()
   return base .. "/requests/status/"
 end
 
-function ExtUtils.validateUrl()
+function ExtUtils.oauthValidateUrl()
+  local base = ExtUtils.gCfgData[ "Service-URL" ]
+  return base .. "/oauth/validate"
+end
+
+function ExtUtils.samlValidateUrl()
   local base = ExtUtils.gCfgData[ "Service-URL" ]
   return base .. "/saml/validate"
 end
@@ -164,6 +185,30 @@ end
 function ExtUtils.verifyHost()
   local verify_host = ExtUtils.gCfgData[ "Verify-Host" ]
   return verify_host == "true"
+end
+
+function ExtUtils.isClientUser( user )
+  -- users in the client-sso-users list are required to use P4LOGINSSO
+  local required = ExtUtils.iCfgData[ "client-sso-users" ]
+  local hasRequired = false
+  if required ~= nil and string.match( required, "^%.%.%." ) == nil then
+    hasRequired = true
+    local items = ExtUtils.splitWords( required )
+    for _, v in pairs( items ) do
+      if v == user then
+        return true, true, hasRequired
+      end
+    end
+  end
+  -- users in groups in the client-sso-groups list are required to use P4LOGINSSO
+  local ngroups = ExtUtils.iCfgData[ "num_client_sso_groups" ]
+  if ngroups > 0 then
+    hasRequired = true
+    local groups = ExtUtils.iCfgData[ "client_sso_groups_tbl" ]
+    local ok, contains = isUserInGroups( user, groups )
+    return ok, contains, hasRequired
+  end
+  return true, false, hasRequired
 end
 
 function ExtUtils.isRequiredUser( user )
@@ -366,19 +411,25 @@ function ExtUtils.isOlderP4V()
   return false
 end
 
--- Extract SAML response from the given string (presumably from the desktop
--- agent), returning just the base64-encoded response value.
+-- Extract the first non-blank line from the response, which could be a SAML
+-- response (with optional prefix) or a JWT from a P4LOGINSSO program.
 function ExtUtils.getResponse( str )
   for line in string.gmatch(str, "[^\r\n]+") do
     if string.sub( line, 1, 14 ) == "saml-response:" then
       return trim( string.sub( line, 15, #line ) )
     end
+    return str
   end
   return nil
 end
 
-function ExtUtils.userIdentifier()
-  local field = ExtUtils.iCfgData[ "user-identifier" ]
+function ExtUtils.userIdentifier( usingClient )
+  local field
+  if usingClient then
+    field = ExtUtils.iCfgData[ "client-user-identifier" ]
+  else
+    field = ExtUtils.iCfgData[ "user-identifier" ]
+  end
   local userid = Helix.Core.Server.GetVar( field:lower() )
   if userid then
     return userid
@@ -387,8 +438,13 @@ function ExtUtils.userIdentifier()
   return Helix.Core.Server.GetVar( "email" )
 end
 
-function ExtUtils.nameIdentifier( profile )
-  local field = ExtUtils.iCfgData[ "name-identifier" ]
+function ExtUtils.nameIdentifier( usingClient, profile )
+  local field
+  if usingClient then
+    field = ExtUtils.iCfgData[ "client-name-identifier" ]
+  else
+    field = ExtUtils.iCfgData[ "name-identifier" ]
+  end
   local nameid = profile[ field ]
   if nameid then
     return nameid

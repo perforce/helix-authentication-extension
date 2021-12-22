@@ -8,7 +8,7 @@ For information about Helix Core Server Extensions, see the [Helix Core Extensio
 
 ### Prerequisites
 
-* This document assumes that you have read "Administrator's Guide for Helix Authentication Service", which is available in the docs directory of [https://github.com/perforce/helix-authentication-service](https://github.com/perforce/helix-authentication-service).
+* This document assumes that you have read "Administrator's Guide for Helix Authentication Service", which is available on the Perforce web site at https://www.perforce.com/manuals/helix-auth-svc/.
 * Helix Core Server, version 2019.1 or later.
 
 ### Support
@@ -155,6 +155,14 @@ To configure a single _instance_ of the extension, include the `--name` option a
 p4 extension --configure Auth::loginhook --name loginhook-a1 -o
 [snip]
 ExtConfig:
+    client-name-identifier:
+        ... Field within JSON web token containing unique user identifer.
+    client-sso-groups:
+        ... Those groups whose members must authenticate using P4LOGINSSO.
+    client-sso-users:
+        ... Those users who must authenticate using P4LOGINSSO.
+    client-user-identifier:
+        ... Trigger variable used as unique P4LOGINSSO user identifier.
     enable-logging:
         ... Extension will write debug messages to a log if 'true'.
     name-identifier:
@@ -179,6 +187,10 @@ All of these settings have sensible defaults. However, for the extension to be e
 
 | Name | Description | Default |
 | ---- | ----------- | ------- |
+| client-name-identifier | Field within JSON web token containing unique user identifer. | _none_ |
+| client-sso-groups | Those groups whose members must authenticate using P4LOGINSSO. | _none_ |
+| client-sso-users | Those users who must authenticate using P4LOGINSSO. | _none_ |
+| client-user-identifier | Trigger variable used as unique P4LOGINSSO user identifier. | _none_ |
 | `enable-logging` | Extension will write debug messages to a log if `true` | `false` |
 | `non-sso-groups` | Those groups who will not be using SSO. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
 | `non-sso-users` | Those users who will not be using SSO. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
@@ -397,6 +409,12 @@ certificates for <Nnn> from <Mmm> are not permitted
 
 If that is the case, then verify that the HAS configuration specifies a certificate for CA that vouches for the validity of the client certificate.
 
+### Authentication using JSON Web Tokens
+
+Perforce users can be authenticated using JSON Web Tokens (JWT) rather than traditional credentials. This requires configuring the Helix Authentication Service to validate the token, and configuring the extension to extract the appropriate field from the payload of the token. To use this feature, the extension must have either `client-sso-groups` or `client-sso-users` or both configured with the set of users that will be authenticating using JWT. On the client system, the `P4LOGINSSO` setting must reference a program that will print the JWT. When a user in the "client-sso" set invokes `p4 login`, the `P4LOGINSSO` program will print the JWT, which the extension will then verifiy via the Helix Authentication Service. The service will return the JSON payload of the JWT, from which the extension will extract the field with the name given by the `client-name-identifier` extension setting. This value is then compared to the value retrieved via the `client-user-identifier`, in the same manner as with `user-identifier` and `name-identifier` for users that authenticate using web-based SSO.
+
+An example program for retreiving a JWT from Azure AD in a managed VM is found in `cloud/azure/get-token.py` in this repository. This Python script will use the special Azure API to retrieve a JWT for the managed VM.
+
 ## Removing the Extension
 
 To remove the login extension, perform the following three steps:
@@ -461,6 +479,8 @@ The process of migrating the old configuration to the new extension is not yet a
 ### Authentication logic in detail
 
 When the extension is installed, the **default** behavior is for **all** users to authenticate with SSO, with the exception of two categories of users: a) those users whose `AuthMethod` is set to `ldap`, and b) those users whose `Type` is not `standard` (i.e. operators and service users). LDAP users are expected to authenticate against an LDAP directory, and non-standard users typically cannot authenticate via a web browser.
+
+If either the `client-sso-users` or `client-sso-groups` contains one or more entries (i.e. does not start with `...`), then any _matching_ users will require the use of the traditional SSO functionality in Helix Core Server. Specifically, the client must have a `P4LOGINSSO` that points to a program that emits a token. This is regardless of the `AuthMethod` or `Type` of the user.
 
 If either the `sso-users` or `sso-groups` contains one or more entries (i.e. does not start with `...`), then any _matching_ users will **always** use SSO. This is regardless of the `AuthMethod` or `Type` of the user. Any users that do _not match_ will **not** authenticate with SSO.
 

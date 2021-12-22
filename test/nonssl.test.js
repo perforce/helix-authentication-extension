@@ -20,6 +20,11 @@ describe('Non-SSL', function () {
     // establish a super user and create the test user
     helpers.establishSuper(p4config)
     helpers.createUser({
+      User: 'clientman',
+      Email: 'clientman@example.com',
+      FullName: '4dbdf450-958d-4c64-88b2-abba2e46f1ff'
+    }, '1c6c49155699d49b397c', p4config)
+    helpers.createUser({
       User: 'repoman',
       Email: 'repoman@example.com',
       FullName: 'Repo Man'
@@ -147,6 +152,74 @@ describe('Non-SSL', function () {
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
         const log = helpers.readExtensionLog(p4config)
         assert.include(log, 'info: skipping user, SSO not required')
+      })
+    })
+
+    describe('client-sso-groups login', function () {
+      before(async function () {
+        helpers.installExtension(p4config)
+        helpers.createGroup({
+          Group: 'client_sso',
+          Users0: 'clientman'
+        }, p4config)
+        helpers.configureClientGroups(p4config, 'oidc', `http://localhost:${port}/pass/token`)
+        await helpers.restartServer(p4config)
+      })
+
+      it('should login client-sso groups successfully', function () {
+        const p4 = new P4({
+          P4PORT: p4config.port,
+          P4USER: 'clientman',
+          P4LOGINSSO: './test/webtoken.sh'
+        })
+        const loginCmd = p4.cmdSync('login', 'secret123')
+        assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+        const log = helpers.readExtensionLog(p4config)
+        assert.include(log, 'info: checking user')
+        assert.include(log, 'info: identifiers match')
+      })
+
+      it('should login non-SSO users successfully', function () {
+        const p4 = new P4({
+          P4PORT: p4config.port,
+          P4USER: p4config.user
+        })
+        const loginCmd = p4.cmdSync('login', 'p8ssword')
+        assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+        const log = helpers.readExtensionLog(p4config)
+        assert.include(log, 'info: skipping SSO for user')
+      })
+    })
+
+    describe('client-sso-users login', function () {
+      before(async function () {
+        helpers.installExtension(p4config)
+        helpers.configureClientUsers(p4config, 'oidc', `http://localhost:${port}/pass/token`)
+        await helpers.restartServer(p4config)
+      })
+
+      it('should login required SSO users successfully', function () {
+        const p4 = new P4({
+          P4PORT: p4config.port,
+          P4USER: 'clientman',
+          P4LOGINSSO: './test/webtoken.sh'
+        })
+        const loginCmd = p4.cmdSync('login', 'secret123')
+        assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+        const log = helpers.readExtensionLog(p4config)
+        assert.include(log, 'info: checking user')
+        assert.include(log, 'info: identifiers match')
+      })
+
+      it('should login non-SSO users successfully', function () {
+        const p4 = new P4({
+          P4PORT: p4config.port,
+          P4USER: p4config.user
+        })
+        const loginCmd = p4.cmdSync('login', 'p8ssword')
+        assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+        const log = helpers.readExtensionLog(p4config)
+        assert.include(log, 'info: skipping SSO for user')
       })
     })
 

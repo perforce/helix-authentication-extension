@@ -1,0 +1,4 @@
+User:	fa2067ca-9797-4c3a-95b8-c6c2e87f615a
+Email:	managed-fa2067ca@example.com
+FullName:	Managed System fa2067ca
+AuthMethod:	perforce

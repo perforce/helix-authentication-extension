@@ -28,6 +28,9 @@ router.get('/pass/case/requests/status/:requestId', mixedCaseProfile)
 router.get('/pass/oidc/requests/new/:userId', newRequest)
 router.get('/pass/oidc/requests/status/:requestId', oidcProfile)
 
+// oauth token validation
+router.get('/pass/token/oauth/validate', oauthProfile)
+
 // basic SAML 2.0 success
 router.get('/pass/saml/requests/new/:userId', newRequest)
 router.get('/pass/saml/requests/status/:requestId', samlProfile)
@@ -107,6 +110,21 @@ function oidcProfile (req, res, next) {
     zoneinfo: 'America/Los_Angeles',
     updated_at: 1566419389,
     email_verified: true
+  })
+}
+
+function oauthProfile(req, res, next) {
+  res.json({
+    aud: 'api://25b17cdb-4c8d-434c-9a21-86d67ac501d1',
+    iss: 'https://oauth.example.com/719d88f3-f957-44cf-9aa5-0a1a3a44f7b9/',
+    iat: 1640033835,
+    nbf: 1640033835,
+    exp: 1640120535,
+    idp: 'https://oauth.example.com/719d88f3-f957-44cf-9aa5-0a1a3a44f7b9/',
+    oid: '4dbdf450-958d-4c64-88b2-abba2e46f1ff',
+    sub: '4dbdf450-958d-4c64-88b2-abba2e46f1ff',
+    tid: '719d88f3-f957-44cf-9aa5-0a1a3a44f7b9',
+    ver: '1.0'
   })
 }
 
