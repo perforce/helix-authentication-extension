@@ -187,10 +187,10 @@ All of these settings have sensible defaults. However, for the extension to be e
 
 | Name | Description | Default |
 | ---- | ----------- | ------- |
-| client-name-identifier | Field within JSON web token containing unique user identifer. | _none_ |
-| client-sso-groups | Those groups whose members must authenticate using P4LOGINSSO. | _none_ |
-| client-sso-users | Those users who must authenticate using P4LOGINSSO. | _none_ |
-| client-user-identifier | Trigger variable used as unique P4LOGINSSO user identifier. | _none_ |
+| `client-name-identifier` | Field within JSON web token containing unique user identifer. | _none_ |
+| `client-sso-groups` | Those groups whose members must authenticate using P4LOGINSSO. | _none_ |
+| `client-sso-users` | Those users who must authenticate using P4LOGINSSO. | _none_ |
+| `client-user-identifier` | Trigger variable used as unique P4LOGINSSO user identifier. | _none_ |
 | `enable-logging` | Extension will write debug messages to a log if `true` | `false` |
 | `non-sso-groups` | Those groups who will not be using SSO. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
 | `non-sso-users` | Those users who will not be using SSO. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
@@ -595,5 +595,13 @@ signature file or certificate file to validate authenticity.
 Then it will be necessary to configure the server to allow for unsigned extensions. This is done by setting the `server.extensions.allow.unsigned` configurable to `1`, as shown below.
 
 ```shell
-$ p4 configure set server.extensions.allow.unsigned=1
+p4 configure set server.extensions.allow.unsigned=1
+```
+
+### non-LDAP users are not authenticated with SSO
+
+When LDAP is configured in Helix Core Server, and a SSO trigger or extension is installed, non-LDAP users will not use the SSO mechanism, by default. However, LDAP authentication and web-based SSO do not work together; see [LDAP.md](./LDAP.md) for more information. To resolve this problem, set `auth.sso.nonldap` to `1` to instruct the server to use SSO for non-LDAP users.
+
+```shell
+p4 configure set auth.sso.nonldap=1
 ```
