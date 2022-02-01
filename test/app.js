@@ -80,6 +80,7 @@ function newRequest (req, res, next) {
   const loginUrl = `${baseUrl}/saml/login/${requestId}`
   res.json({
     request: requestId,
+    instanceId: 'app.js',
     loginUrl,
     baseUrl
   })
@@ -99,6 +100,9 @@ function oidcProfile (req, res, next) {
       }
     }
   }
+  if (req.query.instanceId === undefined) {
+    res.status(400).send('missing required instanceId query parameter')
+  }
   res.json({
     sub: '00u15xtrad5QDzt1D357',
     name: 'Repo Man',
@@ -113,7 +117,7 @@ function oidcProfile (req, res, next) {
   })
 }
 
-function oauthProfile(req, res, next) {
+function oauthProfile (req, res, next) {
   res.json({
     aud: 'api://25b17cdb-4c8d-434c-9a21-86d67ac501d1',
     iss: 'https://oauth.example.com/719d88f3-f957-44cf-9aa5-0a1a3a44f7b9/',
@@ -129,6 +133,9 @@ function oauthProfile(req, res, next) {
 }
 
 function samlProfile (req, res, next) {
+  if (req.query.instanceId === undefined) {
+    res.status(400).send('missing required instanceId query parameter')
+  }
   res.json({
     nameID: 'repoman@example.com',
     nameIDFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
@@ -138,6 +145,9 @@ function samlProfile (req, res, next) {
 
 // user identifier letter-case differs perforce user spec
 function mixedCaseProfile (req, res, next) {
+  if (req.query.instanceId === undefined) {
+    res.status(400).send('missing required instanceId query parameter')
+  }
   res.json({
     nameID: 'rEpOmAn@example.com',
     nameIDFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
@@ -162,6 +172,9 @@ function serverError (req, res, next) {
 }
 
 function wrongProfile (req, res, next) {
+  if (req.query.instanceId === undefined) {
+    res.status(400).send('missing required instanceId query parameter')
+  }
   res.json({
     nameID: 'someone.else@example.com',
     nameIDFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',

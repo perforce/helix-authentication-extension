@@ -123,20 +123,21 @@ function ExtUtils.loginUrl( sdata )
   if string.len(protocol) > 0 and string.match( protocol, "^%.%.%." ) == nil then
     local base = sdata[ "baseUrl" ]
     local request = sdata[ "request" ]
-    return base .. "/" .. protocol .. "/login/" .. request
+    local instance = sdata[ "instanceId" ]
+    return base .. "/" .. protocol .. "/login/" .. request .. "?instanceId=" .. instance
   end
   -- otherwise use what the authentication service returned
   return sdata[ "loginUrl" ]
 end
 
-function ExtUtils.requestUrl()
+function ExtUtils.requestUrl( userId )
   local base = ExtUtils.gCfgData[ "Service-URL" ]
-  return base .. "/requests/new/"
+  return base .. "/requests/new/" .. userId
 end
 
-function ExtUtils.statusUrl()
+function ExtUtils.statusUrl( requestId, instanceId )
   local base = ExtUtils.gCfgData[ "Service-URL" ]
-  return base .. "/requests/status/"
+  return base .. "/requests/status/" .. requestId .. "?instanceId=" .. instanceId
 end
 
 function ExtUtils.oauthValidateUrl()
@@ -144,9 +145,9 @@ function ExtUtils.oauthValidateUrl()
   return base .. "/oauth/validate"
 end
 
-function ExtUtils.samlValidateUrl()
+function ExtUtils.samlValidateUrl( instanceId )
   local base = ExtUtils.gCfgData[ "Service-URL" ]
-  return base .. "/saml/validate"
+  return base .. "/saml/validate?instanceId=" .. instanceId
 end
 
 function ExtUtils.shouldUseSsl( url )

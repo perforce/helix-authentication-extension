@@ -49,6 +49,16 @@ function InstanceConfigEvents()
   }
 end
 
+--[[
+  An Extension once loaded, has its runtime persist for the life of the
+  RhExtension instance. This means that if you have some variable declared
+  outside of your callbacks, that it will be around next time a callback
+  is invoked.
+]]--
+local requestId = nil
+local instanceId = nil
+local usingClient = false
+
 -- Set the SSL related options on the curl instance.
 local function curlSecureOptions( c )
   c:setopt_useragent( utils.getID() )
@@ -104,7 +114,7 @@ local function getData( url )
 end
 
 local function validateSamlResponse( response )
-  local url = utils.samlValidateUrl()
+  local url = utils.samlValidateUrl( instanceId )
   local easy = curl.easy()
   local encoded_response = easy:escape( response )
   local c = curl.easy{
@@ -153,15 +163,6 @@ local function validateOAuthResponse( token )
   end
   return false, code, err
 end
-
---[[
-  An Extension once loaded, has its runtime persist for the life of the
-  RhExtension instance. This means that if you have some variable declared
-  outside of your callbacks, that it will be around next time a callback
-  is invoked.
-]]--
-local requestId = nil
-local usingClient = false
 
 function AuthPreSSO()
   -- N.B. auth-pre-sso does not emit messages to the client so calling
@@ -233,9 +234,12 @@ function AuthPreSSO()
   local userid = utils.userIdentifier( false )
   local easy = curl.easy()
   local safe_id = easy:escape( userid )
-  local ok, url, sdata = getData( utils.requestUrl() .. safe_id )
+  local ok, url, sdata = getData( utils.requestUrl( safe_id ) )
   if ok then
     requestId = sdata[ "request" ]
+    -- Save the instanceId used in rule-based routing so that all subsequent
+    -- requests are routed to the appropriate instance of the service.
+    instanceId = sdata[ "instanceId" ]
   else
     utils.debug( {
       [ "AuthPreSSO" ] = "error: failed to get request identifier",
@@ -363,7 +367,7 @@ function AuthCheckSSO()
   -- Commence the usual 2-step procedure, in which we request the authenticated
   -- user data using a long-poll on the auth service. The service request will
   -- time out if the user does not authenticate with the IdP in a timely manner.
-  local ok, url, sdata = getData( utils.statusUrl() .. requestId )
+  local ok, url, sdata = getData( utils.statusUrl( requestId, instanceId ) )
   if ok then
     utils.debug( {
       [ "AuthCheckSSO" ] = "info: received user data",
