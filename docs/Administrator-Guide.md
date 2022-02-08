@@ -529,6 +529,16 @@ Note that the `nameID` value does not match the `userid`, although they are simi
 
 When logging in, the `p4 login` is seemingly not satisfied until the user visits the same login URL two or three times, and only then will a ticket be issued. Otherwise, the login attempt fails after a timeout. This will happen if there are multiple extension **instance** configurations present. See the [Multiple Instance Configurations](#multiple-instance-configurations) section above for the commands to diagnose and correct the behavior.
 
+### HTTP error code 401 in extension log
+
+If the extension is failing to authenticate the user, and the extension log file contains something like this:
+
+```json
+{"data":{"AuthCheckSSO":"error: auth validation failed for user bruno","http-code":401,"http-error":"nil"},"nanos":194320152,"pid":30482,"recType":0,"seconds":1591982194}
+```
+
+Then the issue is that the extension is not sending certificates to the authentication service when the service is expecting them. If the service is configured to use HTTPS, then the extension must have a `Service-URL` that starts with `https://` in order to send client certificates to the service.
+
 ### HTTP error code 403 in extension log
 
 If the extension is failing to authenticate the user, and the extension log file contains something like this:
@@ -538,6 +548,16 @@ If the extension is failing to authenticate the user, and the extension log file
 ```
 
 Then the issue is that the client certificates used by the extension to request the user profile from the authentication service is not acceptable. Either the certificate issuer is not trusted by the certificate authority in use (as named by the `CA_CERT_FILE` or `CA_CERT_PATH` settings in the service), or the common name in the client certificate does not match the pattern provided in the `CLIENT_CERT_CN` service setting. It could also be the case that the client certificate expired. In most cases, updating the client certificates in extension will resolve the issue.
+
+### HTTP error code 408 in extension log
+
+If the extension log file contains something like this:
+
+```json
+{"data":{"AuthCheckSSO":"error: auth validation failed for user bruno","http-code":408,"http-error":"nil"},"nanos":194320152,"pid":30482,"recType":0,"seconds":1591982194}
+```
+
+Then this issue indicates that the user authenticaton took longer than the authentication service was configured to wait. By default, the service will wait 60 seconds for the user to complete the login process, after which it will respond to the `/requests/status` route with a `408` (timeout). To change the timeout period, set the `LOGIN_TIMEOUT` setting in the service to the desired number of seconds.
 
 ### HTTP error code 504 in extension log
 
