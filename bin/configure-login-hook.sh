@@ -21,6 +21,7 @@ USER_IDENTIFIER=''
 SSO_USERS=''
 SSO_GROUPS=''
 ALLOW_NON_SSO=false
+ALLOW_NON_LDAP=false
 P4D_MIN_CHANGE='1797576'
 P4D_MIN_VERSION='2019.1'
 
@@ -218,6 +219,10 @@ Description:
     --allow-non-sso
         If this argument is given, set the server configurable to allow
         non-SSO authentication, such as database password and LDAP.
+
+    --allow-non-ldap
+        If this argument is given, set the server configurable to allow
+        SSO-based authentication for users not authenticating with LDAP.
 
     --name-identifier <property>
         Property name of uniquely identifying value in IdP response. This is
@@ -453,6 +458,10 @@ function read_arguments() {
                 ;;
             --allow-non-sso)
                 ALLOW_NON_SSO=true
+                shift
+                ;;
+            --allow-non-ldap)
+                ALLOW_NON_LDAP=true
                 shift
                 ;;
             --sso-users)
@@ -889,6 +898,7 @@ function clean_inputs() {
 # Prompt user concerning other server configurables that may be appropriate
 # based on the selections made so far (interactive only).
 function conditional_prompts() {
+    # administrative users generally should not use SSO
     cat <<EOT
 
 To allow the non-SSO users to authenticate with a database password or
@@ -900,6 +910,24 @@ EOT
         case $yn in
             Yes)
                 ALLOW_NON_SSO=true
+                break
+                ;;
+            No) break ;;
+        esac
+    done
+
+    # LDAP and web-based SSO do not mix well
+    cat <<EOT
+
+To allow the use of SSO authentication for non-LDAP users the server
+configurable auth.sso.nonldap must be set to '1'. Would you like the
+script to make that change?
+
+EOT
+    select yn in 'Yes' 'No'; do
+        case $yn in
+            Yes)
+                ALLOW_NON_LDAP=true
                 break
                 ;;
             No) break ;;
@@ -941,6 +969,9 @@ EOT
     echo "  * Set instance user-identifier to ${USER_IDENTIFIER}"
     if $ALLOW_NON_SSO; then
         echo "  * Configure server to allow non-SSO authentication."
+    fi
+    if $ALLOW_NON_LDAP; then
+        echo "  * Configure server to allow SSO authentication for non-LDAP users."
     fi
     echo ''
 }
@@ -1059,6 +1090,9 @@ function configure_server() {
     if $ALLOW_NON_SSO; then
         p4 configure set auth.sso.allow.passwd=1 >/dev/null 2>&1
     fi
+    if $ALLOW_NON_LDAP; then
+        p4 configure set auth.sso.nonldap=1 >/dev/null 2>&1
+    fi
 }
 
 # Restart the server for the trigger changes to take effect.
@@ -1110,6 +1144,9 @@ EOT
     fi
     if $ALLOW_NON_SSO; then
         echo '  * The server was configured to allow non-SSO logins.'
+    fi
+    if $ALLOW_NON_LDAP; then
+        echo '  * The server was configured to allow SSO for non-LDAP users.'
     fi
     cat <<EOT
 
