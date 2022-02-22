@@ -24,16 +24,15 @@ users that authenticate using browser-based SSO.
 
 ## Helix Core Server Configuration
 
-Permitting a combination of authentication mechanisms is a matter of setting the server configuration appropriately, and defining which users are authenticated by which method. Start by defining an LDAP configuration in Helix Core Server using the `p4 ldap` command as described in this knowledge base [guide](https://community.perforce.com/s/article/2590). Once a basic LDAP configuration is in place, set the following server configurables to allow a combination of authentication paths, as shown below:
+Permitting a combination of authentication mechanisms is a matter of setting the server configuration appropriately, and defining which users are authenticated by which method. Start by defining an LDAP configuration in Helix Core Server using the `p4 ldap` command as described in this knowledge base [guide](https://community.perforce.com/s/article/2590). Once a basic LDAP configuration is in place, set the server configurable(s) to allow a combination of authentication paths, as described in the following sections.
 
 ### LDAP users always authenticate with LDAP
 
-With the authentication extension in place, LDAP users will always be prompted for their credentials by the Perforce client, and Helix Core Server will then authenticate the user against the LDAP directory. Neither the extension nor the authentication service will process LDAP user authentication for the reason stated above.
+With the authentication extension in place, LDAP users will always be prompted for their credentials by the Perforce client, and Helix Core Server will then authenticate the user against the LDAP directory. The authentication extension will **not** process LDAP user authentication for the reason stated above.
 
 ### Use SSO for non-LDAP users
 
-With the authentication extension, configuring the server to use SSO for non-LDAP users requires setting the `auth.sso.nonldap` configurable to `1`. which from the command-line would look like this:
-configure the server using the [p4 configure](https://www.perforce.com/manuals/cmdref/Content/CmdRef/p4_configure.html) command:
+With the authentication extension, configuring the server to use SSO for non-LDAP users requires setting the `auth.sso.nonldap` configurable to `1`. From the command-line you can configure the server using the [p4 configure](https://www.perforce.com/manuals/cmdref/Content/CmdRef/p4_configure.html) command:
 
 
 ```shell
