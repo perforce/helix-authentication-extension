@@ -375,7 +375,7 @@ function ensure_readiness() {
     # Test write access by modifying something that is neither tracked by
     # version control nor created by this script, which might foil any logic
     # that decides whether to create the file or not.
-    mkdir -p node_modules > /dev/null 2>&1
+    mkdir -p node_modules >/dev/null 2>&1
     if [ $? != 0 ]; then
         die 'You do not have permission to write to this directory.'
     fi
@@ -1013,7 +1013,7 @@ function install_extension() {
     # server is an older version that does not require signing. If that attempt
     # fails, then try again with the "pretty please" option.
     debug 'installing new extension...'
-    local INSTALL=$(p4 -p "$P4PORT" -u "$P4USER" extension --install loginhook.p4-extension --yes)
+    local INSTALL=$(p4 -p "$P4PORT" -u "$P4USER" extension --install loginhook.p4-extension --yes 2>/dev/null)
     if [[ ! "${INSTALL}" =~ 'installed successfully' ]]; then
         INSTALL=$(p4 -p "$P4PORT" -u "$P4USER" extension --install loginhook.p4-extension --yes --allow-unsigned)
         if [[ ! "${INSTALL}" =~ 'installed successfully' ]]; then
