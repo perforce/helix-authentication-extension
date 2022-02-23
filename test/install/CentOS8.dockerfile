@@ -1,4 +1,7 @@
-FROM centos:8
+#
+# Depends on a manually built image from the HAS source repo.
+#
+FROM has-build:centos8
 #
 # $ docker build -f test/install/CentOS8.dockerfile -t has-centos8-install .
 # $ docker image ls | grep has-centos8-install
