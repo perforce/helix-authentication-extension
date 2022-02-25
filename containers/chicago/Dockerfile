@@ -33,6 +33,7 @@ COPY $BASE_PATH/user_commit_svc.txt .
 COPY $BASE_PATH/user_edge_svc.txt .
 COPY $BASE_PATH/user_jackson.txt .
 COPY $BASE_PATH/user_johndoe.txt .
+COPY $BASE_PATH/user_swarm.txt .
 RUN ./build.sh
 
 #

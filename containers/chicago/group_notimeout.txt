@@ -2,5 +2,6 @@ Group:	no_timeout
 Timeout:	unlimited
 Users:
 	super
+	swarm
 	svc_chicago_commit
 	svc_tokyo_edge

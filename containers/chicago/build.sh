@@ -22,9 +22,16 @@ p4 user -f -i < user_commit_svc.txt
 yes d4490c91-e4e0-4e1e-a5ea-fb5e0423a34e | p4 passwd svc_chicago_commit
 p4 user -f -i < user_edge_svc.txt
 yes f020c1e1-7528-4f6f-b84c-96336a4c955b | p4 passwd svc_tokyo_edge
+p4 user -f -i < user_swarm.txt
+yes ${P4PASSWD} | p4 passwd swarm
 
 # create a group with long lived tickets, log in again
 p4 group -i < group_notimeout.txt
+
+# give the swarm user admin protections
+p4 protect -o > protects.txt
+echo '	admin user swarm * //...' >> protects.txt
+p4 protect -i < protects.txt
 
 # set up commit/edge service user permissions
 p4 protect -i < protections.txt
