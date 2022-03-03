@@ -1,18 +1,9 @@
-#
-# Depends on a manually built image from the HAS source repo.
-#
-FROM has-build:centos8
+FROM rockylinux:8
 #
 # $ docker build -f test/install/CentOS8.dockerfile -t has-centos8-install .
 # $ docker image ls | grep has-centos8-install
 #
 ARG P4PORT="0.0.0.0:1666"
-
-#
-# workaround CentOS 8 repositories going offline
-#
-RUN sed -i -e "s|mirrorlist=|#mirrorlist=|g" /etc/yum.repos.d/CentOS-*
-RUN sed -i -e "s|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g" /etc/yum.repos.d/CentOS-*
 
 # The docker base images are generally minimal, and our install and configure
 # scripts have certain requirements, so install those now.
