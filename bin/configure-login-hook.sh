@@ -647,6 +647,10 @@ You may specify a list of Perforce users that will not be authenticating
 using the single-sign-on integration. This would often include the super
 user, as well as any operator users.
 
+It is recommended to have at least one super or admin user that does not
+authenticate using web-based SSO, and those users can be named here or in
+the non-sso-groups setting in the next prompt.
+
 EOT
     prompt_for NON_SSO_USERS 'Enter list of non-SSO users' "${NON_SSO_USERS}" validate_user_list
 }
