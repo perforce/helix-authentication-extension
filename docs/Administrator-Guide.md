@@ -31,6 +31,10 @@ To test the extension with a limited set of users, prior to enabling SSO for all
 
 See the section below titled [Allowing for non-SSO Users](#allowing-for-non-sso-users) for details. It is **recommended** to have at least one administrative user named among the non-SSO users. Administrative users should be using a database password to avoid being locked out in the event that the SSO mechanism is not operational (for instance, the identity provider is temporarily inaccessible).
 
+### Migrating from LDAP
+
+If you are planning to change some or all users from authenticating via LDAP to authenticating with web-based SSO, please see the [LDAP guide](./LDAP.md) for more information. Each such user will need to have their `AuthMethod` changed and possibly have a database password created.
+
 ## Installing the Extension
 
 The extension can be installed using the provided configuration script, or manually for systems not supported by the script. This section will describe how to use the configuration script, while the [Manual Installation](#manual-installation) section describes the detailed steps for building, installing, and configuring the extension.
