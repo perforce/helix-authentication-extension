@@ -519,7 +519,7 @@ If a Perforce client sees the `Single sign-on on client failed: 'P4LOGINSSO' not
 
 As indicated in the log message, the extension was unable to reach the service to get a request identifier.
 
-### Login via IdP successful, but server login fails
+### Login via IdP successful, but server login fails (1)
 
 The most likely scenario is that the user profile data returned by the identity provider is not matching the Perforce user. See the [Mapping User Profiles to Perforce Users](#mapping-user-profiles-to-perforce-users) section above for details on the basic setup. To determine if this is really the case, set the `enable-logging` *instance* configuration setting to `true` and look at the extension logs after making a login attempt. There should be an entry resembling the following:
 
@@ -530,6 +530,10 @@ The most likely scenario is that the user profile data returned by the identity 
 ```
 
 Note that the `nameID` value does not match the `userid`, although they are similar. The extension will only accept values that match **exactly**. In this example, it would seem that the `userid` is an email address (the `Email` field of the Perforce user spec), while the SAML Name ID is a username. There are two choices for resolving this mismatch: 1) change the SAML IdP configuration to return an email address for the Name ID, 2) change the `user-identifier` *instance* configuration of the extension to `user` and hope that the Perforce user name matches the SAML Name ID.
+
+### Login via IdP successful, but server login fails (2)
+
+Another reason that authentication will the identity provider will succeed but authentication with the server fails is that the user is configured to use LDAP for authentication. This can happen if the user is named in the `sso-users` or `sso-groups` extension setting _and_ their `AuthMethod` is set to `ldap`. As discussed in the [LDAP guide](./LDAP.md) this cannot work, either the user must authenticate with LDAP or web-based SSO, but not both.
 
 ### Login successful only after multiple attempts
 
@@ -626,7 +630,7 @@ p4 configure set server.extensions.allow.unsigned=1
 
 ### non-LDAP users are not authenticated with SSO
 
-When LDAP is configured in Helix Core Server, and a SSO trigger or extension is installed, non-LDAP users will not use the SSO mechanism, by default. However, LDAP authentication and web-based SSO do not work together; see [LDAP.md](./LDAP.md) for more information. To resolve this problem, set `auth.sso.nonldap` to `1` to instruct the server to use SSO for non-LDAP users.
+When LDAP is configured in Helix Core Server, and a SSO trigger or extension is installed, non-LDAP users will not use the SSO mechanism. This is the default behavior of the Helix Core Server. However, LDAP authentication and web-based SSO do not work together, see [LDAP.md](./LDAP.md) for more information. To resolve this problem, set `auth.sso.nonldap` to `1` to instruct the server to allow for the user of SSO with non-LDAP users.
 
 ```shell
 p4 configure set auth.sso.nonldap=1
