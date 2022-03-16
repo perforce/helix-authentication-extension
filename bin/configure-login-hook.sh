@@ -898,23 +898,25 @@ function clean_inputs() {
 # Prompt user concerning other server configurables that may be appropriate
 # based on the selections made so far (interactive only).
 function conditional_prompts() {
-    # administrative users generally should not use SSO
-    cat <<EOT
+    if [[ -n "${NON_SSO_USERS}" ]] || [[ -n "${NON_SSO_GROUPS}" ]]; then
+        # administrative users generally should not use SSO
+        cat <<EOT
 
 To allow the non-SSO users to authenticate with a database password or
 LDAP, the server configurable auth.sso.allow.passwd must be set to '1'.
 Would you like the script to make that change?
 
 EOT
-    select yn in 'Yes' 'No'; do
-        case $yn in
-            Yes)
-                ALLOW_NON_SSO=true
-                break
-                ;;
-            No) break ;;
-        esac
-    done
+        select yn in 'Yes' 'No'; do
+            case $yn in
+                Yes)
+                    ALLOW_NON_SSO=true
+                    break
+                    ;;
+                No) break ;;
+            esac
+        done
+    fi
 
     # LDAP and web-based SSO do not mix well
     cat <<EOT
