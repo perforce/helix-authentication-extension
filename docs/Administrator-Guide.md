@@ -289,13 +289,15 @@ That command will remove the named instance configuration, leaving the other con
 
 ### Applying the Changes
 
-After installing and configuring the authentication extension, the Helix Core server must be restarted for the changes to take effect.
+After installing and configuring the authentication extension, the Helix Core server must be restarted for the changes to take effect. The `restart` is necessary because Helix Core prepares the authentication mechanisms during startup. This is true when adding or removing `auth-` related triggers, as well as when installing or removing the loginhook extension.
+
+It is **recommended** to have at least one administrative user configured in the `non-sso-users` extension setting, or a group of users in the `non-sso-groups` setting; this provides a means of authenticating in the event that the service becomes unavailable for any reason. Typically the _super_ and/or _admin_ users, along with service or operator users, would be named in one of these two settings.
+
+When you are ready to restart the server, you can use the following command:
 
 ```shell
 $ p4 admin restart
 ```
-
-The `restart` is necessary because Helix Core prepares the authentication mechanisms during startup. This is true when adding or removing `auth-` related triggers, as well as when installing or removing the loginhook extension.
 
 ## Next Steps
 
