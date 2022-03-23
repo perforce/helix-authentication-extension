@@ -58,6 +58,7 @@ end
 local requestId = nil
 local instanceId = nil
 local usingClient = false
+local errorMessage = nil
 
 -- Set the SSL related options on the curl instance.
 local function curlSecureOptions( c )
@@ -164,6 +165,20 @@ local function validateOAuthResponse( token )
   return false, code, err
 end
 
+-- return -> (ret: bool, data: str, invokeURL: str, skipSSO: bool)
+-- required: 'ret' if false indicates error
+-- optional: 'data' is not used for SSO authentication?
+-- optional: 'invokeURL' if set will open URL on client
+-- optional: 'skipSSO' if true will bypass single-sign-on
+--
+-- case 1: return false
+--         fails out of single-sign-on and uses another auth method
+-- case 2: return true
+--         prompts user for token and invokes AuthCheckSSO
+-- case 3: return true, "unused", <invokeURL>, false
+--         passes invokeURL to client and invokes AuthCheckSSO
+-- case 4: return true, "unused", "skipping", true
+--         bypasses single-sign-on and uses another auth method
 function AuthPreSSO()
   -- N.B. auth-pre-sso does not emit messages to the client so calling
   -- Helix.Core.Server.SetClientMsg() does nothing.
@@ -171,7 +186,8 @@ function AuthPreSSO()
   local user = Helix.Core.Server.GetVar( "user" )
   local ok, isClientUser, hasClientUsers = utils.isClientUser( user )
   if not ok then
-    return false, "error"
+    -- cannot fail through to AuthCheckSSO without locking out all users
+    return false
   end
   if hasClientUsers and isClientUser then
     -- This user must authenticate via a P4LOGINSSO program that returns
@@ -181,11 +197,12 @@ function AuthPreSSO()
       [ "user" ] = user
     } )
     usingClient = true
-    return true, "unused"
+    return true
   end
   local ok, isRequired, hasRequired = utils.isRequiredUser( user )
   if not ok then
-    return false, "error"
+    -- cannot fail through to AuthCheckSSO without locking out all users
+    return false
   end
   if hasRequired and not isRequired then
     -- required list exists and this user is not in it, no SSO
@@ -193,23 +210,25 @@ function AuthPreSSO()
       [ "AuthPreSSO" ] = "info: skipping user, SSO not required",
       [ "user" ] = user
     } )
-    return true, "unused", "http://example.com", true
+    return true, "unused", "skipping", true
   elseif not hasRequired then
     -- without required list, consider skipped list and other special cases
     local ok, isSkipped, _hasSkipped = utils.isSkipUser( user )
     if not ok then
-      return false, "error"
+      -- cannot fail through to AuthCheckSSO without locking out all users
+      return false
     end
     if isSkipped then
       utils.debug( {
         [ "AuthPreSSO" ] = "info: skipping SSO for user",
         [ "user" ] = user
       } )
-      return true, "unused", "http://example.com", true
+      return true, "unused", "skipping", true
     end
     local ok, authMethod, userType = utils.getAuthMethodAndType( user )
     if not ok then
-      return false, "error"
+      -- cannot fail through to AuthCheckSSO without locking out all users
+      return false
     end
     -- non-'standard' users typically cannot use browser-based auth
     if userType ~= "standard" then
@@ -217,7 +236,7 @@ function AuthPreSSO()
         [ "AuthPreSSO" ] = "info: skipping non-standard user ",
         [ "user" ] = user
       } )
-      return true, "unused", "http://example.com", true
+      return true, "unused", "skipping", true
     end
     -- LDAP users are expected to authenticate using LDAP
     if authMethod == "ldap" then
@@ -225,7 +244,7 @@ function AuthPreSSO()
         [ "AuthPreSSO" ] = "info: skipping LDAP user ",
         [ "user" ] = user
       } )
-      return true, "unused", "http://example.com", true
+      return true, "unused", "skipping", true
     end
   end
   -- Get a request id from the service, save it in requestId; do this every time
@@ -250,7 +269,10 @@ function AuthPreSSO()
       [ "AuthPreSSO" ] = "info: ensure Service-URL is valid",
       [ "Service-URL" ] = utils.gCfgData[ "Service-URL" ]
     } )
-    return false, "error"
+    -- At this point we know this user should be using SSO but there was a
+    -- problem, so try to inform them of what went wrong.
+    errorMessage = "error connecting to service, check extension logs"
+    return true, "unused", "http://example.com", false
   end
   local url = utils.loginUrl( sdata )
   -- For now, use the 1-step procedure for P4PHP clients; N.B. when Swarm is
@@ -258,12 +280,12 @@ function AuthPreSSO()
   local clientprog = Helix.Core.Server.GetVar( "clientprog" )
   if string.find( clientprog, "P4PHP" ) then
     utils.debug( { [ "AuthPreSSO" ] = "info: 1-step mode for P4PHP client" } )
-    return true, url
+    return true
   end
   -- For Helix TeamHub, use the 1-step login procedure.
   if string.find( clientprog, "PilsnerHTHAdapter" ) then
     utils.debug( { [ "AuthPreSSO" ] = "info: 1-step mode for PilsnerHTHAdapter client" } )
-    return true, url
+    return true
   end
   utils.debug( {
     [ "AuthPreSSO" ] = "info: invoking URL " .. url,
@@ -286,7 +308,7 @@ local function compareIdentifiers( userid, nameid )
       [ "AuthCheckSSO" ] = "error: nameid is nil",
       [ "userid" ] = userid
     } )
-    return false, "error"
+    return false
   end
   utils.debug( {
     [ "AuthCheckSSO" ] = "info: comparing user identifiers",
@@ -309,12 +331,17 @@ local function compareIdentifiers( userid, nameid )
   return ok
 end
 
+-- return true if match, false otherwise
 function AuthCheckSSO()
   utils.init()
   -- Cannot check in auth-pre-sso as p4v does not receive/capture/report the
   -- client messages sent from that trigger hook.
   if utils.isOlderP4V() then
     Helix.Core.Server.SetClientMsg( 'please upgrade P4V for login2 support' )
+    return false
+  end
+  if errorMessage then
+    Helix.Core.Server.SetClientMsg( errorMessage )
     return false
   end
   local userid = utils.userIdentifier( usingClient )

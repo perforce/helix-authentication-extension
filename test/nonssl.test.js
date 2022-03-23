@@ -388,9 +388,8 @@ describe('Non-SSL', function () {
         }
         const p4 = new P4(config)
         const loginCmd = p4.cmdSync('login')
-        // should fallback to attempting the ususal SSO login which fails
-        // because P4LOGINSSO is not set in the client
-        assert.isTrue(helpers.findData(loginCmd, 'Single sign-on on client failed'))
+        // will emit a error message about the service
+        assert.isTrue(helpers.findData(loginCmd, 'error connecting to service'))
         const log = helpers.readExtensionLog(p4config)
         assert.include(log, '"http-code":500')
       })
