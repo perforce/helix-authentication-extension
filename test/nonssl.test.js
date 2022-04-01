@@ -308,7 +308,7 @@ describe('Non-SSL', function () {
         await helpers.restartServer(p4config)
       })
 
-      it('should login successfully', function () {
+      it('should fail with http 401 error', function () {
         const config = {
           P4USER: 'repoman',
           P4PORT: p4config.port,
@@ -332,7 +332,7 @@ describe('Non-SSL', function () {
         await helpers.restartServer(p4config)
       })
 
-      it('should login successfully', function () {
+      it('should fail with http 403 error', function () {
         const config = {
           P4USER: 'repoman',
           P4PORT: p4config.port,
@@ -356,7 +356,7 @@ describe('Non-SSL', function () {
         await helpers.restartServer(p4config)
       })
 
-      it('should login successfully', function () {
+      it('should fail with http 408 error', function () {
         const config = {
           P4USER: 'repoman',
           P4PORT: p4config.port,
@@ -380,7 +380,7 @@ describe('Non-SSL', function () {
         await helpers.restartServer(p4config)
       })
 
-      it('should login successfully', function () {
+      it('should fail with http 500 error', function () {
         const config = {
           P4USER: 'repoman',
           P4PORT: p4config.port,
@@ -402,7 +402,7 @@ describe('Non-SSL', function () {
         await helpers.restartServer(p4config)
       })
 
-      it('should login successfully', function () {
+      it('should reject mismatched identifiers', function () {
         const config = {
           P4USER: 'repoman',
           P4PORT: p4config.port,
