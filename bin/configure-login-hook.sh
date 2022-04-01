@@ -2,7 +2,7 @@
 #
 # Configuration script for Helix Authentication Extension.
 #
-# Copyright 2021, Perforce Software Inc. All rights reserved.
+# Copyright 2022, Perforce Software Inc. All rights reserved.
 #
 INTERACTIVE=true
 MONOCHROME=false
@@ -20,6 +20,8 @@ NAME_IDENTIFIER=''
 USER_IDENTIFIER=''
 SSO_USERS=''
 SSO_GROUPS=''
+SSO_ALLOW_PASSWD_IS_SET=false
+SSO_NONLDAP_IS_SET=false
 ALLOW_NON_SSO=false
 ALLOW_NON_LDAP=false
 P4D_MIN_CHANGE='1797576'
@@ -899,46 +901,74 @@ function clean_inputs() {
     fi
 }
 
+# Query the server for some configuration settings.
+function query_configuration() {
+    #
+    # The p4 command-line makes for a poor API...
+    #
+    # $ p4 configure show security
+    # security=3 (configure)
+    # $ p4 configure show auth.sso.allow.passwd
+    # auth.sso.allow.passwd:0 (default)
+    # $ p4 configure set auth.sso.allow.passwd=1
+    # For server 'any', configuration variable 'auth.sso.allow.passwd' set to '1'
+    # $ p4 configure show auth.sso.allow.passwd
+    # auth.sso.allow.passwd:1 (configure)
+    #
+    local PASSWD=$(p4 configure show auth.sso.allow.passwd | grep -E 'auth.sso.allow.passwd[:=]1')
+    if [[ "${PASSWD}" =~ 'auth.sso.allow.passwd' ]]; then
+        SSO_ALLOW_PASSWD_IS_SET=true
+    fi
+    local NONLDAP=$(p4 configure show auth.sso.nonldap | grep -E 'auth.sso.nonldap[:=]1')
+    if [[ "${NONLDAP}" =~ 'auth.sso.nonldap' ]]; then
+        SSO_NONLDAP_IS_SET=true
+    fi
+}
+
 # Prompt user concerning other server configurables that may be appropriate
 # based on the selections made so far (interactive only).
 function conditional_prompts() {
-    if [[ -n "${NON_SSO_USERS}" ]] || [[ -n "${NON_SSO_GROUPS}" ]]; then
-        # administrative users generally should not use SSO
-        cat <<EOT
+    if ! $SSO_ALLOW_PASSWD_IS_SET; then
+        if [[ -n "${NON_SSO_USERS}" ]] || [[ -n "${NON_SSO_GROUPS}" ]]; then
+            # administrative users generally should not use SSO
+            cat <<EOT
 
 To allow the non-SSO users to authenticate with a database password or
 LDAP, the server configurable auth.sso.allow.passwd must be set to '1'.
 Would you like the script to make that change?
 
 EOT
-        select yn in 'Yes' 'No'; do
-            case $yn in
-                Yes)
-                    ALLOW_NON_SSO=true
-                    break
-                    ;;
-                No) break ;;
-            esac
-        done
+            select yn in 'Yes' 'No'; do
+                case $yn in
+                    Yes)
+                        ALLOW_NON_SSO=true
+                        break
+                        ;;
+                    No) break ;;
+                esac
+            done
+        fi
     fi
 
     # LDAP and web-based SSO do not mix well
-    cat <<EOT
+    if ! $SSO_NONLDAP_IS_SET; then
+        cat <<EOT
 
 To allow the use of SSO authentication for non-LDAP users the server
 configurable auth.sso.nonldap must be set to '1'. Would you like the
 script to make that change?
 
 EOT
-    select yn in 'Yes' 'No'; do
-        case $yn in
-            Yes)
-                ALLOW_NON_LDAP=true
-                break
-                ;;
-            No) break ;;
-        esac
-    done
+        select yn in 'Yes' 'No'; do
+            case $yn in
+                Yes)
+                    ALLOW_NON_LDAP=true
+                    break
+                    ;;
+                No) break ;;
+            esac
+        done
+    fi
 }
 
 # Print what this script will do.
@@ -1163,7 +1193,7 @@ EOT
     fi
     local ignore=$(test -n "${NON_SSO_USERS}" || test -n "${NON_SSO_GROUPS}")
     local NON_SSO_EXISTS=$?
-    if ! $ALLOW_NON_SSO && [[ $NON_SSO_EXISTS -eq 0 ]]; then
+    if ! $SSO_ALLOW_PASSWD_IS_SET && ! $ALLOW_NON_SSO && [[ $NON_SSO_EXISTS -eq 0 ]]; then
         echo '  * Set the Perforce configurable auth.sso.allow.passwd to 1 to allow'
         echo '    non-SSO user authentication via a database password, LDAP, etc.'
     fi
@@ -1199,6 +1229,7 @@ function main() {
         exit 1
     fi
     clean_inputs
+    query_configuration
     if $INTERACTIVE; then
         conditional_prompts
     fi
