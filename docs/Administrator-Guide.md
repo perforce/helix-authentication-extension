@@ -500,6 +500,10 @@ If a user attempts to authenticate with Helix Server while the authentication se
 
 If the user attempts to authenticate with the identity provider and enters invalid credentials, the extension will reject the login attempt completely, and in turn Helix Server will reject the user authentication. There is **no fallback** of any kind _if_ the authentication service is accessible and functioning properly.
 
+### Login by superuser for another user
+
+If a superuser performs a `login` for another user, as with the command `p4 login <username>`, the existing behavior will remain unchanged. That is, the extension will not be invoked and a ticket will immediately be issued for the user. In a similar manner, any multi-factor authentication (MFA) will also be implicitly granted for that user.
+
 ## Troubleshooting
 
 ### Client login reverts to password prompt
