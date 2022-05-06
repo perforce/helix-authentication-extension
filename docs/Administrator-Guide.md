@@ -563,7 +563,7 @@ If the extension is failing to authenticate the user, and the extension log file
 
 Then the issue is that the client certificates used by the extension to request the user profile from the authentication service is not acceptable. Either the certificate issuer is not trusted by the certificate authority in use (as named by the `CA_CERT_FILE` or `CA_CERT_PATH` settings in the service), or the common name in the client certificate does not match the pattern provided in the `CLIENT_CERT_CN` service setting. It could also be the case that the client certificate expired. In most cases, updating the client certificates in extension will resolve the issue.
 
-### HTTP error code 408 in extension log
+### HTTP error code 408 in extension log (1)
 
 If the extension log file contains something like this:
 
@@ -571,7 +571,17 @@ If the extension log file contains something like this:
 {"data":{"AuthCheckSSO":"error: auth validation failed for user bruno","http-code":408,"http-error":"nil"},"nanos":194320152,"pid":30482,"recType":0,"seconds":1591982194}
 ```
 
-Then this issue indicates that the user authenticaton took longer than the authentication service was configured to wait. By default, the service will wait 60 seconds for the user to complete the login process, after which it will respond to the `/requests/status` route with a `408` (timeout). To change the timeout period, set the `LOGIN_TIMEOUT` setting in the service to the desired number of seconds.
+This typically indicates that the user authenticaton took longer than the authentication service was configured to wait. By default, the service will wait 60 seconds for the user to complete the login process, after which it will respond to the `/requests/status` route with a `408` (timeout). To change the timeout period, set the `LOGIN_TIMEOUT` setting in the service to the desired number of seconds.
+
+### HTTP error code 408 in extension log (2)
+
+If the user is authenticating successfully with the service but the extension log still shows this error:
+
+```json
+{"data":{"AuthCheckSSO":"error: auth validation failed for user bruno","http-code":408,"http-error":"nil"},"nanos":194320152,"pid":30482,"recType":0,"seconds":1591982194}
+```
+
+Then there is a chance that the extension has more than one instance configuration. See the [Multiple Instance Configurations](#multiple-instance-configurations) section for more information on detecting and correcting this situation.
 
 ### HTTP error code 504 in extension log
 
