@@ -1,5 +1,5 @@
 //
-// Copyright 2020-2021 Perforce Software
+// Copyright 2022 Perforce Software
 //
 import fs from 'fs-extra'
 import * as path from 'node:path'
@@ -12,7 +12,7 @@ const defaultConfig = {
   password: 'p8ssword',
   prog: 'p4api',
   progv: '2021.2.0',
-  p4root: './tmp/p4d-nonssl'
+  p4root: './tmp/p4d/nonssl'
 }
 
 const defaultSslConfig = {
@@ -20,7 +20,7 @@ const defaultSslConfig = {
   password: 'p8ssword',
   prog: 'p4api',
   progv: '2021.2.0',
-  p4root: './tmp/p4d-ssl'
+  p4root: './tmp/p4d/ssl'
 }
 
 function startServerGeneric (config, ssldir) {
@@ -72,7 +72,7 @@ export async function startSslServer () {
   fs.emptyDirSync(config.p4root)
   // set up everything for the SSL server
   const ssldir = path.join(config.p4root, 'ssl')
-  fs.mkdirSync(ssldir)
+  fs.ensureDirSync(ssldir)
   fs.chmodSync(ssldir, 0o700)
   const certfile = path.join(ssldir, 'certificate.txt')
   fs.copyFileSync('test/fixtures/certificate.txt', certfile)
