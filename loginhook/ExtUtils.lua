@@ -292,8 +292,15 @@ function ExtUtils.getAuthMethodAndType( user )
   local method = "perforce"
   local type = "standard"
   cu.Message = function( self, m )
+    local msg = m:Fmt()
+    if msg:match( "Perforce password %(P4PASSWD%) invalid" ) ~= nil then
+      ExtUtils.debug( {
+        [ "getAuthMethodAndType" ] = "error: ExtP4USER has invalid ticket"
+      } )
+      return false, nil, nil
+    end
     ExtUtils.debug( {
-      [ "getAuthMethodAndType" ] = "info: " .. m:Fmt(),
+      [ "getAuthMethodAndType" ] = "info: " .. msg,
       [ "user" ] = user
     } )
   end
@@ -351,8 +358,15 @@ function isUserInGroups( user, groups )
 
   local gs = {}
   cu.Message = function( self, m )
+    local msg = m:Fmt()
+    if msg:match( "Perforce password %(P4PASSWD%) invalid" ) ~= nil then
+      ExtUtils.debug( {
+        [ "isUserInGroups" ] = "error: ExtP4USER has invalid ticket"
+      } )
+      return false, nil, nil
+    end
     ExtUtils.debug( {
-      [ "isUserInGroups" ] = "info: " .. m:Fmt(),
+      [ "isUserInGroups" ] = "info: " .. msg,
       [ "user" ] = user
     } )
   end
