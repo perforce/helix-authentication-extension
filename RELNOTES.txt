@@ -91,6 +91,18 @@ Known Limitations
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
+Bugs fixed in 2022.1
+
+    HAS-173 (Change #2204616, 2206760, 2206866, 2207007)
+        A cryptographically signed build of the extension will be provided
+        via GitHub, avoiding the need to allow unsigned extensions.
+
+    HAS-267 (Change #2221386)
+        If the extension setting Service-URL is missing from the global
+        configuration, the extension will fail in a manner that still
+        permits database-password accounts to authenticate.
+
+----------------------------------------------------------------------
 New functionality in 2021.2
 
     HAS-48 (Change #2143954)
