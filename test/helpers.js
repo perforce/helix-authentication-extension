@@ -24,6 +24,11 @@ export function findData (command, query) {
       return true
     }
   }
+  if (command.data && typeof command.data === 'string') {
+    if (command.data.includes(query)) {
+      return true
+    }
+  }
   if (command.info && Array.isArray(command.info)) {
     for (const entry of command.info) {
       if (typeof entry.data === 'string' && entry.data.includes(query)) {

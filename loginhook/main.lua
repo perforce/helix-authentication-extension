@@ -1,7 +1,7 @@
 --[[
   Authentication extensions for OpenID Connect and SAML 2.0
 
-  Copyright 2021 Perforce Software
+  Copyright 2022 Perforce Software
 ]]--
 local cjson = require "cjson"
 local curl = require "cURL.safe"
@@ -45,7 +45,8 @@ end
 function InstanceConfigEvents()
   return {
     [ "auth-pre-sso" ] = "auth",
-    [ "auth-check-sso" ] = "auth"
+    [ "auth-check-sso" ] = "auth",
+    [ "extension-run" ] = "unset"
   }
 end
 
@@ -320,13 +321,13 @@ local function compareIdentifiers( userid, nameid )
   -- sensitivity setting).
   local ok = (userid:lower() == nameid:lower())
   if ok then
-      utils.debug( { [ "AuthCheckSSO" ] = "info: identifiers match" } )
-    else
-      utils.debug( {
-        [ "AuthCheckSSO" ] = "error: identifiers do not match",
-        [ "userid" ] = userid,
-        [ "nameid" ] = nameid
-      } )
+    utils.debug( { [ "AuthCheckSSO" ] = "info: identifiers match" } )
+  else
+    utils.debug( {
+      [ "AuthCheckSSO" ] = "error: identifiers do not match",
+      [ "userid" ] = userid,
+      [ "nameid" ] = nameid
+    } )
   end
   return ok
 end
@@ -412,4 +413,45 @@ function AuthCheckSSO()
   } )
   Helix.Core.Server.SetClientMsg( 'check the loginhook extension logs' )
   return false
+end
+
+-- return -> (ret: bool, forward: bool)
+-- required: 'ret' if false indicates error
+-- optional: 'forward' if true will forward command to commit server
+function RunCommand( args )
+  utils.init()
+
+  function TestService()
+    local ok, url, sdata = getData( utils.requestUrl( "testuser" ) )
+    if ok then
+      Helix.Core.Server.ClientOutputText( "Service response: OK\n" )
+    else
+      Helix.Core.Server.ClientOutputText(
+        "Service error: " .. url .. ": " .. tostring( sdata ) .. "\n"
+      )
+    end
+  end
+
+  function TestCommand()
+    local user = Helix.Core.Server.GetVar( "user" )
+    local ok, authMethod, userType = utils.getAuthMethodAndType( user )
+    if ok then
+      Helix.Core.Server.ClientOutputText( "Command successful\n" )
+    else
+      Helix.Core.Server.ClientOutputText( "Command failure, check extension logs\n" )
+    end
+  end
+
+  local cmd = table.remove( args, 1 )
+  if cmd == "test-svc" then
+    TestService()
+  elseif cmd == "test-cmd" then
+    TestCommand()
+  elseif cmd == "test-all" then
+    TestService()
+    TestCommand()
+  else
+    Helix.Core.Server.ClientOutputText( "unsupported command: " .. cmd .. "\n" )
+  end
+  return true
 end

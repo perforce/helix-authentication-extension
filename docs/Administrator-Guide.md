@@ -27,6 +27,8 @@ It is helpful for the end users to have updated Helix Core clients. The updated 
 
 To test the extension with a limited set of users, prior to enabling SSO for all users, you can set the `sso-users` or `sso-groups` configuration settings, as described in the [Testing](#testing) section below. With either of these settings in place, only users that are listed in `sso-users`, or are a member of one of the groups listed in `sso-groups`, will be authenticated using the extension. Once the proper functioning of the extension has been established, you can then clear these settings to enable SSO for all users.
 
+Basic preliminary testing of the extension is also possible using `p4 extension --run` which is described in the [Testing](#testing) section below.
+
 ### Excluding some users from SSO
 
 See the section below titled [Allowing for non-SSO Users](#allowing-for-non-sso-users) for details. It is **recommended** to have at least one administrative user named among the non-SSO users. Administrative users should be using a database password to avoid being locked out in the event that the SSO mechanism is not operational (for instance, the identity provider is temporarily inaccessible).
@@ -302,6 +304,26 @@ $ p4 admin restart
 ## Next Steps
 
 ### Testing
+
+Preliminary testing of the extension, after installation but before restarting Helix Core Server, is possible with the use of the `p4 extension --run` command. The extension supports several commands:
+
+* `test-svc`: Tests the connection to the authentication service.
+* `test-cmd`: Tests the invocation of Perforce commands on the server.
+* `test-all`: Runs all available tests.
+
+Examples of running these tests are shown here:
+
+```shell
+$ p4 extension --run loginhook-a1 test-svc
+Service response: OK
+
+$ p4 extension --run loginhook-a1 test-cmd
+Command successful
+
+$ p4 extension --run loginhook-a1 test-all
+Service response: OK
+Command successful
+```
 
 For the purpose of testing the authentication integration with a limited number of users, you may change the `sso-users` field to a list of Perforce users that _must_ authenticate using the SSO authentication integration. When this value is configured with one or more users, then the `non-sso-users` and `non-sso-groups` lists will be ignored by the extension. Likewise, any users _not_ included in this list will _not_ authenticate using the extension. To clear the `sso-users` field, replace the list of users with `...` to indicate that the field is to be ignored. When the `sso-users` field starts with `...` then the `non-sso-users` and `non-sso-groups` fields will be considered by the extension during user authentication.
 
