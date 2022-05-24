@@ -20,6 +20,10 @@ function trim( s )
   return s:gsub( "^%s*(.-)%s*$", "%1" )
 end
 
+function ExtUtils.isempty( s )
+    return s == nil or s == ""
+end
+
 function getGCfg()
   local cfg = {}
   for k, v in pairs( Helix.Core.Server.GetGlobalConfigData() ) do
@@ -291,18 +295,17 @@ function ExtUtils.getAuthMethodAndType( user )
 
   local method = "perforce"
   local type = "standard"
+  local ticket = false
   cu.Message = function( self, m )
     local msg = m:Fmt()
     if msg:match( "Perforce password %(P4PASSWD%) invalid" ) ~= nil then
+      ticket = true
+    else
       ExtUtils.debug( {
-        [ "getAuthMethodAndType" ] = "error: ExtP4USER has invalid ticket"
+        [ "getAuthMethodAndType" ] = "info: " .. msg,
+        [ "user" ] = user
       } )
-      return false, nil, nil
     end
-    ExtUtils.debug( {
-      [ "getAuthMethodAndType" ] = "info: " .. msg,
-      [ "user" ] = user
-    } )
   end
   cu.HandleError = function( self, m )
     ExtUtils.debug( {
@@ -325,6 +328,12 @@ function ExtUtils.getAuthMethodAndType( user )
   ca:Run( "user", cu )
   ca:Final()
 
+  if ticket then
+    ExtUtils.debug( {
+      [ "getAuthMethodAndType" ] = "error: ExtP4USER has invalid ticket"
+    } )
+    return false, nil, nil
+  end
   return true, method, type
 end
 
