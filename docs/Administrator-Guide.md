@@ -307,21 +307,25 @@ $ p4 admin restart
 
 Preliminary testing of the extension, after installation but before restarting Helix Core Server, is possible with the use of the `p4 extension --run` command. The extension supports several commands:
 
-* `test-svc`: Tests the connection to the authentication service.
-* `test-cmd`: Tests the invocation of Perforce commands on the server.
-* `test-all`: Runs all available tests.
+| Command | Description |
+| ------- | ----------- |
+| <nobr>`test-svc`</nobr> | Tests ability to start a login request with authentication service. |
+| <nobr>`test-ssl`</nobr> | Tests ability to retrieve request status from authentication service. This typically involves a TLS connection, thus this test will ensure the client certificates are accepted by the service. |
+| <nobr>`test-cmd`</nobr> | Tests the invocation of Perforce commands on the server. |
+| <nobr>`test-all`</nobr> | Runs all available tests. |
 
 Examples of running these tests are shown here:
 
 ```shell
 $ p4 extension --run loginhook-a1 test-svc
-Service response: OK
+Request start: OK
 
 $ p4 extension --run loginhook-a1 test-cmd
 Command successful
 
 $ p4 extension --run loginhook-a1 test-all
-Service response: OK
+Request start: OK
+Request status: OK
 Command successful
 ```
 

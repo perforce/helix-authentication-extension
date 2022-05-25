@@ -9,7 +9,7 @@ import * as runner from 'helix-auth-extension/test/runner.js'
 import p4pkg from 'p4api'
 const { P4 } = p4pkg
 
-describe('Non-SSL', function () {
+describe('RunCommand', function () {
   let serviceProcess
   let p4config
   let port
@@ -56,7 +56,7 @@ describe('Non-SSL', function () {
       await helpers.restartServer(p4config)
     })
 
-    it('should indicate service success', function () {
+    it('should indicate request start success', function () {
       const p4 = new P4({
         P4PORT: p4config.port,
         P4USER: p4config.user
@@ -64,8 +64,26 @@ describe('Non-SSL', function () {
       const loginCmd = p4.cmdSync('login', 'p8ssword')
       assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
       const extCmd = p4.cmdSync('extension --run testing test-svc')
-      // console.info('extCmd:', extCmd)
-      assert.isTrue(helpers.findData(extCmd, 'Service response: OK'))
+      assert.isTrue(helpers.findData(extCmd, 'Request start: OK'))
+    })
+  })
+
+  describe('test-ssl success', function () {
+    before(async function () {
+      helpers.installExtension(p4config)
+      helpers.configureExtension(p4config, 'oidc', `http://localhost:${port}/fail/404`)
+      await helpers.restartServer(p4config)
+    })
+
+    it('should indicate request status success', function () {
+      const p4 = new P4({
+        P4PORT: p4config.port,
+        P4USER: p4config.user
+      })
+      const loginCmd = p4.cmdSync('login', 'p8ssword')
+      assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+      const extCmd = p4.cmdSync('extension --run testing test-ssl')
+      assert.isTrue(helpers.findData(extCmd, 'Request status: OK'))
     })
   })
 

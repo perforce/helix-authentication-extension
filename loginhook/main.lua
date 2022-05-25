@@ -424,7 +424,21 @@ function RunCommand( args )
   function TestService()
     local ok, url, sdata = getData( utils.requestUrl( "testuser" ) )
     if ok then
-      Helix.Core.Server.ClientOutputText( "Service response: OK\n" )
+      Helix.Core.Server.ClientOutputText( "Request start: OK\n" )
+    else
+      Helix.Core.Server.ClientOutputText(
+        "Service error: " .. url .. ": " .. tostring( sdata ) .. "\n"
+      )
+    end
+  end
+
+  function TestSecure()
+    -- We expect this request to fail, in which case 'url' will be the response
+    -- code, which should be a 404 to indicate that the given request does not
+    -- exist. If the TLS certs are not accepted, then 403 is returned.
+    local ok, url, sdata = getData( utils.statusUrl( "nine3two", "none" ) )
+    if url == 404 then
+      Helix.Core.Server.ClientOutputText( "Request status: OK\n" )
     else
       Helix.Core.Server.ClientOutputText(
         "Service error: " .. url .. ": " .. tostring( sdata ) .. "\n"
@@ -445,10 +459,13 @@ function RunCommand( args )
   local cmd = table.remove( args, 1 )
   if cmd == "test-svc" then
     TestService()
+  elseif cmd == "test-ssl" then
+    TestSecure()
   elseif cmd == "test-cmd" then
     TestCommand()
   elseif cmd == "test-all" then
     TestService()
+    TestSecure()
     TestCommand()
   else
     Helix.Core.Server.ClientOutputText( "unsupported command: " .. cmd .. "\n" )

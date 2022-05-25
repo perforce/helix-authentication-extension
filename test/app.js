@@ -43,6 +43,10 @@ router.get('/fail/401/requests/status/:requestId', fail401)
 router.get('/fail/403/requests/new/:userId', newRequest)
 router.get('/fail/403/requests/status/:requestId', fail403)
 
+// request status results in a 404
+router.get('/fail/404/requests/new/:userId', newRequest)
+router.get('/fail/404/requests/status/:requestId', fail404)
+
 // request status results in a 408
 router.get('/fail/408/requests/new/:userId', newRequest)
 router.get('/fail/408/requests/status/:requestId', fail408)
@@ -157,6 +161,10 @@ function mixedCaseProfile (req, res, next) {
 
 function fail401 (req, res, next) {
   res.status(401).send('client certificate required')
+}
+
+function fail404 (req, res, next) {
+  res.status(404).send('request not found')
 }
 
 function fail403 (req, res, next) {
