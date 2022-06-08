@@ -1,7 +1,7 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 #
-# $ docker build -f test/install/Ubuntu20.dockerfile -t has-ubuntu20-install .
-# $ docker image ls | grep has-ubuntu20-install
+# $ docker build -f test/install/Ubuntu22.dockerfile -t has-ubuntu22-install .
+# $ docker image ls | grep has-ubuntu22-install
 #
 ARG APT_URL="http://package.perforce.com/apt/ubuntu"
 ARG PUB_KEY="http://package.perforce.com/perforce.pubkey"
@@ -19,7 +19,9 @@ RUN apt-get update && \
 ADD ${PUB_KEY} perforce.pubkey
 RUN apt-key add perforce.pubkey && \
     rm -f perforce.pubkey
-RUN echo "deb ${APT_URL} $(lsb_release -sc) release" > /etc/apt/sources.list.d/perforce.sources.list
+# temporary hack: no p4/p4d packages for jammy yet, so use focal
+# RUN echo "deb ${APT_URL} $(lsb_release -sc) release" > /etc/apt/sources.list.d/perforce.sources.list
+RUN echo "deb ${APT_URL} focal release" > /etc/apt/sources.list.d/perforce.sources.list
 RUN apt-get update && \
     apt-get -q -y install helix-cli helix-p4d
 
