@@ -1025,6 +1025,19 @@ function prompt_to_proceed() {
 
 # Package and install the extension in Helix Core server.
 function install_extension() {
+    # Build the extension first to make sure we _can_ build it, before removing
+    # any previous installation. The --delete will work with older clients while
+    # the --package will fail, leaving us in weird state.
+    #
+    # do not clobber an existing (signed) package that is ready to install
+    if [[ ! -f loginhook.p4-extension ]]; then
+        debug 'building new extension...'
+        local BUILD=$(p4 -p "$P4PORT" -u "$P4USER" extension --package loginhook)
+        if [[ ! "${BUILD}" =~ 'packaged successfully' ]]; then
+            error 'Failed to build extension package file'
+            return 1
+        fi
+    fi
     # remove the extension if it is already installed, cannot install on top of
     # an existing installation
     local EXISTS=$(p4 -p "$P4PORT" -u "$P4USER" extension --list --type=extensions)
@@ -1033,15 +1046,6 @@ function install_extension() {
         local DELETE=$(p4 -p "$P4PORT" -u "$P4USER" extension --delete Auth::loginhook --yes)
         if [[ ! "${DELETE}" =~ 'successfully deleted' ]]; then
             error 'Failed to remove existing extension installation'
-            return 1
-        fi
-    fi
-    # do not clobber an existing (signed) package that is ready to install
-    if [[ ! -f loginhook.p4-extension ]]; then
-        debug 'building new extension...'
-        local BUILD=$(p4 -p "$P4PORT" -u "$P4USER" extension --package loginhook)
-        if [[ ! "${BUILD}" =~ 'packaged successfully' ]]; then
-            error 'Failed to build extension package file'
             return 1
         fi
     fi
