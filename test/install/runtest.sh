@@ -190,6 +190,7 @@ unset P4USER
     --non-sso-users super \
     --name-identifier nameID \
     --user-identifier user \
+    --skip-tests \
     --yes
 
 echo 'waiting for p4d to restart...'

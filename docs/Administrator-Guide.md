@@ -321,12 +321,12 @@ $ p4 extension --run loginhook-a1 test-svc
 Request start: OK
 
 $ p4 extension --run loginhook-a1 test-cmd
-Command successful
+Command invoke: OK
 
 $ p4 extension --run loginhook-a1 test-all
 Request start: OK
 Request status: OK
-Command successful
+Command invoke: OK
 ```
 
 For the purpose of testing the authentication integration with a limited number of users, you may change the `sso-users` field to a list of Perforce users that _must_ authenticate using the SSO authentication integration. When this value is configured with one or more users, then the `non-sso-users` and `non-sso-groups` lists will be ignored by the extension. Likewise, any users _not_ included in this list will _not_ authenticate using the extension. To clear the `sso-users` field, replace the list of users with `...` to indicate that the field is to be ignored. When the `sso-users` field starts with `...` then the `non-sso-users` and `non-sso-groups` fields will be considered by the extension during user authentication.

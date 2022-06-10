@@ -450,7 +450,7 @@ function RunCommand( args )
     local user = Helix.Core.Server.GetVar( "user" )
     local ok, authMethod, userType = utils.getAuthMethodAndType( user )
     if ok then
-      Helix.Core.Server.ClientOutputText( "Command successful\n" )
+      Helix.Core.Server.ClientOutputText( "Command invoke: OK\n" )
     else
       Helix.Core.Server.ClientOutputText( "Command failure, check extension logs\n" )
     end

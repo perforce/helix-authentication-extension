@@ -14,6 +14,7 @@ RESTART_OK=false
 SERVICE_URL=''
 DEFAULT_PROTOCOL=''
 ENABLE_LOGGING=''
+SKIP_TESTS=false
 NON_SSO_USERS=''
 NON_SSO_GROUPS=''
 NAME_IDENTIFIER=''
@@ -252,6 +253,9 @@ Description:
     --yes
         Restart the Helix Core server if running in non-interactive mode.
 
+    --skip-tests
+        Do not run the automated tests after installation.
+
     --debug
         Enable debugging output for this configuration script.
 
@@ -400,7 +404,7 @@ function read_arguments() {
     # build up the list of arguments in pieces since there are so many
     local ARGS=(p4port: super: superpassword: service-url: default-protocol: enable-logging)
     ARGS+=(non-sso-users: non-sso-groups: sso-users: sso-groups: name-identifier: user-identifier:)
-    ARGS+=(allow-non-sso yes debug help)
+    ARGS+=(allow-non-sso yes debug skip-tests help)
     local TEMP=$(getopt -n 'configure-auth-service.sh' \
         -o 'hmn' \
         -l "$(join_by , ${ARGS[@]})" -- "$@")
@@ -488,6 +492,10 @@ function read_arguments() {
                 ;;
             --debug)
                 DEBUG=true
+                shift
+                ;;
+            --skip-tests)
+                SKIP_TESTS=true
                 shift
                 ;;
             --help)
@@ -1125,6 +1133,26 @@ function configure_extension() {
     return 0
 }
 
+# Test the extension to ensure proper functioning, or at least let the user know
+# that something may need fixing.
+function test_extension() {
+    highlight_on
+    cat <<EOT
+
+The configure script will now run some tests to ensure that the extension
+is functioning as expected...
+
+EOT
+    p4 extension --run loginhook-a1 test-all
+    cat <<EOT
+
+If every test indicates "OK" then the extension is ready.
+If not, correct the issues before restarting the server.
+
+EOT
+    highlight_off
+}
+
 # Set server configurables according to user selections.
 function configure_server() {
     if $ALLOW_NON_SSO; then
@@ -1244,6 +1272,9 @@ function main() {
     cd "$( cd "$(dirname "$0")" ; pwd -P )/.."
     install_extension
     configure_extension
+    if ! $SKIP_TESTS; then
+        test_extension
+    fi
     configure_server
     restart_server
     print_summary

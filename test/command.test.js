@@ -102,7 +102,7 @@ describe('RunCommand', function () {
       const loginCmd = p4.cmdSync('login', 'p8ssword')
       assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
       const extCmd = p4.cmdSync('extension --run testing test-cmd')
-      assert.isTrue(helpers.findData(extCmd, 'Command successful'))
+      assert.isTrue(helpers.findData(extCmd, 'Command invoke: OK'))
     })
   })
 
