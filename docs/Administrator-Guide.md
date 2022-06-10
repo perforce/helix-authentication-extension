@@ -243,6 +243,7 @@ $ p4 extension --list --type configs
 ... owner super
 ... type auth-check-sso
 ... arg auth
+... debugStatus none
 
 ... config foobar
 ... extension Auth::loginhook
@@ -251,6 +252,16 @@ $ p4 extension --list --type configs
 ... owner super
 ... type auth-pre-sso
 ... arg auth
+... debugStatus none
+
+... config foobar
+... extension Auth::loginhook
+... uuid 117E9283-732B-45A6-9993-AE64C354F1C5
+... revision 1
+... owner super
+... type extension-run
+... arg unset
+... debugStatus none
 
 ... config loginhook
 ... extension Auth::loginhook
@@ -266,6 +277,7 @@ $ p4 extension --list --type configs
 ... owner super
 ... type auth-check-sso
 ... arg auth
+... debugStatus none
 
 ... config loginhook-all
 ... extension Auth::loginhook
@@ -274,6 +286,16 @@ $ p4 extension --list --type configs
 ... owner super
 ... type auth-pre-sso
 ... arg auth
+... debugStatus none
+
+... config loginhook-all
+... extension Auth::loginhook
+... uuid 117E9283-732B-45A6-9993-AE64C354F1C5
+... revision 1
+... owner super
+... type extension-run
+... arg unset
+... debugStatus none
 ```
 
 From the example output above, we see two instance configurations, one of which is named `foobar`. To remove this extraneous configuration, use the `p4 extension --delete` command, as shown in the example below:
