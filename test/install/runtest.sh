@@ -40,6 +40,7 @@ echo 'configuring extension for OIDC...'
     --non-sso-users super \
     --name-identifier email \
     --user-identifier email \
+    --skip-tests \
     --yes
 
 echo 'waiting for p4d to restart...'
@@ -61,6 +62,7 @@ echo 'configuring extension for OIDC...'
     --non-sso-users super \
     --name-identifier email \
     --user-identifier email \
+    --skip-tests \
     --yes
 
 echo 'waiting for p4d to restart...'
@@ -90,6 +92,7 @@ echo 'configuring extension for SAML...'
     --non-sso-users super \
     --name-identifier nameID \
     --user-identifier fullname \
+    --skip-tests \
     --yes
 
 echo 'waiting for p4d to restart...'
@@ -121,6 +124,7 @@ echo 'configuring extension for SSO users...'
     --sso-users jackson \
     --name-identifier nameID \
     --user-identifier fullname \
+    --skip-tests \
     --yes
 
 echo 'waiting for p4d to restart...'
@@ -152,6 +156,7 @@ echo 'configuring extension for SSO groups...'
     --sso-groups requireds \
     --name-identifier nameID \
     --user-identifier fullname \
+    --skip-tests \
     --yes
 
 echo 'waiting for p4d to restart...'
