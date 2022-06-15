@@ -168,7 +168,7 @@ end
 
 -- return -> (ret: bool, data: str, invokeURL: str, skipSSO: bool)
 -- required: 'ret' if false indicates error
--- optional: 'data' is not used for SSO authentication?
+-- optional: 'data' has multiple meanings that depend on the use case
 -- optional: 'invokeURL' if set will open URL on client
 -- optional: 'skipSSO' if true will bypass single-sign-on
 --
@@ -180,6 +180,8 @@ end
 --         passes invokeURL to client and invokes AuthCheckSSO
 -- case 4: return true, "unused", "skipping", true
 --         bypasses single-sign-on and uses another auth method
+-- case 5: return true, url
+--         P4API client will utilize the url returned as `data`
 function AuthPreSSO()
   -- N.B. auth-pre-sso does not emit messages to the client so calling
   -- Helix.Core.Server.SetClientMsg() does nothing.
@@ -276,17 +278,19 @@ function AuthPreSSO()
     return true, "unused", "http://example.com", false
   end
   local url = utils.loginUrl( sdata )
-  -- For now, use the 1-step procedure for P4PHP clients; N.B. when Swarm is
-  -- logging the user into Perforce, the clientprog is P4PHP instead of SWARM.
+  -- Return the login URL as a property named `data` for P4PHP clients.
+  --
+  -- N.B. Swarm uses a clientprog value of "P4PHP" when performing user login,
+  -- but the login will be handled differently in that case regardless.
   local clientprog = Helix.Core.Server.GetVar( "clientprog" )
   if string.find( clientprog, "P4PHP" ) then
-    utils.debug( { [ "AuthPreSSO" ] = "info: 1-step mode for P4PHP client" } )
-    return true
+    utils.debug( { [ "AuthPreSSO" ] = "info: loginURL via 'data' for P4PHP client" } )
+    return true, url
   end
-  -- For Helix TeamHub, use the 1-step login procedure.
+  -- Return the login URL as a property named `data` for Helix TeamHub.
   if string.find( clientprog, "PilsnerHTHAdapter" ) then
-    utils.debug( { [ "AuthPreSSO" ] = "info: 1-step mode for PilsnerHTHAdapter client" } )
-    return true
+    utils.debug( { [ "AuthPreSSO" ] = "info: loginURL via 'data' for PilsnerHTHAdapter" } )
+    return true, url
   end
   utils.debug( {
     [ "AuthPreSSO" ] = "info: invoking URL " .. url,
