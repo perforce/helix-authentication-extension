@@ -391,6 +391,7 @@ function ensure_readiness() {
 }
 
 # Source selected P4 settings by use of the p4 set command.
+# Has no effect if the settings have not already been set by the user.
 function source_enviro() {
     if [ -n "$(p4 set -q P4PORT)" ]; then
         eval "$(p4 set -q P4PORT)"
@@ -923,11 +924,11 @@ function query_configuration() {
     # $ p4 configure show auth.sso.allow.passwd
     # auth.sso.allow.passwd:1 (configure)
     #
-    local PASSWD=$(p4 configure show auth.sso.allow.passwd | grep -E 'auth.sso.allow.passwd[:=]1')
+    local PASSWD=$(p4 -p "$P4PORT" -u "$P4USER" configure show auth.sso.allow.passwd | grep -E 'auth.sso.allow.passwd[:=]1')
     if [[ "${PASSWD}" =~ 'auth.sso.allow.passwd' ]]; then
         SSO_ALLOW_PASSWD_IS_SET=true
     fi
-    local NONLDAP=$(p4 configure show auth.sso.nonldap | grep -E 'auth.sso.nonldap[:=]1')
+    local NONLDAP=$(p4 -p "$P4PORT" -u "$P4USER" configure show auth.sso.nonldap | grep -E 'auth.sso.nonldap[:=]1')
     if [[ "${NONLDAP}" =~ 'auth.sso.nonldap' ]]; then
         SSO_NONLDAP_IS_SET=true
     fi
@@ -1143,7 +1144,7 @@ The configure script will now run some tests to ensure that the extension
 is functioning as expected...
 
 EOT
-    p4 extension --run loginhook-a1 test-all
+    p4 -p "$P4PORT" -u "$P4USER" extension --run loginhook-a1 test-all
     cat <<EOT
 
 If every test indicates "OK" then the extension is ready.
@@ -1156,10 +1157,10 @@ EOT
 # Set server configurables according to user selections.
 function configure_server() {
     if $ALLOW_NON_SSO; then
-        p4 configure set auth.sso.allow.passwd=1 >/dev/null 2>&1
+        p4 -p "$P4PORT" -u "$P4USER" configure set auth.sso.allow.passwd=1 >/dev/null 2>&1
     fi
     if $ALLOW_NON_LDAP; then
-        p4 configure set auth.sso.nonldap=1 >/dev/null 2>&1
+        p4 -p "$P4PORT" -u "$P4USER" configure set auth.sso.nonldap=1 >/dev/null 2>&1
     fi
 }
 
