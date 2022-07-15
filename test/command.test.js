@@ -32,6 +32,7 @@ describe('RunCommand', function () {
 
   describe('test-svc failure', function () {
     before(async function () {
+      this.timeout(10000)
       helpers.installExtension(p4config)
       helpers.configureExtension(p4config, 'oidc', `http://localhost:12345/pass/oidc`)
       await helpers.restartServer(p4config)
@@ -51,6 +52,7 @@ describe('RunCommand', function () {
 
   describe('test-svc success', function () {
     before(async function () {
+      this.timeout(10000)
       helpers.installExtension(p4config)
       helpers.configureExtension(p4config, 'oidc', `http://localhost:${port}/pass/oidc`)
       await helpers.restartServer(p4config)
@@ -70,6 +72,7 @@ describe('RunCommand', function () {
 
   describe('test-ssl success', function () {
     before(async function () {
+      this.timeout(10000)
       helpers.installExtension(p4config)
       helpers.configureExtension(p4config, 'oidc', `http://localhost:${port}/fail/404`)
       await helpers.restartServer(p4config)
@@ -89,6 +92,7 @@ describe('RunCommand', function () {
 
   describe('test-cmd success', function () {
     before(async function () {
+      this.timeout(10000)
       helpers.installExtension(p4config)
       helpers.configureExtension(p4config, 'oidc', `http://localhost:${port}/pass/oidc`)
       await helpers.restartServer(p4config)
