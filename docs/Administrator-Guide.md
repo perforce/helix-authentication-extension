@@ -509,7 +509,20 @@ Command unavailable: external authentication 'auth-check-sso' trigger not found.
 
 ## Upgrading the Extension
 
-The procedure for upgrading the extension to a newer release consists of these steps:
+### Using the configuration script
+
+Installing a new version of the extension over an existing installation is most
+easily done by running the `bin/configure-login-hook.sh` script from within the
+directory containing the new extension. That is, download the latest version of
+the extension and invoke the configure script contained within. The removal of
+the old extension and installation and configuration of the new extension will
+be done automatically by the configure script.
+
+### Manually remove and update
+
+The manual procedure for upgrading the extension to a newer release consists of
+the steps outlined below. The configure script does effectively the same thing,
+so it may be easier to simply run the configure script as described above.
 
 1. Print and retain the current extension configuration:
     * `p4 extension --configure Auth::loginhook -o`
@@ -525,8 +538,6 @@ The procedure for upgrading the extension to a newer release consists of these s
     * `p4 extension --configure Auth::loginhook`
     * `p4 extension --configure Auth::loginhook --name loginhook-a1`
 1. Restart the Helix Server (`p4 admin restart`)
-
-The process of migrating the old configuration to the new extension is not yet automated, so care must be taken to copy the values to the new extension configuration.
 
 ## Notes on Extension Behavior
 
