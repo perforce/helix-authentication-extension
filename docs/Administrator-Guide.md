@@ -6,6 +6,10 @@ Helix Authentication Service support for Helix Core server and Helix Core client
 
 For information about Helix Core Server Extensions, see the [Helix Core Extensions Developer Guide](https://www.perforce.com/manuals/extensions/Content/Extensions/Home-extensions.html).
 
+The overall flow of the authentication process is shown in the image below.
+
+![sequence diagram](./sequence_diagram.png)
+
 ### Prerequisites
 
 * This document assumes that you have read "Administrator's Guide for Helix Authentication Service", which is available on the Perforce web site at https://www.perforce.com/manuals/helix-auth-svc/.

@@ -48,14 +48,17 @@ Helix Core Server running the extension.
 The authentication extension has been tested with the following clients. The
 extension will work with the versions shown, as well as later versions.
 
-* P4 2019.1
+* P4 2019.1, the Helix Core command-line client
     + Earlier versions will also work, but the user will have to copy the URL
       displayed in the console and paste it into the browser location bar.
-* P4V 2019.2
-* P4VS 2019.2 Update 2
-* P4EXP 2019.2
-* P4Eclipse 2019.1
-* P4SL 2019.1
+* P4V 2019.2, the Helix Core Visual Client
+* P4VS 2019.2, patch 2, the Helix Plugin for Visual Studio
+* P4EXP 2019.2, the Helix Plugin for File Explorer
+* Helix DAM, 2022.1
+* Helix Plugin for Eclipse (P4Eclipse) 2019.1 patch 2
+* Helix Plugin for Matlab (P4SL) 2019.1
+* Helix Swarm 2018.3, the free code review tool
+* Helix TeamHub, 2022.1
 
 ## Documentation
 
