@@ -35,9 +35,9 @@ function InstanceConfigFields()
     [ "client-sso-users" ] = "... Those users who must authenticate using P4LOGINSSO.",
     [ "client-sso-groups" ] = "... Those groups whose members must authenticate using P4LOGINSSO.",
     [ "client-user-identifier" ] = "... Trigger variable used as unique P4LOGINSSO user identifier.",
-    [ "client-name-identifier" ] = "... Field within JSON web token containing unique user identifer.",
+    [ "client-name-identifier" ] = "... Field within JSON web token containing unique user identifier.",
     [ "user-identifier" ] = "... Trigger variable used as unique user identifier.",
-    [ "name-identifier" ] = "... Field within IdP response containing unique user identifer.",
+    [ "name-identifier" ] = "... Field within IdP response containing unique user identifier.",
     [ "enable-logging" ] = "... Extension will write debug messages to a log if 'true'."
   }
 end
