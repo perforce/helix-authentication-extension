@@ -116,6 +116,9 @@ local function getData( url )
 end
 
 local function validateSamlResponse( response )
+  if instanceId == nil then
+    return false, 500, "instanceId is not set"
+  end
   local url = utils.samlValidateUrl( instanceId )
   local easy = curl.easy()
   local encoded_response = easy:escape( response )
