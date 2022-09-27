@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Extension
-                            Version 2022.1
+                            Version 2022.2
 
 
 Introduction
@@ -89,6 +89,14 @@ Known Limitations
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+Bugs fixed in 2022.2
+
+    HAS-333 (Change #2295793)
+        Configure script will build extension before removing existing
+        extension, avoiding issue with older p4 client failing to build
+        the extension.
 
 ----------------------------------------------------------------------
 Bugs fixed in 2022.1

@@ -11,7 +11,7 @@ const defaultConfig = {
   user: 'bruno',
   password: 'p8ssword',
   prog: 'p4api',
-  progv: '2022.1.0',
+  progv: '2022.2.0',
   p4root: './tmp/p4d/nonssl'
 }
 
@@ -19,7 +19,7 @@ const defaultSslConfig = {
   user: 'bruno',
   password: 'p8ssword',
   prog: 'p4api',
-  progv: '2022.1.0',
+  progv: '2022.2.0',
   p4root: './tmp/p4d/ssl'
 }
 
