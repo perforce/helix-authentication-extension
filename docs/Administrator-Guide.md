@@ -473,6 +473,23 @@ Perforce users can be authenticated using JSON Web Tokens (JWT) rather than trad
 
 An example program for retreiving a JWT from Azure AD in a managed VM is found in `cloud/azure/get-token.py` in this repository. This Python script will use the special Azure API to retrieve a JWT for the managed VM.
 
+## Disabling the Extension
+
+To disable the login extension, change the `ExtEnabled` setting to `false` in
+the instance configuration of the extension, then restart Helix Core Server for
+the change to take effect. Until the server is restarted, logins will be
+**broken** for all users.
+
+Versions of Helix Core Server that support disabling an authentication extension
+include 2020.2, 2020.1.3, 2019.2.10, and all versions thereafter, including the
+2021.N and 2022.N releases.
+
+## Enabling the Extension
+
+To enable the login extension, change the `ExtEnabled` setting to `true` in the
+instance configuration of the extension, then restart Helix Core Server for the
+change to take effect.
+
 ## Removing the Extension
 
 To remove the login extension, perform the following three steps:
