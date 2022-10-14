@@ -619,6 +619,18 @@ Note that the `nameID` value does not match the `userid`, although they are simi
 
 Another reason that authentication will the identity provider will succeed but authentication with the server fails is that the user is configured to use LDAP for authentication. This can happen if the user is named in the `sso-users` or `sso-groups` extension setting _and_ their `AuthMethod` is set to `ldap`. As discussed in the [LDAP guide](./LDAP.md) this cannot work, either the user must authenticate with LDAP or web-based SSO, but not both.
 
+### Group-based filter does not work
+
+If users are members of groups that are named in the `non-sso-groups` or `sso-groups` extension configuration, and they are suddenly unable login using the correct authentication method, check the extension debug logs for a message like this one:
+
+```json
+{"data":{"isUserInGroups":"error: ExtP4USER has invalid ticket","user":"jdoe"},"nanos":194320152,"pid":30482,"recType":0,"seconds":1591982194}
+```
+
+This log entry indicates that the extension user itself does not have a valid ticket. There are several causes for this situation. It may be that the `P4TICKETS` setting for the system user that is running the `p4d` instance refers to a file that does not have the appropriate ticket entry. It may be that the user named in the `ExtP4USER` field of the extension configuration has a short-lived ticket rather than a long-lived ticket. Typically a **super** user will be the `ExtP4USER` user for the extension and this user will be a member of a group with a `Timeout` setting of `unlimited`, meaning that their ticket will never expire. The extension `ExtP4USER` user should likewise have a long-lived ticket, otherwise this problem will occur again when the ticket expires.
+
+Yet another cause is that the client `P4PORT` value connects to the `p4d` instance on a network interface that is not associated with a ticket for the `ExtP4USER` user. This is rare, but one solution may be to use `p4 login -h` for the `ExtP4USER` user on all relevant addresses of the Helix Core Server instance.
+
 ### Login successful only after multiple attempts
 
 When logging in, the `p4 login` is seemingly not satisfied until the user visits the same login URL two or three times, and only then will a ticket be issued. Otherwise, the login attempt fails after a timeout. This will happen if there are multiple extension **instance** configurations present. See the [Multiple Instance Configurations](#multiple-instance-configurations) section above for the commands to diagnose and correct the behavior.
@@ -732,7 +744,7 @@ p4 configure set server.extensions.allow.unsigned=1
 
 ### non-LDAP users are not authenticated with SSO
 
-When LDAP is configured in Helix Core Server, and a SSO trigger or extension is installed, non-LDAP users will not use the SSO mechanism. This is the default behavior of the Helix Core Server. However, LDAP authentication and web-based SSO do not work together, see [LDAP.md](./LDAP.md) for more information. To resolve this problem, set `auth.sso.nonldap` to `1` to instruct the server to allow for the user of SSO with non-LDAP users.
+When LDAP is configured in Helix Core Server, and an SSO trigger or extension is installed, non-LDAP users will not use the SSO mechanism. This is the default behavior of the Helix Core Server. However, LDAP authentication and web-based SSO do not work together, see [LDAP.md](./LDAP.md) for more information. To resolve this problem, set `auth.sso.nonldap` to `1` to instruct the server to allow for the use of SSO with non-LDAP users.
 
 ```shell
 p4 configure set auth.sso.nonldap=1
