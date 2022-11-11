@@ -686,6 +686,8 @@ If the extension is failing to authenticate the user, and the extension log file
 
 Then the issue is that the reverse proxy in front of the authentication service is timing out before the service itself times out (e.g. after `LOGIN_TIMEOUT` seconds). The timeout defined in the reverse proxy should be longer than the login timeout defined in the authentication service.
 
+There may also be a chance that the extension has more than one instance configuration. See the [Multiple Instance Configurations](#multiple-instance-configurations) section for more information on detecting and correcting this situation.
+
 ### Curl "got nothing" errors in extension log
 
 If the extension is failing to authenticate the user, and the extension log file contains something like this:
