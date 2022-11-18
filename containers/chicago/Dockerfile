@@ -1,7 +1,7 @@
 #
 # build the commit server image
 #
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 ARG PUB_KEY
 ARG APT_URL
 ARG BASE_PATH

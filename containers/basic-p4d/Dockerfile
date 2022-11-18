@@ -14,7 +14,7 @@
 # $ docker image tag helix-p4d-basic 192.168.1.2:32000/helix-p4d-basic
 # $ docker push 192.168.1.2:32000/helix-p4d-basic
 #
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ARG BASE_PATH="containers/basic-p4d"
 ARG PUB_KEY="http://package.perforce.com/perforce.pubkey"
