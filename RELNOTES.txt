@@ -6,7 +6,8 @@
 Introduction
 
     The Helix Authentication Extension is a Helix Core extension that integrates
-    with the Helix Authentication Service to facilitate the integration of
+    
+    th the Helix Authentication Service to facilitate the integration of
     identity providers supporting either the OpenID Connect or SAML 2.0
     authentication protocols.
 
@@ -30,7 +31,7 @@ Supported Platforms
     Linux (x86_64)
         RHEL 7, 8
         CentOS 7, 8.0
-        Ubuntu 16.04, 18.04, 20.04
+        Ubuntu 18.04, 20.04, 22.04
 
     The above platforms are tested and subject to regression testing on a
     frequent basis. Errors or bugs discovered in these platforms are prioritized
