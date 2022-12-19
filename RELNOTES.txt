@@ -92,7 +92,7 @@ Known Limitations
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-Bugs fixed in 2022.2
+Bugs fixed in 2022.2 (2022.2/2350030) (2022/11/14)
 
     HAS-333 (Change #2295793)
         Configure script will build extension before removing existing
@@ -100,7 +100,7 @@ Bugs fixed in 2022.2
         the extension.
 
 ----------------------------------------------------------------------
-Bugs fixed in 2022.1
+Bugs fixed in 2022.1 (2022.1/2295205) (2022/06/09)
 
     HAS-173 (Change #2204616, 2206760, 2206866, 2207007)
         A cryptographically signed build of the extension will be provided
@@ -112,13 +112,13 @@ Bugs fixed in 2022.1
         permits database-password accounts to authenticate.
 
 ----------------------------------------------------------------------
-New functionality in 2021.2
+New functionality in 2021.2 (2021.2/2186511) (2021/09/23)
 
     HAS-48 (Change #2143954)
         Allow changing the TLS certificate file paths.
 
 ----------------------------------------------------------------------
-Bugs fixed in 2021.1
+Bugs fixed in 2021.1 (2021.1/2130312) (2021/05/27)
 
     HAS-188 (Change #2084514)
         Configure script now reads extension configuration correctly.
@@ -127,21 +127,21 @@ Bugs fixed in 2021.1
         Extension correctly distinquishes P4V from P4VS during login.
 
 ----------------------------------------------------------------------
-Other changes in 2021.1
+Other changes in 2021.1 (2021.1/2130312) (2021/05/27)
 
     HAS-139 (Change #2090744)
         Extension automatically treats non-standard users as not using SSO
         mechanism for authentication (i.e. operators and service users).
 
 ----------------------------------------------------------------------
-Bugs fixed in 2020.2
+Bugs fixed in 2020.2 (2020.2/2065870) (2021/01/28)
 
     HAS-78 (Change #2049963, 2050005)
         Add options "sso-users" and "sso-groups" to define Perforce users
         and groups that must use the SSO authentication mechanism.
 
 ----------------------------------------------------------------------
-Bugs fixed in 2020.1
+Bugs fixed in 2020.1 (2020.1/2016391) (2020/09/24)
 
     HAS-43
         URL not sent to user logging in to edge server.
