@@ -14,6 +14,7 @@ function GlobalConfigFields()
     -- changed from their default (documentation) values, since it is a wildcard
     -- in Perforce and cannot be used for anything else.
     [ "Service-URL" ] = "... The authentication service base URL.",
+    [ "Service-Down-URL" ] = "... URL to open when Service-URL fails, defaults to example.com",
     [ "Auth-Protocol" ] = "... Authentication protocol, such as 'saml' or 'oidc'.",
     [ "Client-Cert" ] = "... Path to client public key, defaults to ./client.crt",
     [ "Client-Key" ] = "... Path to client private key, defaults to ./client.key",
@@ -278,7 +279,7 @@ function AuthPreSSO()
     -- At this point we know this user should be using SSO but there was a
     -- problem, so try to inform them of what went wrong.
     errorMessage = "error connecting to service, check extension logs"
-    return true, "unused", "http://example.com", false
+    return true, "unused", utils.serviceDownUrl(), false
   end
   local url = utils.loginUrl( sdata )
   -- Return the login URL as a property named `data` for P4PHP clients.

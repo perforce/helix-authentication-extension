@@ -134,6 +134,14 @@ function ExtUtils.loginUrl( sdata )
   return sdata[ "loginUrl" ]
 end
 
+function ExtUtils.serviceDownUrl()
+  local sdurl = ExtUtils.gCfgData[ "Service-Down-URL" ]
+  if sdurl ~= nil and string.len(sdurl) > 0 and string.match( sdurl, "^%.%.%." ) == nil then
+    return sdurl
+  end
+  return "http://example.com"
+end
+
 function ExtUtils.requestUrl( userId )
   local base = ExtUtils.gCfgData[ "Service-URL" ]
   return base .. "/requests/new/" .. userId
