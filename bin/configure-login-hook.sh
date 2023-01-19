@@ -406,7 +406,7 @@ function read_arguments() {
     local ARGS=(p4port: super: superpassword: service-url: default-protocol: enable-logging)
     ARGS+=(non-sso-users: non-sso-groups: sso-users: sso-groups: name-identifier: user-identifier:)
     ARGS+=(allow-non-sso yes debug skip-tests help)
-    local TEMP=$(getopt -n 'configure-auth-service.sh' \
+    local TEMP=$(getopt -n 'configure-login-hook.sh' \
         -o 'hmn' \
         -l "$(join_by , ${ARGS[@]})" -- "$@")
     if (( $? != 0 )); then
