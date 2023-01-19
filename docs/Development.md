@@ -35,3 +35,9 @@ the path to the GNU getopt directory:
 ```shell
 $ PATH="/usr/local/opt/gnu-getopt/bin:$PATH" ./bin/configure-login-hook.sh
 ```
+
+On M1 systems, the path will be different:
+
+```shell
+$ PATH="/opt/homebrew/opt/gnu-getopt/bin:$PATH" ./bin/configure-login-hook.sh
+```
