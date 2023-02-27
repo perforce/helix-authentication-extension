@@ -1,12 +1,12 @@
                             Release Notes for
                         Helix Authentication Extension
-                            Version 2022.2
+                            Version 2023.1
 
 
 Introduction
 
     The Helix Authentication Extension is a Helix Core extension that integrates
-    
+
     th the Helix Authentication Service to facilitate the integration of
     identity providers supporting either the OpenID Connect or SAML 2.0
     authentication protocols.
@@ -90,6 +90,14 @@ Known Limitations
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+
+----------------------------------------------------------------------
+New functionality in 2023.1 (2023.1/???) (2023/??/??)
+
+    HAS-332
+        Add configurable Service-Down-URL to which the extension will direct
+        the user in the event that the authentication service is failing.
 
 ----------------------------------------------------------------------
 Bugs fixed in 2022.2 (2022.2/2350030) (2022/11/14)
