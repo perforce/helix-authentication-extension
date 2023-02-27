@@ -74,6 +74,10 @@ is a non-trivial task. Some expertise in a security systems is helpful. In the
 event that you need assistance with configuring these systems, please contact
 [Perforce Support](https://www.perforce.com/support/request-support).
 
+## How to Report Security Vulnerabilities
+
+If you discover a security vulnerability in the extension, please contact [Perforce Support](https://www.perforce.com/support/request-support).
+
 ## Development
 
 See the [development](./docs/Development.md) page for additional information
