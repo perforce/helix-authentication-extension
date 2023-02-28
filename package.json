@@ -1,6 +1,6 @@
 {
   "name": "helix-auth-extension",
-  "version": "2022.2.0",
+  "version": "2023.1.0",
   "description": "Helix Authentication Extension",
   "type": "module",
   "engines": {
