@@ -165,31 +165,38 @@ function read_arguments() {
 
 function ensure_extension() {
     if ! p4 extension --configure Auth::loginhook -o >/dev/null 2>&1; then
-        die "Authentication extension not installed."
+        error 'Authentication extension seemingly not installed.'
+        die 'Try using the "perforce" user to run the script.'
     fi
 }
 
 function p4_info() {
+    echo 'running p4 info...'
     p4 info > $COLLECT_TEMP/p4-info.txt
 }
 
 function p4_configure() {
+    echo 'running p4 configure show allservers...'
     p4 configure show allservers > $COLLECT_TEMP/configure-all.txt
 }
 
 function p4_extensions() {
+    echo 'running p4 extension --list --type extensions...'
     p4 extension --list --type extensions > $COLLECT_TEMP/extensions.txt
 }
 
 function p4_ext_configs() {
+    echo 'running p4 extension --list --type configs...'
     p4 extension --list --type configs > $COLLECT_TEMP/configs.txt
 }
 
 function ext_global_config() {
+    echo 'running p4 extension --configure Auth::loginhook -o...'
     p4 extension --configure Auth::loginhook -o > $COLLECT_TEMP/global-config.txt
 }
 
 function ext_instance_config() {
+    echo 'running p4 extension --list --type configs...'
     # scan all of the extension configurations to find ours; there may be more
     # than one, and this will capture all of them
     CONFIGS=$(p4 extension --list --type configs)
@@ -212,6 +219,7 @@ function ext_instance_config() {
                 IS_OUR_EXT=true
             fi
             if [[ "${PARTS[1]}" == 'type' && "${PARTS[2]}" == 'auth-check-sso' ]] && $IS_OUR_EXT; then
+                echo "running p4 extension --configure Auth::loginhook --name ${INSTANCE_NAME} -o..."
                 p4 extension --configure Auth::loginhook --name "${INSTANCE_NAME}" -o > $COLLECT_TEMP/${INSTANCE_NAME}.txt
             fi
         fi
@@ -220,6 +228,7 @@ function ext_instance_config() {
 
 function ext_log_file() {
     # scan all of the extensions to find ours
+    echo 'running p4 extension --list --type extensions...'
     EXTENSIONS=$(p4 extension --list --type extensions)
     IS_OUR_EXT=false
     DATA_DIR=''
@@ -271,7 +280,6 @@ function main() {
     source_enviro
     set -e
     read_arguments "$@"
-    cd "$( cd "$(dirname "$0")" ; pwd -P )/.."
     ensure_extension
     COLLECT_TEMP=$(mktemp -d)
     p4_info
