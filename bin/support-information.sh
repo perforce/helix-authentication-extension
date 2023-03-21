@@ -166,6 +166,7 @@ function read_arguments() {
 function ensure_extension() {
     if ! p4 extension --configure Auth::loginhook -o >/dev/null 2>&1; then
         error 'Authentication extension seemingly not installed.'
+        error 'Try checking that the user has a valid Perforce ticket.'
         die 'Try using the "perforce" user to run the script.'
     fi
 }
