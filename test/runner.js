@@ -1,5 +1,5 @@
 //
-// Copyright 2022 Perforce Software
+// Copyright 2023 Perforce Software
 //
 import fs from 'fs-extra'
 import * as path from 'node:path'
@@ -11,7 +11,7 @@ const defaultConfig = {
   user: 'bruno',
   password: 'p8ssword',
   prog: 'p4api',
-  progv: '2022.2.0',
+  progv: '2023.1.0',
   p4root: './tmp/p4d/nonssl'
 }
 
@@ -19,7 +19,7 @@ const defaultSslConfig = {
   user: 'bruno',
   password: 'p8ssword',
   prog: 'p4api',
-  progv: '2022.2.0',
+  progv: '2023.1.0',
   p4root: './tmp/p4d/ssl'
 }
 
