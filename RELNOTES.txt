@@ -93,14 +93,14 @@ Changes in every release: Bugs Fixed, New Functionality
 
 
 ----------------------------------------------------------------------
-New functionality in 2023.1 (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+New functionality in 2023.1 (2023.1/2422401) (2023/03/24)
 
     HAS-332
         Add configurable Service-Down-URL to which the extension will direct
         the user in the event that the authentication service is failing.
 
 ----------------------------------------------------------------------
-Bugs fixed in 2022.2 (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Bugs fixed in 2022.2 (2022.2/2350030) (2022/11/14)
 
     HAS-333 (Change #2295793)
         Configure script will build extension before removing existing
@@ -108,7 +108,7 @@ Bugs fixed in 2022.2 (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
         the extension.
 
 ----------------------------------------------------------------------
-Bugs fixed in 2022.1 (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Bugs fixed in 2022.1 (2022.1/2295205) (2022/06/09)
 
     HAS-173 (Change #2204616, 2206760, 2206866, 2207007)
         A cryptographically signed build of the extension will be provided
