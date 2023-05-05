@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Extension
-                            Version 2023.1
+                            Version 2023.2
 
 
 Introduction
