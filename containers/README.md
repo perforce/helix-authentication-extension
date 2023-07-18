@@ -55,8 +55,9 @@ An alternative to using dnsmasq would be to hard-code the names in the `/etc/hos
 Build and start the containers (from the parent directory) like so:
 
 ```shell
-$ docker-compose up --build -d
-$ docker-compose exec chicago.doc /setup/login.sh
+$ docker compose build chicago.doc
+$ docker compose up --build -d
+$ docker compose exec chicago.doc /setup/login.sh
 ```
 
 The last `exec` command is to perform the commit service user login to the edge server instance, which cannot be done until both containers have been started, hence it cannot be done during the build.
@@ -65,4 +66,4 @@ To test authentication, you will need to build and start the Docker containers d
 
 The **p4d** Helix Core Server instance has been configured with the full suite of test accounts defined in the authentication service containers. By default, the SAML/Shibboleth accounts will be in effect. To change this, configure the extension to specify `oidc` as the protocol in the `Auth-Protocol` global setting.
 
-The **chicago** (and in turn **tokyo**) instances have only the `jackson` and `johndoe` accounts defined, simply for brevity. You are free to define any accounts you like, as long as the OIDC or SAML identity providers know about them.
+The **chicago** and **tokyo** instances have only the `jackson` and `johndoe` accounts defined, simply for brevity. You are free to define any accounts you like, as long as the OIDC or SAML identity providers know about them.
