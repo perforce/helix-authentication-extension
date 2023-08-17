@@ -2,7 +2,7 @@
 #
 # Configuration script for Helix Authentication Extension.
 #
-# Copyright 2022, Perforce Software Inc. All rights reserved.
+# Copyright 2023, Perforce Software Inc. All rights reserved.
 #
 INTERACTIVE=true
 MONOCHROME=false
@@ -12,13 +12,23 @@ P4USER=''
 P4PASSWD=''
 RESTART_OK=false
 SERVICE_URL=''
+SERVICE_DOWN_URL=''
+CLIENT_CERT=''
+CLIENT_KEY=''
+AUTHORITY_CERT=''
+VERIFY_PEER=''
+VERIFY_HOST=''
 DEFAULT_PROTOCOL=''
 ENABLE_LOGGING=''
 SKIP_TESTS=false
 NON_SSO_USERS=''
 NON_SSO_GROUPS=''
+CLIENT_SSO_USERS=''
+CLIENT_SSO_GROUPS=''
 NAME_IDENTIFIER=''
 USER_IDENTIFIER=''
+CLIENT_NAME_IDENTIFIER=''
+CLIENT_USER_IDENTIFIER=''
 SSO_USERS=''
 SSO_GROUPS=''
 SSO_ALLOW_PASSWD_IS_SET=false
@@ -857,6 +867,76 @@ function fetch_extension_settings() {
     fi
 }
 
+# Retrieve any extension settings that are normally not modified by this script
+# in order to preserve whatever values the admin had defined. In the process of
+# "upgrading" the extension, the old one is removed, and as a result its
+# configuration is lost as well.
+#
+# Requires a valid p4 ticket for the super user.
+function fetch_unconfigured_settings() {
+    if ! p4 -p "$P4PORT" -u "$P4USER" extension --list --type extensions | grep -q '... extension Auth::loginhook'; then
+        return
+    fi
+
+    #
+    # global settings
+    #
+    GLOBAL=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook -o)
+    if (( $? != 0 )); then
+        return
+    fi
+    VALUE=$(awk '/Client-Cert:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
+    if [[ ! "${VALUE}" =~ '... ' ]]; then
+        CLIENT_CERT=${CLIENT_CERT:-${VALUE}}
+    fi
+    VALUE=$(awk '/Client-Key:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
+    if [[ ! "${VALUE}" =~ '... ' ]]; then
+        CLIENT_KEY=${CLIENT_KEY:-${VALUE}}
+    fi
+    VALUE=$(awk '/Service-Down-URL:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
+    if [[ ! "${VALUE}" =~ '... ' ]]; then
+        SERVICE_DOWN_URL=${SERVICE_DOWN_URL:-${VALUE}}
+    fi
+    VALUE=$(awk '/Authority-Cert:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
+    if [[ ! "${VALUE}" =~ '... ' ]]; then
+        AUTHORITY_CERT=${AUTHORITY_CERT:-${VALUE}}
+    fi
+    VALUE=$(awk '/Verify-Peer:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
+    if [[ ! "${VALUE}" =~ '... ' ]]; then
+        VERIFY_PEER=${VERIFY_PEER:-${VALUE}}
+    fi
+    VALUE=$(awk '/Verify-Host:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
+    if [[ ! "${VALUE}" =~ '... ' ]]; then
+        VERIFY_HOST=${VERIFY_HOST:-${VALUE}}
+    fi
+
+    #
+    # instance settings
+    #    
+    INSTANCE=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook --name loginhook-a1 -o)
+    if (( $? != 0 )); then
+        return
+    fi
+    VALUE=$(awk '/client-name-identifier:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${INSTANCE}")
+    if [[ ! "${VALUE}" =~ '... ' ]]; then
+        CLIENT_NAME_IDENTIFIER="${CLIENT_NAME_IDENTIFIER:-${VALUE}}"
+    fi
+    VALUE=$(awk '/client-user-identifier:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${INSTANCE}")
+    if [[ ! "${VALUE}" =~ '... ' ]]; then
+        CLIENT_USER_IDENTIFIER="${CLIENT_USER_IDENTIFIER:-${VALUE}}"
+    fi
+    VALUE=$(awk '/client-sso-users:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
+    if [[ ! "${VALUE}" =~ '... ' ]]; then
+        IFS=',' readarray -t NAMES <<< "$VALUE"
+        CLIENT_SSO_USERS="${CLIENT_SSO_USERS:-${NAMES[*]}}"
+    fi
+    VALUE=$(awk '/client-sso-groups:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
+    if [[ ! "${VALUE}" =~ '... ' ]]; then
+        IFS=',' readarray -t NAMES <<< "$VALUE"
+        CLIENT_SSO_GROUPS="${CLIENT_SSO_GROUPS:-${NAMES[*]}}"
+    fi
+}
+
 # Validate all of the inputs however they may have been provided.
 function validate_inputs() {
     if ! validate_url "$SERVICE_URL"; then
@@ -904,6 +984,30 @@ function clean_inputs() {
     if [[ ! -z "$SERVICE_URL" ]]; then
         # trim trailing slashes
         SERVICE_URL="$(echo -n "$SERVICE_URL" | sed 's,[/]*$,,')"
+    fi
+    if [[ -z "${AUTHORITY_CERT}" ]]; then
+        AUTHORITY_CERT='... use default value'
+    fi
+    if [[ -z "${CLIENT_CERT}" ]]; then
+        CLIENT_CERT='... use default value'
+    fi
+    if [[ -z "${CLIENT_KEY}" ]]; then
+        CLIENT_KEY='... use default value'
+    fi
+    if [[ -z "${VERIFY_PEER}" ]]; then
+        VERIFY_PEER='... use default value'
+    fi
+    if [[ -z "${VERIFY_HOST}" ]]; then
+        VERIFY_HOST='... use default value'
+    fi
+    if [[ -z "${SERVICE_DOWN_URL}" ]]; then
+        SERVICE_DOWN_URL='... not configured'
+    fi
+    if [[ -z "${CLIENT_NAME_IDENTIFIER}" ]]; then
+        CLIENT_NAME_IDENTIFIER='... use default value'
+    fi
+    if [[ -z "${CLIENT_USER_IDENTIFIER}" ]]; then
+        CLIENT_USER_IDENTIFIER='... use default value'
     fi
     if [[ -z "${DEFAULT_PROTOCOL}" ]]; then
         DEFAULT_PROTOCOL='... use auth service default protocol'
@@ -1097,8 +1201,14 @@ function configure_extension() {
     local PROG1="/^ExtP4USER:/ { print \"ExtP4USER:\t${P4USER}\"; next; }"
     local PROG2="/Auth-Protocol:/ { print; print \"\t\t${DEFAULT_PROTOCOL}\"; getline; next; }"
     local PROG3="/Service-URL:/ { print; print \"\t\t${SERVICE_URL}\"; getline; next; }"
+    local PROG4="/Service-Down-URL:/ { print; print \"\t\t${SERVICE_DOWN_URL}\"; getline; next; }"
+    local PROG5="/Authority-Cert:/ { print; print \"\t\t${AUTHORITY_CERT}\"; getline; next; }"
+    local PROG6="/Client-Cert:/ { print; print \"\t\t${CLIENT_CERT}\"; getline; next; }"
+    local PROG7="/Client-Key:/ { print; print \"\t\t${CLIENT_KEY}\"; getline; next; }"
+    local PROG8="/Verify-Peer:/ { print; print \"\t\t${VERIFY_PEER}\"; getline; next; }"
+    local PROG9="/Verify-Host:/ { print; print \"\t\t${VERIFY_HOST}\"; getline; next; }"
     local GLOBAL=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook -o \
-        | awk "${PROG1} ${PROG2} ${PROG3} {print}" \
+        | awk "${PROG1} ${PROG2} ${PROG3} ${PROG4} ${PROG5} ${PROG6} ${PROG7} ${PROG8} ${PROG9} {print}" \
         | p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook -i)
     if [[ ! "${GLOBAL}" =~ 'Extension config loginhook saved' ]]; then
         error 'Failed to configure global settings'
@@ -1113,19 +1223,25 @@ function configure_extension() {
         LOGGING='... off'
     fi
     local PROG1="/enable-logging:/ { print; print \"\t\t${LOGGING}\"; getline; next; }"
-    local PROG2="/name-identifier:/ { print; print \"\t\t${NAME_IDENTIFIER}\"; getline; next; }"
-    local PROG3="/user-identifier:/ { print; print \"\t\t${USER_IDENTIFIER}\"; getline; next; }"
+    local PROG2="/[^-]name-identifier:/ { print; print \"\t\t${NAME_IDENTIFIER}\"; getline; next; }"
+    local PROG3="/[^-]user-identifier:/ { print; print \"\t\t${USER_IDENTIFIER}\"; getline; next; }"
     local SSO_USERS=$(format_user_list "${SSO_USERS}")
     local SSO_GROUPS=$(format_user_list "${SSO_GROUPS}")
     local NON_USERS=$(format_user_list "${NON_SSO_USERS}")
     local NON_GROUPS=$(format_user_list "${NON_SSO_GROUPS}")
+    local CLIENT_USERS=$(format_user_list "${CLIENT_SSO_USERS}")
+    local CLIENT_GROUPS=$(format_user_list "${CLIENT_SSO_GROUPS}")
     # use printf to not emit the ORS that (g)awk print does by default
     local PROG4="/non-sso-groups:/ { print; printf \"${NON_GROUPS}\"; getline; next; }"
     local PROG5="/non-sso-users:/ { print; printf \"${NON_USERS}\"; getline; next; }"
     local PROG6="/[^-]sso-users:/ { print; printf \"${SSO_USERS}\"; getline; next; }"
     local PROG7="/[^-]sso-groups:/ { print; printf \"${SSO_GROUPS}\"; getline; next; }"
+    local PROG8="/client-sso-groups:/ { print; printf \"${CLIENT_GROUPS}\"; getline; next; }"
+    local PROG9="/client-sso-users:/ { print; printf \"${CLIENT_USERS}\"; getline; next; }"
+    local PROG10="/client-name-identifier:/ { print; print \"\t\t${CLIENT_NAME_IDENTIFIER}\"; getline; next; }"
+    local PROG11="/client-user-identifier:/ { print; print \"\t\t${CLIENT_USER_IDENTIFIER}\"; getline; next; }"
     local LOCAL=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook --name loginhook-a1 -o \
-        | awk "${PROG1} ${PROG2} ${PROG3} ${PROG4} ${PROG5} ${PROG6} ${PROG7} {print}" \
+        | awk "${PROG1} ${PROG2} ${PROG3} ${PROG4} ${PROG5} ${PROG6} ${PROG7} ${PROG8} ${PROG9} ${PROG10} ${PROG11} {print}" \
         | p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook --name loginhook-a1 -i)
     if [[ ! "${LOCAL}" =~ 'Extension config loginhook-a1 saved' ]]; then
         error 'Failed to configure instance settings'
@@ -1261,6 +1377,7 @@ function main() {
     elif ! validate_inputs; then
         exit 1
     fi
+    fetch_unconfigured_settings
     clean_inputs
     query_configuration
     if $INTERACTIVE; then

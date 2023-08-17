@@ -40,11 +40,7 @@ echo 'configuring extension for OIDC...'
     --non-sso-users super \
     --name-identifier email \
     --user-identifier email \
-    --skip-tests \
-    --yes
-
-echo 'waiting for p4d to restart...'
-sleep 10
+    --skip-tests
 
 p4 -ztag extension --configure Auth::loginhook -o | tr -s '[:space:]' ' ' > output
 grep -q 'Auth-Protocol: ... ' output
@@ -62,11 +58,7 @@ echo 'configuring extension for OIDC...'
     --non-sso-users super \
     --name-identifier email \
     --user-identifier email \
-    --skip-tests \
-    --yes
-
-echo 'waiting for p4d to restart...'
-sleep 10
+    --skip-tests
 
 p4 -ztag extension --configure Auth::loginhook -o | tr -s '[:space:]' ' ' > output
 grep -q 'Auth-Protocol: oidc' output
@@ -92,11 +84,7 @@ echo 'configuring extension for SAML...'
     --non-sso-users super \
     --name-identifier nameID \
     --user-identifier fullname \
-    --skip-tests \
-    --yes
-
-echo 'waiting for p4d to restart...'
-sleep 10
+    --skip-tests
 
 p4 -ztag extension --configure Auth::loginhook -o | tr -s '[:space:]' ' ' > output
 grep -q 'Auth-Protocol: saml' output
@@ -112,6 +100,27 @@ grep -Eq '[^-]sso-groups: ... \(none\)' output
 grep -q 'user-identifier: fullname' output
 
 #
+# inject settings that the configure script normally does not touch
+#
+PROG1="/Service-Down-URL:/ { print; print \"\t\thttps://corp.example.com\"; getline; next; }"
+PROG2="/Client-Cert:/ { print; print \"\t\tmyclient.crt\"; getline; next; }"
+PROG3="/Client-Key:/ { print; print \"\t\tmyclient.key\"; getline; next; }"
+PROG4="/Authority-Cert:/ { print; print \"\t\tcorp-ca.crt\"; getline; next; }"
+PROG5="/Verify-Peer:/ { print; print \"\t\tmaybe\"; getline; next; }"
+PROG6="/Verify-Host:/ { print; print \"\t\tmaybe\"; getline; next; }"
+p4 extension --configure Auth::loginhook -o | \
+    awk "${PROG1} ${PROG2} ${PROG3} ${PROG4} ${PROG5} ${PROG6} {print}" | \
+    p4 extension --configure Auth::loginhook -i
+
+PROG1="/client-sso-users:/ { print; print \"\t\tchris, susan, harry\"; getline; next; }"
+PROG2="/client-sso-groups:/ { print; print \"\t\tclient-group\"; getline; next; }"
+PROG3="/client-user-identifier:/ { print; print \"\t\tcluserid\"; getline; next; }"
+PROG4="/client-name-identifier:/ { print; print \"\t\tclnameid\"; getline; next; }"
+p4 extension --configure Auth::loginhook --name loginhook-a1 -o | \
+    awk "${PROG1} ${PROG2} ${PROG3} ${PROG4} {print}" | \
+    p4 extension --configure Auth::loginhook --name loginhook-a1 -i
+
+#
 # run the configure script and set up SSO users
 #
 echo 'configuring extension for SSO users...'
@@ -124,15 +133,18 @@ echo 'configuring extension for SSO users...'
     --sso-users jackson \
     --name-identifier nameID \
     --user-identifier fullname \
-    --skip-tests \
-    --yes
-
-echo 'waiting for p4d to restart...'
-sleep 10
+    --skip-tests
 
 p4 -ztag extension --configure Auth::loginhook -o | tr -s '[:space:]' ' ' > output
 grep -q 'Auth-Protocol: saml' output
 grep -q 'Service-URL: https://localhost:3000' output
+# ensure that the unconfigured settings are copied to the new installation
+grep -q 'Service-Down-URL: https://corp.example.com' output
+grep -q 'Client-Cert: myclient.crt' output
+grep -q 'Client-Key: myclient.key' output
+grep -q 'Authority-Cert: corp-ca.crt' output
+grep -q 'Verify-Peer: maybe' output
+grep -q 'Verify-Host: maybe' output
 
 p4 extension --configure Auth::loginhook --name loginhook-a1 -o | tr -s '[:space:]' ' ' > output
 grep -q 'enable-logging: ... off' output
@@ -142,6 +154,16 @@ grep -Eq '[^-]sso-groups: ... \(none\)' output
 grep -q 'non-sso-groups: ... (none)' output
 grep -q 'non-sso-users: ... (none)' output
 grep -q 'user-identifier: fullname' output
+# ensure that the unconfigured settings are copied to the new installation
+cat output
+echo '1'
+grep -q 'client-sso-groups: client-group' output
+echo '2'
+grep -q 'client-sso-users: chris susan harry' output
+echo '3'
+grep -q 'client-user-identifier: cluserid' output
+echo '4'
+grep -q 'client-name-identifier: clnameid' output
 
 #
 # run the configure script and set up SSO groups
@@ -156,11 +178,7 @@ echo 'configuring extension for SSO groups...'
     --sso-groups requireds \
     --name-identifier nameID \
     --user-identifier fullname \
-    --skip-tests \
-    --yes
-
-echo 'waiting for p4d to restart...'
-sleep 10
+    --skip-tests
 
 p4 -ztag extension --configure Auth::loginhook -o | tr -s '[:space:]' ' ' > output
 grep -q 'Auth-Protocol: saml' output
@@ -195,11 +213,7 @@ unset P4USER
     --non-sso-users super \
     --name-identifier nameID \
     --user-identifier user \
-    --skip-tests \
-    --yes
-
-echo 'waiting for p4d to restart...'
-sleep 10
+    --skip-tests
 
 # Set up the p4 environment again for the sake of these tests. Also note that
 # the configure script already logged the super user into p4d, so we have a
