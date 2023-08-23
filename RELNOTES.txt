@@ -91,6 +91,12 @@ Known Limitations
 
 Changes in every release: Bugs Fixed, New Functionality
 
+----------------------------------------------------------------------
+Bugs fixed in 2022.2 (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+     HAS-452 (Change #2295793)
+        Configure script now captures all existing settings when upgrading
+        an existing extension installation.
 
 ----------------------------------------------------------------------
 New functionality in 2023.1 (2023.1/2422401) (2023/03/24)
