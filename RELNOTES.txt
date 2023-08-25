@@ -92,7 +92,7 @@ Known Limitations
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-Bugs fixed in 2022.2 (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Bugs fixed in 2023.2 (2023.2/2479541) (2023/08/24)
 
      HAS-452 (Change #2295793)
         Configure script now captures all existing settings when upgrading
