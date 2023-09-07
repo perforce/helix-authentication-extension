@@ -246,7 +246,7 @@ function AuthPreSSO()
       return true, "unused", "skipping", true
     end
     -- LDAP users are expected to authenticate using LDAP
-    if authMethod == "ldap" then
+    if authMethod:match( "^ldap" ) ~= nil then
       utils.debug( {
         [ "AuthPreSSO" ] = "info: skipping LDAP user ",
         [ "user" ] = user

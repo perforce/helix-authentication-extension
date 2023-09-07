@@ -1,0 +1,4 @@
+User:	sampson
+Email:	sampson@example.org
+FullName:	Sam P. Son
+AuthMethod:	ldap+2fa

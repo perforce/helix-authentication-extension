@@ -33,6 +33,7 @@ p4 extension --configure Auth::loginhook --name loginhook-all -o \
 # populate p4d with test data
 #
 p4 user -f -i < user_george.txt
+p4 user -f -i < user_sampson.txt
 p4 user -f -i < user_jackson.txt
 yes 94f6ce8c-fbea-4fcd-b7d0-564de93beb1b | p4 passwd jackson
 p4 user -f -i < user_johndoe.txt

@@ -31,6 +31,7 @@ WORKDIR /perforce
 #
 COPY $BASE_PATH/build.sh .
 COPY $BASE_PATH/user_george.txt .
+COPY $BASE_PATH/user_sampson.txt .
 COPY $BASE_PATH/user_jackson.txt .
 COPY $BASE_PATH/user_janedoe.txt .
 COPY $BASE_PATH/user_johndoe.txt .
