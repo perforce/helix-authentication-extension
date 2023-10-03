@@ -12,6 +12,7 @@ P4USER=''
 P4PASSWD=''
 RESTART_OK=false
 SERVICE_URL=''
+RESOLVE_HOST=''
 SERVICE_DOWN_URL=''
 CLIENT_CERT=''
 CLIENT_KEY=''
@@ -822,11 +823,11 @@ function fetch_extension_settings() {
         return
     fi
     PROTO=$(awk '/Auth-Protocol:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
-    if [[ ! "${PROTO}" =~ '... ' ]]; then
+    if [[ ! "${PROTO}" =~ '...' ]]; then
         DEFAULT_PROTOCOL=${DEFAULT_PROTOCOL:-${PROTO}}
     fi
     URL=$(awk '/Service-URL:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
-    if [[ ! "${URL}" =~ '... ' ]]; then
+    if [[ ! "${URL}" =~ '...' ]]; then
         SERVICE_URL=${SERVICE_URL:-${URL}}
     fi
     INSTANCE=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook --name loginhook-a1 -o)
@@ -834,34 +835,34 @@ function fetch_extension_settings() {
         return
     fi
     LOGGING=$(awk '/enable-logging:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${INSTANCE}")
-    if [[ ! "${LOGGING}" =~ '... ' ]]; then
+    if [[ ! "${LOGGING}" =~ '...' ]]; then
         ENABLE_LOGGING='yes'
     fi
     NAMEID=$(awk '/[ \t]name-identifier:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${INSTANCE}")
-    if [[ ! "${NAMEID}" =~ '... ' ]]; then
+    if [[ ! "${NAMEID}" =~ '...' ]]; then
         NAME_IDENTIFIER="${NAME_IDENTIFIER:-${NAMEID}}"
     fi
     USERID=$(awk '/[ \t]user-identifier:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${INSTANCE}")
-    if [[ ! "${USERID}" =~ '... ' ]]; then
+    if [[ ! "${USERID}" =~ '...' ]]; then
         USER_IDENTIFIER="${USER_IDENTIFIER:-${USERID}}"
     fi
     NON_USERS=$(awk '/non-sso-users:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
-    if [[ ! "${NON_USERS}" =~ '... ' ]]; then
+    if [[ ! "${NON_USERS}" =~ '...' ]]; then
         IFS=',' readarray -t NAMES <<< "$NON_USERS"
         NON_SSO_USERS="${NON_SSO_USERS:-${NAMES[*]}}"
     fi
     NON_GROUPS=$(awk '/non-sso-groups:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
-    if [[ ! "${NON_GROUPS}" =~ '... ' ]]; then
+    if [[ ! "${NON_GROUPS}" =~ '...' ]]; then
         IFS=',' readarray -t NAMES <<< "$NON_GROUPS"
         NON_SSO_GROUPS="${NON_SSO_GROUPS:-${NAMES[*]}}"
     fi
     SSOUSERS=$(awk '/[ \t]sso-users:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
-    if [[ ! "${SSOUSERS}" =~ '... ' ]]; then
+    if [[ ! "${SSOUSERS}" =~ '...' ]]; then
         IFS=',' readarray -t NAMES <<< "$SSOUSERS"
         SSO_USERS="${SSO_USERS:-${NAMES[*]}}"
     fi
     SSOGROUPS=$(awk '/[ \t]sso-groups:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
-    if [[ ! "${SSOGROUPS}" =~ '... ' ]]; then
+    if [[ ! "${SSOGROUPS}" =~ '...' ]]; then
         IFS=',' readarray -t NAMES <<< "$SSOGROUPS"
         SSO_GROUPS="${SSO_GROUPS:-${NAMES[*]}}"
     fi
@@ -886,27 +887,31 @@ function fetch_unconfigured_settings() {
         return
     fi
     VALUE=$(awk '/Client-Cert:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
-    if [[ ! "${VALUE}" =~ '... ' ]]; then
+    if [[ ! "${VALUE}" =~ '...' ]]; then
         CLIENT_CERT=${CLIENT_CERT:-${VALUE}}
     fi
     VALUE=$(awk '/Client-Key:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
-    if [[ ! "${VALUE}" =~ '... ' ]]; then
+    if [[ ! "${VALUE}" =~ '...' ]]; then
         CLIENT_KEY=${CLIENT_KEY:-${VALUE}}
     fi
+    VALUE=$(awk '/Resolve-Host:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
+    if [[ ! "${VALUE}" =~ '...' ]]; then
+        RESOLVE_HOST=${RESOLVE_HOST:-${VALUE}}
+    fi
     VALUE=$(awk '/Service-Down-URL:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
-    if [[ ! "${VALUE}" =~ '... ' ]]; then
+    if [[ ! "${VALUE}" =~ '...' ]]; then
         SERVICE_DOWN_URL=${SERVICE_DOWN_URL:-${VALUE}}
     fi
     VALUE=$(awk '/Authority-Cert:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
-    if [[ ! "${VALUE}" =~ '... ' ]]; then
+    if [[ ! "${VALUE}" =~ '...' ]]; then
         AUTHORITY_CERT=${AUTHORITY_CERT:-${VALUE}}
     fi
     VALUE=$(awk '/Verify-Peer:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
-    if [[ ! "${VALUE}" =~ '... ' ]]; then
+    if [[ ! "${VALUE}" =~ '...' ]]; then
         VERIFY_PEER=${VERIFY_PEER:-${VALUE}}
     fi
     VALUE=$(awk '/Verify-Host:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${GLOBAL}")
-    if [[ ! "${VALUE}" =~ '... ' ]]; then
+    if [[ ! "${VALUE}" =~ '...' ]]; then
         VERIFY_HOST=${VERIFY_HOST:-${VALUE}}
     fi
 
@@ -918,20 +923,20 @@ function fetch_unconfigured_settings() {
         return
     fi
     VALUE=$(awk '/client-name-identifier:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${INSTANCE}")
-    if [[ ! "${VALUE}" =~ '... ' ]]; then
+    if [[ ! "${VALUE}" =~ '...' ]]; then
         CLIENT_NAME_IDENTIFIER="${CLIENT_NAME_IDENTIFIER:-${VALUE}}"
     fi
     VALUE=$(awk '/client-user-identifier:/ { getline; sub(/^[ \t]+/, ""); print }' <<<"${INSTANCE}")
-    if [[ ! "${VALUE}" =~ '... ' ]]; then
+    if [[ ! "${VALUE}" =~ '...' ]]; then
         CLIENT_USER_IDENTIFIER="${CLIENT_USER_IDENTIFIER:-${VALUE}}"
     fi
     VALUE=$(awk '/client-sso-users:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
-    if [[ ! "${VALUE}" =~ '... ' ]]; then
+    if [[ ! "${VALUE}" =~ '...' ]]; then
         IFS=',' readarray -t NAMES <<< "$VALUE"
         CLIENT_SSO_USERS="${CLIENT_SSO_USERS:-${NAMES[*]}}"
     fi
     VALUE=$(awk '/client-sso-groups:/ { getline; while (match($0, "^\t\t")) { sub(/^[ \t]+/, ""); print; getline } }' <<<"${INSTANCE}")
-    if [[ ! "${VALUE}" =~ '... ' ]]; then
+    if [[ ! "${VALUE}" =~ '...' ]]; then
         IFS=',' readarray -t NAMES <<< "$VALUE"
         CLIENT_SSO_GROUPS="${CLIENT_SSO_GROUPS:-${NAMES[*]}}"
     fi
@@ -1094,7 +1099,7 @@ The operations involved are as follows:
 
 EOT
     echo "  * Set global Service-URL to ${SERVICE_URL}"
-    if [[ -n "${DEFAULT_PROTOCOL}" ]] && [[ ! "${DEFAULT_PROTOCOL}" =~ '... ' ]]; then
+    if [[ -n "${DEFAULT_PROTOCOL}" ]] && [[ ! "${DEFAULT_PROTOCOL}" =~ '...' ]]; then
         echo "  * Set global Auth-Protocol to '${DEFAULT_PROTOCOL}'"
     fi
     if [[ "${ENABLE_LOGGING}" == 'yes' ]]; then
@@ -1207,8 +1212,9 @@ function configure_extension() {
     local PROG7="/Client-Key:/ { print; print \"\t\t${CLIENT_KEY}\"; getline; next; }"
     local PROG8="/Verify-Peer:/ { print; print \"\t\t${VERIFY_PEER}\"; getline; next; }"
     local PROG9="/Verify-Host:/ { print; print \"\t\t${VERIFY_HOST}\"; getline; next; }"
+    local PROGA="/Resolve-Host:/ { print; print \"\t\t${RESOLVE_HOST}\"; getline; next; }"
     local GLOBAL=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook -o \
-        | awk "${PROG1} ${PROG2} ${PROG3} ${PROG4} ${PROG5} ${PROG6} ${PROG7} ${PROG8} ${PROG9} {print}" \
+        | awk "${PROG1} ${PROG2} ${PROG3} ${PROG4} ${PROG5} ${PROG6} ${PROG7} ${PROG8} ${PROG9} ${PROGA} {print}" \
         | p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook -i)
     if [[ ! "${GLOBAL}" =~ 'Extension config loginhook saved' ]]; then
         error 'Failed to configure global settings'
@@ -1238,10 +1244,10 @@ function configure_extension() {
     local PROG7="/[^-]sso-groups:/ { print; printf \"${SSO_GROUPS}\"; getline; next; }"
     local PROG8="/client-sso-groups:/ { print; printf \"${CLIENT_GROUPS}\"; getline; next; }"
     local PROG9="/client-sso-users:/ { print; printf \"${CLIENT_USERS}\"; getline; next; }"
-    local PROG10="/client-name-identifier:/ { print; print \"\t\t${CLIENT_NAME_IDENTIFIER}\"; getline; next; }"
-    local PROG11="/client-user-identifier:/ { print; print \"\t\t${CLIENT_USER_IDENTIFIER}\"; getline; next; }"
+    local PROGA="/client-name-identifier:/ { print; print \"\t\t${CLIENT_NAME_IDENTIFIER}\"; getline; next; }"
+    local PROGB="/client-user-identifier:/ { print; print \"\t\t${CLIENT_USER_IDENTIFIER}\"; getline; next; }"
     local LOCAL=$(p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook --name loginhook-a1 -o \
-        | awk "${PROG1} ${PROG2} ${PROG3} ${PROG4} ${PROG5} ${PROG6} ${PROG7} ${PROG8} ${PROG9} ${PROG10} ${PROG11} {print}" \
+        | awk "${PROG1} ${PROG2} ${PROG3} ${PROG4} ${PROG5} ${PROG6} ${PROG7} ${PROG8} ${PROG9} ${PROGA} ${PROGB} {print}" \
         | p4 -p "$P4PORT" -u "$P4USER" extension --configure Auth::loginhook --name loginhook-a1 -i)
     if [[ ! "${LOCAL}" =~ 'Extension config loginhook-a1 saved' ]]; then
         error 'Failed to configure instance settings'

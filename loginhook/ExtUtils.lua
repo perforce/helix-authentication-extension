@@ -1,5 +1,5 @@
 --[[
-  Copyright 2021 Perforce Software
+  Copyright 2023 Perforce Software
 ]]--
 local ExtUtils = {}
 local cjson = require "cjson"
@@ -119,6 +119,14 @@ function ExtUtils.debug( data )
   if log_enabled == "true" then
     Helix.Core.Server.log( data )
   end
+end
+
+function ExtUtils.resolveHost()
+  local resolve = ExtUtils.gCfgData[ "Resolve-Host" ]
+  if resolve ~= nil and resolve:match( "^%.%.%." ) == nil then
+    return resolve
+  end
+  return nil
 end
 
 function ExtUtils.loginUrl( sdata )

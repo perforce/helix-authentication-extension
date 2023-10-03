@@ -98,21 +98,23 @@ ExtP4USER:     sampleExtensionsUser
 
 ExtConfig:
     Auth-Protocol:
-        ... Authentication protocol, saml or oidc.
+        ... Authentication protocol, such as 'saml' or 'oidc'.
     Authority-Cert:
         ... Path to certificate authority public key, defaults to ./ca.crt
     Client-Cert:
         ... Path to client public key, defaults to ./client.crt
     Client-Key:
         ... Path to client private key, defaults to ./client.key
+    Resolve-Host:
+        ... host:port:ip mapping used to override DNS, if necessary.
     Service-Down-URL:
         ... URL to open when Service-URL fails, defaults to example.com
     Service-URL:
         ... The authentication service base URL.
-    Verify-Peer:
-        ... Ensure service certificate is valid, if 'true'.
     Verify-Host:
         ... Ensure service host name matches certificate, if 'true'.
+    Verify-Peer:
+        ... Ensure service certificate is valid, if 'true'.
 ```
 
 where `[snip]` means some information has been omitted.
@@ -129,6 +131,7 @@ Of the settings in `ExtConfig`, only the `Service-URL` setting is required. The 
 | `Authority-Cert` | Path to the public key of the certificate authority. See the [Certificates](#certificates) section for more information. | Defaults to the `ca.crt` file in the extension directory. |
 | `Client-Cert` | Path to the public key of the extension client certificate. See the [Certificates](#certificates) section for more information. | Defaults to the `client.crt` file in the extension directory. |
 | `Client-Key` | Path to the private key of the extension client certificate. See the [Certificates](#certificates) section for more information. | Defaults to the `client.key` file in the extension directory. |
+| `Resolve-Host` | A host name, port number, and IP address, separated by colons (:), that act as a simple DNS lookup in cases where this might be necessary (e.g. Kubernetes). | _none_ |
 | `Service-Down-URL` | The URL to open in the browser when the extension cannot connect to the service at `Service-URL` | `example.com` |
 | `Service-URL` | The address of the authentication service by which the Helix Server can make a connection | `http://localhost:3000` |
 | `Verify-Peer` | If set to `true` then the extension will verify that the authentication service is using a valid SSL/TLS certficate. | _false_ |
@@ -152,12 +155,16 @@ ExtConfig:
         /p4/1/ssl/loginhook-client.crt
     Client-Key:
         /p4/1/ssl/loginhook-client.key
+    Resolve-Host:
+        ... host:port:ip mapping used to override DNS, if necessary.
+    Service-Down-URL:
+        ... URL to open when Service-URL fails, defaults to example.com
     Service-URL:
         https://auth-svc.example.com:3000/
-    Verify-Peer:
-        ... Ensure service certificate is valid, if 'true'.
     Verify-Host:
         ... Ensure service host name matches certificate, if 'true'.
+    Verify-Peer:
+        ... Ensure service certificate is valid, if 'true'.
 ```
 
 ### Instance
@@ -219,6 +226,14 @@ In this following example, each level of indentation represents a single tab cha
 ```
 [snip]
 ExtConfig:
+    client-name-identifier:
+        ... Field within JSON web token containing unique user identifer.
+    client-sso-groups:
+        ... Those groups whose members must authenticate using P4LOGINSSO.
+    client-sso-users:
+        ... Those users who must authenticate using P4LOGINSSO.
+    client-user-identifier:
+        ... Trigger variable used as unique P4LOGINSSO user identifier.
     enable-logging:
         true
     name-identifier:
@@ -475,6 +490,23 @@ If that is the case, then verify that the HAS configuration specifies a certific
 Perforce users can be authenticated using JSON Web Tokens (JWT) rather than traditional credentials. This requires configuring the Helix Authentication Service to validate the token, and configuring the extension to extract the appropriate field from the payload of the token. To use this feature, the extension must have either `client-sso-groups` or `client-sso-users` or both configured with the set of users that will be authenticating using JWT. On the client system, the `P4LOGINSSO` setting must reference a program that will print the JWT. When a user in the "client-sso" set invokes `p4 login`, the `P4LOGINSSO` program will print the JWT, which the extension will then verifiy via the Helix Authentication Service. The service will return the JSON payload of the JWT, from which the extension will extract the field with the name given by the `client-name-identifier` extension setting. This value is then compared to the value retrieved via the `client-user-identifier`, in the same manner as with `user-identifier` and `name-identifier` for users that authenticate using web-based SSO.
 
 An example program for retreiving a JWT from Azure AD in a managed VM is found in `cloud/azure/get-token.py` in this repository. This Python script will use the special Azure API to retrieve a JWT for the managed VM.
+
+### Configuring simple DNS lookup for Kubernetes
+
+This is a complex scenario that involves everything happening all at once, creating problems for the extension. In short, if you have `p4d` running in a pod that cannot resolve the service hostname to its assigned IP address, you will want to configure the `Resolve-Host` setting. Continue reading for more details on when and how to use this setting.
+
+In the sample scenario below, the host names and IP addresses are only examples.
+
+* A load balancer is listening at address `192.168.1.21`.
+* A DNS entry for `auth-svc.cluster` exists that maps to `192.168.1.21`.
+* An ingress controller is configured to map `auth-svc.cluster` to the k8s service that is managing the pod running the authentication service.
+* That ingress controller is configured to terminate the TLS connection and forward the client certificate to the authentication service via an HTTP header.
+* The authentication service is configured to expect the client certificate via said header.
+* Helix Core Server, and in turn, the extension are running in a separate pod on the cluster.
+
+For whatever reason, the pod running `p4d` is either not configured to resolve the service's FQDN, or name resolution is not working as hoped. There may be different reasons for this, but the point is that it is happening and you need to do something about it. That something is to set the `Resolve-Host` global configuration value to provide a simple mapping of the service host name to the IP address of the load balancer. In our example above, `Resolve-Host` would be set to `auth-svc.cluster:443:192.168.1.21` -- the first part is the FQDN of the service, the second part between the colons (`:`) is the port number on which the load balancer is listening for HTTPS connections, the third part is the IP address of said load balancer.
+
+Why is this necessary? Because with just an IP address for the `Service-URL`, the `libcurl` library will ignore the SSL/TLS options and not send the client certificate. By using its `resolve` option, we can work around this by providing our own simple DNS lookup. What about using the internal name of the authentication service within the Kubernetes cluster? The extension cannot use that name since the service is only accepting HTTP requests -- HTTPS connections are meant to be handled by the ingress controller.
 
 ## Disabling the Extension
 

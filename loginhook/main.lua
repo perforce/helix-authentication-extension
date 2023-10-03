@@ -1,7 +1,7 @@
 --[[
   Authentication extensions for OpenID Connect and SAML 2.0
 
-  Copyright 2022 Perforce Software
+  Copyright 2023 Perforce Software
 ]]--
 local cjson = require "cjson"
 local curl = require "cURL.safe"
@@ -15,6 +15,7 @@ function GlobalConfigFields()
     -- in Perforce and cannot be used for anything else.
     [ "Service-URL" ] = "... The authentication service base URL.",
     [ "Service-Down-URL" ] = "... URL to open when Service-URL fails, defaults to example.com",
+    [ "Resolve-Host" ] = "... host:port:ip mapping used to override DNS, if necessary.",
     [ "Auth-Protocol" ] = "... Authentication protocol, such as 'saml' or 'oidc'.",
     [ "Client-Cert" ] = "... Path to client public key, defaults to ./client.crt",
     [ "Client-Key" ] = "... Path to client private key, defaults to ./client.key",
@@ -96,14 +97,25 @@ local function getData( url )
     See the API docs for lcurl (http://lua-curl.github.io/lcurl/modules/lcurl.html)
     as that describes much more of the functionality than the Lua-cURLv3 API docs.
     See https://github.com/Lua-cURL/Lua-cURLv3/blob/master/src/lcopteasy.h for all options.
+    See https://curl.se/libcurl/c/curl_easy_setopt.html for underlying C API options.
   ]]--
   local c = curl.easy()
   local rsp = ""
   c:setopt( curl.OPT_URL, url )
   -- Store all the data in memory in the 'rsp' variable.
-  c:setopt( curl.OPT_WRITEFUNCTION, function( chunk ) rsp = rsp .. chunk end )
+  c:setopt_writefunction( function( chunk ) rsp = rsp .. chunk end )
   if utils.shouldUseSsl( url ) then
     curlSecureOptions( c )
+  end
+  -- Optionally use our own simple DNS resolution work-around. This maps the
+  -- host name in the Service-URL setting to a port and IP address. While the
+  -- Host header ought to have worked, libcurl seems to not send the client
+  -- certificates in that case. By using the resolve option, we can supply our
+  -- own simplistic DNS lookup and still send the client certificates.
+  local resolve = utils.resolveHost()
+  if resolve ~= nil then
+    -- example 'resolve' value: "auth-svc.cluster:443:192.168.1.21"
+    c:setopt( curl.OPT_RESOLVE, { resolve } )
   end
   utils.debug( { [ "getData" ] = "info: fetching " .. url } )
   local ok, err = c:perform()
@@ -133,7 +145,7 @@ local function validateSamlResponse( response )
   }
   c:setopt_useragent( utils.getID() )
   local rsp = ""
-  c:setopt( curl.OPT_WRITEFUNCTION, function( chunk ) rsp = rsp .. chunk end )
+  c:setopt_writefunction( function( chunk ) rsp = rsp .. chunk end )
   if utils.shouldUseSsl( url ) then
     curlSecureOptions( c )
   end
@@ -157,7 +169,7 @@ local function validateOAuthResponse( token )
   }
   c:setopt_useragent( utils.getID() )
   local rsp = ""
-  c:setopt( curl.OPT_WRITEFUNCTION, function( chunk ) rsp = rsp .. chunk end )
+  c:setopt_writefunction( function( chunk ) rsp = rsp .. chunk end )
   if utils.shouldUseSsl( url ) then
     curlSecureOptions( c )
   end
