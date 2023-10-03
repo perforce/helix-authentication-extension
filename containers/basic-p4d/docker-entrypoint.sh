@@ -57,7 +57,6 @@ EOF
         --superpassword "${P4PASSWD}" \
         --service-url https://has.example.com:3000 \
         --enable-logging \
-        --default-protocol saml \
         --non-sso-groups no_timeout \
         --name-identifier nameID \
         --user-identifier email \

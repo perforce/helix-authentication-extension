@@ -3,6 +3,11 @@
 # Script for redeploying the extension, replacing whatever was installed
 # previously, retaining the existing configuration.
 #
+# NOTE: This script has not been tested and is intended to be used only on
+# development and test systems by the developers working on this extension.
+#
+# UNSUPPORTED, USE AT YOUR OWN RISK
+#
 
 rm -f loginhook.p4-extension
 p4 -u $P4USER -p $P4PORT extension --package loginhook

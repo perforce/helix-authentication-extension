@@ -1,0 +1,15 @@
+#
+# apply like so:
+#
+# $ kubectl patch deployment -n ingress-nginx ingress-nginx-controller --patch "$(cat kubernetes/patches/ingress-nginx-controller.yaml)"
+#
+---
+spec:
+  template:
+    spec:
+      containers:
+      - name: controller
+        ports:
+         - containerPort: 1666
+           hostPort: 1666
+...

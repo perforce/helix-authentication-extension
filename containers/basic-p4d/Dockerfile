@@ -10,9 +10,9 @@
 #
 # Pushing the image to a registry (e.g. to use with Kubernetes):
 #
-# $ docker image rm 192.168.1.2:32000/helix-p4d-basic
-# $ docker image tag helix-p4d-basic 192.168.1.2:32000/helix-p4d-basic
-# $ docker push 192.168.1.2:32000/helix-p4d-basic
+# $ docker image rm 192.168.1.1:5000/helix-p4d-basic
+# $ docker image tag helix-p4d-basic 192.168.1.1:5000/helix-p4d-basic
+# $ docker push 192.168.1.1:5000/helix-p4d-basic
 #
 FROM ubuntu:20.04
 

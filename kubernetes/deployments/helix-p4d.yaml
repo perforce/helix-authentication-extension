@@ -5,6 +5,7 @@ metadata:
   labels:
     app: helix-p4d
   name: helix-p4d
+  namespace: helix
 spec:
   replicas: 1
   selector:
@@ -18,13 +19,13 @@ spec:
       volumes:
       - name: p4-storage
         persistentVolumeClaim:
-          claimName: p4-data-pvc
+          claimName: p4-data
       - name: p4-secrets
         secret:
-          secretName: loginhook
+          secretName: loginhook-tls
       containers:
       - name: helix-p4d-basic
-        image: 192.168.1.2:32000/helix-p4d-basic
+        image: 192.168.1.1:5000/helix-p4d-basic
         imagePullPolicy: Always
         ports:
         - containerPort: 1666
