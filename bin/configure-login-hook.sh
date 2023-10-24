@@ -1005,8 +1005,11 @@ function clean_inputs() {
     if [[ -z "${VERIFY_HOST}" ]]; then
         VERIFY_HOST='... use default value'
     fi
+    if [[ -z "${RESOLVE_HOST}" ]]; then
+        RESOLVE_HOST='... use default value'
+    fi
     if [[ -z "${SERVICE_DOWN_URL}" ]]; then
-        SERVICE_DOWN_URL='... not configured'
+        SERVICE_DOWN_URL='... use default value'
     fi
     if [[ -z "${CLIENT_NAME_IDENTIFIER}" ]]; then
         CLIENT_NAME_IDENTIFIER='... use default value'
