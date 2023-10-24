@@ -58,6 +58,7 @@ extension will work with the versions shown, as well as later versions.
 * Helix Plugin for Eclipse (P4Eclipse) 2019.1 patch 2
 * Helix Plugin for Matlab (P4SL) 2019.1
 * Helix Swarm 2018.3, the free code review tool
+* Helix Sync 2023.4
 * Helix TeamHub, 2022.1
 
 ## Documentation
