@@ -39,6 +39,7 @@ p4 protect -i < protections.txt
 # configure the commit/edge replication settings
 # n.b. configure-helix-p4d.sh already defined the 'server'
 p4 configure set chicago_commit#journalPrefix=/chicago/journals/journal
+p4 configure set chicago_commit#journalPrefixBackup=/chicago/journals/journal.bak
 p4 configure set chicago_commit#lbr.autocompress=1
 p4 configure set chicago_commit#monitor=2
 p4 configure set chicago_commit#P4LOG=/chicago/logs/log
@@ -46,6 +47,7 @@ p4 configure set chicago_commit#P4TICKETS=/chicago/root/.p4tickets
 p4 configure set chicago_commit#serviceUser=svc_chicago_commit
 p4 configure set tokyo_edge#db.replication=readonly
 p4 configure set tokyo_edge#journalPrefix=/tokyo/journals/journal
+p4 configure set tokyo_edge#journalPrefixBackup=/tokyo/journals/journal.bak
 p4 configure set tokyo_edge#lbr.autocompress=1
 p4 configure set tokyo_edge#lbr.replication=readonly
 p4 configure set tokyo_edge#monitor=1
