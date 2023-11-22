@@ -753,6 +753,7 @@ function prompt_for_inputs() {
 
 # Ensure the Helix server is running.
 function check_perforce_server() {
+    local ISSSL=false
     if [ -z "$P4PORT" ]; then
         error 'No P4PORT specified'
         return 1
@@ -766,12 +767,22 @@ function check_perforce_server() {
             error "Unable to trust the server [$P4PORT]"
             return 1
         fi
+        ISSSL=true
     fi
 
     local P4INFO=""
     if ! P4INFO=$(p4 -p "$P4PORT" -ztag info 2>/dev/null); then
-        error "Unable to connect to Helix server [$P4PORT]"
-        return 1
+        # try using ssl if not already specified
+        if ! $ISSSL; then
+            if ! P4INFO=$(p4 -p "ssl:$P4PORT" -ztag info 2>/dev/null); then
+                error "Unable to connect to Helix server [$P4PORT]"
+                return 1
+            fi
+            P4PORT="ssl:${P4PORT}"
+        else
+            error "Unable to connect to Helix server [$P4PORT]"
+            return 1
+        fi
     fi
 
     # Divide the server version into parts that can be easily analyzed.
