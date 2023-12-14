@@ -82,9 +82,9 @@ If this is not the first time you are installing the extension, remove the exist
 
 The extension is configured at both the _global_ and _instance_ level. To learn about these levels, see the "Server extension configuration (global and instance specs)" topic in the [Helix Core Extensions Developer Guide](https://www.perforce.com/manuals/extensions/Content/Extensions/extensionspec.html). The extension has settings that are specific to the global and instance configuration, as described below.
 
-Both the global and instance configuration are defined using Perforce forms, in which fields consist of a label, a colon, a tab character, and a value. Fields that allow multiple values will start on a new line, with each value on a separate line, and all lines are prefixed by a tab character. Within the `ExtConfig` section, field labels are prefixed by **one** tab character, and values start on a new line and are prefixed with **two** tab characters. If any **space** characters are present in the line _before_ the setting name or value, the extension configuration will not be parsed correctly.
+Both the global and instance configuration are defined using Perforce forms, in which fields consist of a label, a colon, a tab character, and a value. Within the `ExtConfig` section, all field values **must** start on a new line, with multiple values put on separate lines, and all lines are prefixed by a tab character. Field labels are prefixed by **one** tab character, and values start on a new line and are prefixed with **two** tab characters. If any **space** characters are present in the line _before_ the setting name or value, the extension configuration will not be parsed correctly.
 
-Specific to this extension, any value that starts with `...` means the value is left undefined, and the default behavior will take effect, if any. When defining a value for a configuration setting, remove the `...` and everything that follows on that line, then enter the desired value.
+Specific to this extension, any value that starts with `...` means that the value is left undefined, and the default value will take effect, if any. When defining a value for a configuration setting, remove the `...` and everything that follows on that line, then enter the desired value.
 
 ### Global
 
