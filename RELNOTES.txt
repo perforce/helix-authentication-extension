@@ -1,15 +1,14 @@
                             Release Notes for
                         Helix Authentication Extension
-                            Version 2023.2
+                            Version 2024.1
 
 
 Introduction
 
-    The Helix Authentication Extension is a Helix Core extension that integrates
-
-    th the Helix Authentication Service to facilitate the integration of
-    identity providers supporting either the OpenID Connect or SAML 2.0
-    authentication protocols.
+    The Helix Authentication Extension is a Helix Core Server extension that
+    integrates with the Helix Authentication Service to facilitate the
+    integration of identity providers supporting either the OpenID Connect or
+    SAML 2.0 authentication protocols.
 
     Perforce numbers releases YYYY.R/CCCCC, for example 2002.2/30547. YYYY is
     the year; R is the release of that year; CCCCC is the bug fix change level.
@@ -47,8 +46,12 @@ Requirements
 Documentation
 
     The Helix Authentication Extension Administrator's Guide is publicly
-    available on perforce.com. The guide details the steps for installation,
-    upgrade, and configuration of the server extension.
+    available on GitHub at the URL below:
+
+        https://github.com/perforce/helix-authentication-extension
+
+    The guide details the steps for installation, upgrade, and configuration of
+    the server extension.
 
 
 Known Limitations
@@ -90,6 +93,17 @@ Known Limitations
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+Bugs fixed in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-491 (Change #2485848)
+        Perforce user with 'ldap+2fa' was mistakenly given a login URL.
+
+    HAS-496 (Change #2497947)
+        Extension could not connect to the service in certain circumstances that
+        involves a complex network setup. Added Resolve-Host setting to provide
+        a work-around in those scenarios.
 
 ----------------------------------------------------------------------
 Bugs fixed in 2023.2 (2023.2/2479541) (2023/08/24)
