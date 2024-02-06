@@ -130,7 +130,6 @@ function prompt_for_password() {
 
     while true; do
         local pw=''
-        local pw2=''
         if [[ -n "$default" ]]; then
             # conceal the length of the incoming password
             read -s -e -p "$prompt [************]: " pw
@@ -142,9 +141,6 @@ function prompt_for_password() {
         fi
         echo ''
         if $check_func "$pw"; then
-            if [[ -n "$default" ]]; then
-                break
-            fi
             # No need to prompt again, the credentials will be checked
             # immediately rather than after receiving all user input.
             eval "$var=\"$pw\""
