@@ -2,7 +2,7 @@
 #
 # Configuration script for Helix Authentication Extension.
 #
-# Copyright 2023, Perforce Software Inc. All rights reserved.
+# Copyright 2024, Perforce Software Inc. All rights reserved.
 #
 INTERACTIVE=true
 MONOCHROME=false
@@ -107,7 +107,7 @@ function prompt_for() {
             read -e -p "$prompt: " input
         fi
         if $check_func "$input"; then
-            eval "$var=\"$input\""
+            export "$var"="$input"
             break
         fi
     done
@@ -143,7 +143,7 @@ function prompt_for_password() {
         if $check_func "$pw"; then
             # No need to prompt again, the credentials will be checked
             # immediately rather than after receiving all user input.
-            eval "$var=\"$pw\""
+            export "$var"="$pw"
             break
         fi
     done
@@ -172,10 +172,10 @@ function prompt_for_yn() {
     # coerce the input value into either a 'yes' or a 'no'
     case $input in
         [yY][eE][sS]|[yY])
-            eval "$var='yes'"
+            export "$var"='yes'
             ;;
         *)
-            eval "$var='no'"
+            export "$var"='no'
             ;;
     esac
     return 0
