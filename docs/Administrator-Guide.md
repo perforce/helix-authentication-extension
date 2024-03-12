@@ -35,7 +35,7 @@ Basic preliminary testing of the extension is also possible using `p4 extension 
 
 ### Excluding some users from SSO
 
-See the section below titled [Allowing for non-SSO Users](#allowing-for-non-sso-users) for details. It is **recommended** to have at least one administrative user named among the non-SSO users. Administrative users should be using a database password to avoid being locked out in the event that the SSO mechanism is not operational (for instance, the identity provider is temporarily inaccessible).
+See the section below titled [Allowing for non-SSO Users](#allowing-for-non-sso-users) for details. It is **recommended** to have at least one administrative user that will *not* be authenticating using web-based SSO. Administrative users should be using a database password to avoid being locked out in the event that the SSO mechanism is not operational (for instance, the identity provider is temporarily inaccessible).
 
 ### Migrating from LDAP
 
@@ -201,7 +201,7 @@ ExtConfig:
 
 where `[snip]` means some information has been omitted.
 
-All of these settings have sensible defaults. However, for the extension to be enabled, we must configure it. You might want to change either the `non-sso-groups` or `non-sso-users` fields to a list of Perforce groups and users that are _not_ participating in the SSO authentication integration.
+All of these settings have sensible defaults. However, for the extension to be enabled, we must configure it by invoking `p4 extension --configure` at least once. For instance, you might want to change either the `non-sso-groups` or `non-sso-users` fields to a list of Perforce groups and users that are _not_ participating in the SSO authentication integration.
 
 #### Instance Settings
 
@@ -214,8 +214,8 @@ All of these settings have sensible defaults. However, for the extension to be e
 | `enable-logging` | Extension will write debug messages to a log if `true` | `false` |
 | `non-sso-groups` | Those groups who will not be using SSO. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
 | `non-sso-users` | Those users who will not be using SSO. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
-| `sso-groups` | Those groups whose members must authenticate using SSO. If this field is set to the name one or more groups, then the `non-sso-groups` field will be ignored. See the [Testing](#testing) section below. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
-| `sso-users` | Those users who must authenticate using SSO. If this field is set to the name one or more users, then the `non-sso-users` field will be ignored. See the [Testing](#testing) section below. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
+| `sso-groups` | Those groups whose members must authenticate using SSO. If this field is set to the name one or more groups, then the `non-sso-groups` and `non-sso-users` fields will be ignored. See the [Testing](#testing) section below. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
+| `sso-users` | Those users who must authenticate using SSO. If this field is set to the name one or more users, then the `non-sso-users` and `non-sso-groups` fields will be ignored. See the [Testing](#testing) section below. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
 | `user-identifier` | Trigger variable used as unique user identifier, one of: `fullname`, `email`, or `user`. | `email` |
 | `name-identifier` | Field within identity provider user profile containing unique user identifer. | `email` |
 
@@ -337,7 +337,7 @@ That command will remove the named instance configuration, leaving the other con
 
 After installing and configuring the authentication extension, the Helix Core server must be restarted for the changes to take effect. The `restart` is necessary because Helix Core prepares the authentication mechanisms during startup. This is true when adding or removing `auth-` related triggers, as well as when installing or removing the loginhook extension.
 
-It is **recommended** to have at least one administrative user configured in the `non-sso-users` extension setting, or a group of users in the `non-sso-groups` setting; this provides a means of authenticating in the event that the service becomes unavailable for any reason. Typically the _super_ and/or _admin_ users, along with service or operator users, would be named in one of these two settings.
+It is **recommended** to have at least one administrative user that will *not* authenticate using the web-based SSO; this provides a means of authenticating in the event that the service becomes unavailable for any reason. Typically the _super_ and/or _admin_ users would be named in one of these two settings.
 
 When you are ready to restart the server, you can use the following command:
 
@@ -599,13 +599,13 @@ so it may be easier to simply run the configure script as described above.
 
 ### Authentication logic in detail
 
-When the extension is installed, the **default** behavior is for **all** users to authenticate with SSO, with the exception of two categories of users: a) those users whose `AuthMethod` is set to `ldap`, and b) those users whose `Type` is not `standard` (i.e. operators and service users). LDAP users are expected to authenticate against an LDAP directory, and non-standard users typically cannot authenticate via a web browser.
+When the extension is installed, the **default** behavior is for **all** users to authenticate with SSO, with the exception of two categories of users: a) those users whose `AuthMethod` is set to `ldap`, and b) those users whose `Type` is not `standard` (operators and service users). LDAP users are expected to authenticate against an LDAP directory, and non-standard users typically cannot authenticate via a web browser.
 
-If either the `client-sso-users` or `client-sso-groups` contains one or more entries (i.e. does not start with `...`), then any _matching_ users will require the use of the traditional SSO functionality in Helix Core Server. Specifically, the client must have a `P4LOGINSSO` that points to a program that emits a token. This is regardless of the `AuthMethod` or `Type` of the user.
+If either the `client-sso-users` or `client-sso-groups` contains one or more entries (does not start with `...`), then any _matching_ users will require the use of the traditional SSO functionality in Helix Core Server. Specifically, the client must have a `P4LOGINSSO` that points to a program that emits a token. This is regardless of the `AuthMethod` or `Type` of the user.
 
-If either the `sso-users` or `sso-groups` contains one or more entries (i.e. does not start with `...`), then any _matching_ users will **always** use SSO. This is regardless of the `AuthMethod` or `Type` of the user. Any users that do _not match_ will **not** authenticate with SSO. Note that LDAP users cannot used web-based SSO to authenticate with Helix Core Server. All such users **must** have their `AuthMethod` set to `perforce` to support web-based SSO. See [LDAP.md](./LDAP.md) for more information.
+If either the `sso-users` or `sso-groups` contains one or more entries (does not start with `...`), then any _matching_ users will **always** use SSO. This is regardless of the `AuthMethod` or `Type` of the user. Any users that do _not match_ will **not** authenticate with SSO. Note that LDAP users cannot use web-based SSO to authenticate with Helix Core Server. All such users **must** have their `AuthMethod` set to `perforce` to support web-based SSO. See [LDAP.md](./LDAP.md) for more information.
 
-If `sso-users` and `sso-groups` are not defined (i.e. start with `...`), then the `non-sso-users` and `non-sso-groups` settings are taken into consideration, as well as the default behavior for the `AuthMethod` and `Type` as described above. 
+If `sso-users` and `sso-groups` are not defined (start with `...`), then the `non-sso-users` and `non-sso-groups` settings are taken into consideration, as well as the default behavior for the `AuthMethod` and `Type` as described above. 
 
 ### When the authentication service is unreachable
 
