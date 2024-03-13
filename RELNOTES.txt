@@ -95,7 +95,7 @@ Known Limitations
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-Bugs fixed in YYYY.N ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Bugs fixed in 2024.1 (2024.1/2571580) (2024/03/13)
 
     HAS-491 (Change #2485848)
         Perforce user with 'ldap+2fa' was mistakenly given a login URL.
