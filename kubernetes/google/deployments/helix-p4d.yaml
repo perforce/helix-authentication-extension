@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: helix-p4d
+  name: helix-p4d
+  namespace: helix
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: helix-p4d
+  template:
+    metadata:
+      labels:
+        app: helix-p4d
+    spec:
+      volumes:
+      - name: p4-storage
+        persistentVolumeClaim:
+          claimName: p4-data
+      - name: p4-secrets
+        secret:
+          secretName: loginhook-tls
+      containers:
+      - name: helix-p4d-basic
+        image: us-central1-docker.pkg.dev/p4-has-test-58982/my-docker-repo/helix-p4d-basic
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 1666
+        volumeMounts:
+        - name: p4-storage
+          mountPath: /p4
+        - name: p4-secrets
+          mountPath: /opt/perforce/certs
+          readOnly: true
+...

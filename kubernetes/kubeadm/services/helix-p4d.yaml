@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: helix-p4d
+  namespace: helix
+  labels:
+    app: helix-p4d
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 1666
+    protocol: TCP
+  selector:
+    app: helix-p4d
+...
