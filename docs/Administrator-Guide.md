@@ -656,13 +656,15 @@ Another reason that authentication will the identity provider will succeed but a
 
 ### Group-based filter does not work
 
-If users are members of groups that are named in the `non-sso-groups` or `sso-groups` extension configuration, and they are suddenly unable login using the correct authentication method, check the extension debug logs for a message like this one:
+If users are members of groups that are named in the `non-sso-groups` or `sso-groups` settings in extension configuration, and they are suddenly unable to login using the correct authentication method, check the extension debug logs for a message like this one:
 
 ```json
 {"data":{"isUserInGroups":"error: ExtP4USER has invalid ticket","user":"jdoe"},"nanos":194320152,"pid":30482,"recType":0,"seconds":1591982194}
 ```
 
 This log entry indicates that the extension user itself does not have a valid ticket. There are several causes for this situation. It may be that the `P4TICKETS` setting for the system user that is running the `p4d` instance refers to a file that does not have the appropriate ticket entry. It may be that the user named in the `ExtP4USER` field of the extension configuration has a short-lived ticket rather than a long-lived ticket. Typically a **super** user will be the `ExtP4USER` user for the extension and this user will be a member of a group with a `Timeout` setting of `unlimited`, meaning that their ticket will never expire. The extension `ExtP4USER` user should likewise have a long-lived ticket, otherwise this problem will occur again when the ticket expires.
+
+Another cause may be that the `ExtP4USER` has multiple ticket values, as shown in the output of `p4 tickets`, which are associated with different hosts and/or `auth.id` values. If this happens, it is best to remove the stale tickets by invoking `p4 logout -a` as the `ExtP4USER`, then login again. If there are multiple servers in the topology (such as commit and edge servers), then invoke `p4 login` as the `ExtP4USER` on each of these systems, ensuring that they each get a valid ticket.
 
 Yet another cause is that the client `P4PORT` value connects to the `p4d` instance on a network interface that is not associated with a ticket for the `ExtP4USER` user. This is rare, but one solution may be to use `p4 login -h` for the `ExtP4USER` user on all relevant addresses of the Helix Core Server instance.
 
