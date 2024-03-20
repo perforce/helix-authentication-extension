@@ -1,55 +1,53 @@
-# Kubernetes
+# Kubernetes in Azure
 
-This directory contains example manifests for deploying Helix Core Server and the `loginhook` extension within a Google-managed [Kubernetes](https://kubernetes.io) cluster using the [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine). This document describes the overall setup and provides additional tips and information. Familiarity with the `kubectl` command is assumed.
+This directory contains example manifests for deploying Helix Core Server and the `loginhook` extension within an Azure-managed [Kubernetes](https://kubernetes.io) cluster using the [Azure Kubernetes Service](https://azure.microsoft.com/en-us/products/kubernetes-service). This document describes the overall setup and provides additional tips and information. Familiarity with the `kubectl` command is assumed.
 
 **Note:** This document and these manifests are intended for development and testing purposes. Running Helix Core Server in a container in production is strongly discouraged and **not supported** by Perforce. If you were to try, the first problem you would encounter is that the IP address will change whenever the pod is restarted, rendering an IP-based license invalid. Putting that aside, it may not even be worthwhile to use k8s since `p4d` does not scale horizontally, rendering the very thing k8s is known for completely useless. Lastly, the performance overhead of cluster-based storage will likely be untenable -- popular storage drivers often introduce a 40% overhead, with OpenEBS+Mayastor being a notable exception.
 
 **Note:** A complication with running Helix Core Server in the cloud is that the client address will appear as one of several load balancers rather than the actual client. As a result, host-based tickets will be ineffective, forcing users to perform a `p4 login -a` to get a ticket that works on any host.
 
-## Google Cloud Documentation
+## Azure Documentation
 
-Visit https://console.cloud.google.com/ and use the search box at the top of the page to quickly find documentation and other relevant information. This guide will only cover the bare minimum for setting up these services, and relies heavily on the existing documentation by Google.
+Visit https://portal.azure.com/ and use the search box at the top of the page to quickly find documentation and other relevant information. This guide will only cover the bare minimum for setting up these services, and relies heavily on the existing documentation by Microsoft.
 
 ## Initial Setup
 
 ### Create the Cluster
 
-1. Visit https://console.cloud.google.com/ in a browser
-1. Create a new project or use an existing one.
-1. Navigate to **Kubernetes Engine** and create a new cluster. There are no special requirements, the default selections will work fine.
+1. Visit https://portal.azure.com/ in a browser
+1. Create an account if do not have one already.
+1. Navigate to **All services** and search for "Kubernetes services" and click the link.
+1. Create a new cluster from that page. There are no special requirements, the default selections will work fine.
 
 ### Client Setup
 
-1. Install the [Google Cloud CLI](https://cloud.google.com/cli) to your desktop or laptop.
-    * If using [Homebrew](https://brew.sh), you can run `brew install google-cloud-sdk`
-1. Update the installed components: `gcloud components update`
-1. Install the `kubectl` command-line tool:
-    * Using gcloud: `gcloud components install kubectl`
-    * Using Homebrew: `brew install kubernetes-cli`
-1. Install the GKE plugin for `kubectl` and authenticate with your cluster:
+From the cluster overview page in the Azure portal, find the **Get started** tab and click that to open a set of guides for setting up client access to the cluster. In particular, you may want to set up access using `kubectl` in order to easily use the instructions in this guide.
+
+Install the [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) to your desktop or laptop. If using [Homebrew](https://brew.sh), you can run `brew install azure-cli`
 
 ```shell
-gcloud components install gke-gcloud-auth-plugin
-gcloud auth login
-gcloud config set project <name-of-project>
-gcloud container clusters get-credentials <your-cluster> --region=<your-region>
+az login
+az account set --subscription <your-subscription-id>
+az aks get-credentials --resource-group <your-resource-group> --name <preferred-name> --overwrite-existing
 ```
 
-### Artifact Registry
+At this point the `kubectl` CLI will work as expected with this cluster.
 
-In order to produce container images and push them to a private registry, you will need to create an *image registry* and use that address when pulling private container images into your cluster. Google Cloud offers this as the **Artifact Registry** service, which charges for disk and network usage. See these [instructions](https://cloud.google.com/artifact-registry/docs/docker/store-docker-container-images) for details on the setup and usage.
+### Container Registry
+
+In order to produce container images and push them to a private registry, you will need to create a *image registry* and use that address when pulling private container images into your cluster. Azure offers this as the **Azure Container Registry** service, which charges for disk and network usage. See the [overview](https://learn.microsoft.com/en-us/azure/container-registry/container-registry-intro) for more information and links to instructions for creating a registry.
 
 ### Build the p4d image
 
-Kubernetes will pull container images from [Docker Hub](https://hub.docker.com) by default, unless the image includes the address of a registry. These manifests assume that to be the case, using `us-central1-docker.pkg.dev/p4-has-test-58982/my-docker-repo` as the address of a private artifact registry. The steps below will produce the image for Helix Core Server and push it to that artifact registry.
+Kubernetes will pull container images from [Docker Hub](https://hub.docker.com) by default, unless the image includes the address of a registry. These manifests assume that to be the case, using `p4hastest.azurecr.io` as the address of a private artifact registry. The steps below will produce the image for Helix Core Server and push it to that artifact registry.
 
 **Note:** You will need to create your own registry and modify the commands below to match.
 
 ```shell
 docker build -f containers/basic-p4d/Dockerfile -t helix-p4d-basic .
-docker image rm us-central1-docker.pkg.dev/p4-has-test-58982/my-docker-repo/helix-p4d-basic
-docker image tag helix-p4d-basic us-central1-docker.pkg.dev/p4-has-test-58982/my-docker-repo/helix-p4d-basic
-docker push us-central1-docker.pkg.dev/p4-has-test-58982/my-docker-repo/helix-p4d-basic
+docker image rm p4hastest.azurecr.io/helix-p4d-basic
+docker image tag helix-p4d-basic p4hastest.azurecr.io/helix-p4d-basic
+docker push p4hastest.azurecr.io/helix-p4d-basic
 ```
 
 ## Deploy
@@ -72,25 +70,25 @@ At this point, Helix Core Server should be running and listening on port `1666`,
 
 ```shell
 $ kubectl -n helix get svc
-NAME        TYPE           CLUSTER-IP       EXTERNAL-IP      PORT(S)          AGE
-helix-p4d   LoadBalancer   34.118.226.238   34.135.206.102   1666:31590/TCP   17h
+NAME        TYPE           CLUSTER-IP   EXTERNAL-IP     PORT(S)          AGE
+helix-p4d   LoadBalancer   10.0.14.26   52.226.95.110   1666:31972/TCP   16m
 ```
 
-The output shows that the IP address is `34.135.206.102` and the service is exposed on port `1666` as expected. Connecting to the server using `p4` is shown below:
+The output shows that the IP address is `52.226.95.110` and the service is exposed on port `1666` as expected. Connecting to the server using `p4` is shown below:
 
 ```shell
-$ p4 -u super -p 34.135.206.102:1666 info
+$ p4 -u super -p 52.226.95.110:1666 info
 User name: super
 Client name: joesample-client
 Client host: joesample-host
 Client unknown.
 Current directory: /home/joesample
-Peer address: 99.82.198.92:51201
-Client address: 99.82.198.92
-Server address: helix-p4d-7ff5f67ff6-bxtr8:1666
+Peer address: 10.224.0.5:19076
+Client address: 10.224.0.5
+Server address: helix-p4d-64798b99d6-6mmxb:1666
 Server root: /p4/main/root
-Server date: 2024/03/14 17:11:00 +0000 UTC
-Server uptime: 18:08:11
+Server date: 2024/03/19 23:41:08 +0000 UTC
+Server uptime: 00:05:18
 Server version: P4D/LINUX26X86_64/2023.2/2563409 (2024/02/27)
 ServerID: main
 Server services: commit-server
@@ -110,7 +108,7 @@ The global configuration of the extension should look something like this, with 
 	Client-Key:
 		/opt/perforce/certs/tls.key
 	Resolve-Host:
-		auth-svc.pcloud:443:34.67.11.220
+		auth-svc.pcloud:443:4.255.69.138
 	Service-URL:
 		https://auth-svc.pcloud
 ```
@@ -158,5 +156,5 @@ root@helix-p4d-7bd98cf98b-xgvbl:/p4/main/root/server.extensions.dir/117E9283-732
 Use the `bin/redeploy.sh` script to rebuild, remove, install, and configure the extension. Note that this script is not tested or supported by Perforce, it may result in data loss.
 
 ```shell
-env P4USER=super P4PORT=34.135.206.102:1666 ./bin/redeploy.sh
+env P4USER=super P4PORT=52.226.95.110:1666 ./bin/redeploy.sh
 ```
