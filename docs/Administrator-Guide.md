@@ -621,11 +621,19 @@ If a superuser performs a `login` for another user, as with the command `p4 logi
 
 ## Troubleshooting
 
-### Client login reverts to password prompt
+### Client login reverts to password prompt (1)
 
 In the event that the Perforce client begins prompting for a password, rather than directing the user's browser to the identity provider, check that the Helix Authentication Service is running at the address referenced in the extension configuration (`Service-URL`). If the extension is not able to connect to the service, it will defer back to the server to handle the user authentication.
 
 Ensure the debug logging is enabled in the extension, try the login again, and check the logs for any error messages. Based on the message in the log, check for a matching error in the issues described below.
+
+### Client login reverts to password prompt (2)
+
+If the Helix Core Server is not invoking the extension during login, but running the test (`p4 configure --run loginhook-a1 test-all`) is working, then it may be that there are LDAP configurations and that is preventing the extension from running. In this scenario, it is necessary to configure p4d to allow for SSO authentication for users that are not using LDAP `AuthMethod`.
+
+```shell
+p4 configure set auth.sso.nonldap=1
+```
 
 ### Login fails with 'P4LOGINSSO' not set
 
