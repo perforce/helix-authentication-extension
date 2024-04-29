@@ -13,27 +13,6 @@ export P4PASSWD='Passw0rd!'
 export SVC_NAME=main
 export P4ROOT="/p4/${SVC_NAME}"
 
-function configure_p4d() {
-    # patch configure script to wait for p4d to start fully (P4-20611)
-    cd /opt/perforce/sbin
-    # ignore non-zero exit status when patch has already been applied
-    set +e
-    patch -p0 <<EOF
---- configure-helix-p4d.sh	2021-04-09 10:43:16.000000000 -0700
-+++ configure-helix-p4d.sh	2021-04-09 10:43:19.000000000 -0700
-@@ -963,6 +963,7 @@
-         if [ $attemps -gt 10 ]; then
-             die "Server failed to start!"
-         fi
-+        sleep 1
-     done
- 
-     # If it's not a fresh installation, we're done at this point
-EOF
-    set -e
-    ./configure-helix-p4d.sh -n -p ${P4PORT} -r ${P4ROOT} -u ${P4USER} -P "${P4PASSWD}" ${SVC_NAME}
-}
-
 function install_loginhook() {
     # enable database passwords so super can log in w/o SSO
     p4 configure set auth.sso.allow.passwd=1
@@ -68,7 +47,7 @@ EOF
 # file in /etc can be lost between runs, so save and restore as needed.
 #
 if [ ! -d "${P4ROOT}/root" ]; then
-    configure_p4d
+    /opt/perforce/sbin/configure-helix-p4d.sh -n -p ${P4PORT} -r ${P4ROOT} -u ${P4USER} -P "${P4PASSWD}" ${SVC_NAME}
     cp "/etc/perforce/p4dctl.conf.d/${SVC_NAME}.conf" "${P4ROOT}"
 elif [ ! -f "/etc/perforce/p4dctl.conf.d/${SVC_NAME}.conf" ]; then
     cp "${P4ROOT}/${SVC_NAME}.conf" "/etc/perforce/p4dctl.conf.d"

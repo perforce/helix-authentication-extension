@@ -19,10 +19,6 @@ gpgcheck=1\n'\
 >> /etc/yum.repos.d/perforce.repo
 RUN yum -q -y install helix-cli helix-p4d
 
-# patch configure script to wait for p4d to start fully (P4-20611)
-COPY containers/configure.diff /tmp
-RUN cd /opt/perforce/sbin && \
-    patch -p0 </tmp/configure.diff
 RUN /opt/perforce/sbin/configure-helix-p4d.sh -n -p ${P4PORT} -u super -P Rebar123 despot
 
 # create a working directory for which the perforce user has write permissions

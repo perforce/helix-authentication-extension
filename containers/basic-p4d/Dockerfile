@@ -14,7 +14,7 @@
 # $ docker image tag helix-p4d-basic 192.168.1.1:5000/helix-p4d-basic
 # $ docker push 192.168.1.1:5000/helix-p4d-basic
 #
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ARG BASE_PATH="containers/basic-p4d"
 ARG PUB_KEY="http://package.perforce.com/perforce.pubkey"
@@ -24,7 +24,7 @@ ARG P4PORT="0.0.0.0:1666"
 # install p4 and p4d via packages
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
-    apt-get -q -y install apt-utils lsb-release gnupg patch
+    apt-get -q -y install apt-utils lsb-release gnupg
 ADD ${PUB_KEY} perforce.pubkey
 RUN apt-key add perforce.pubkey && \
     rm -f perforce.pubkey
