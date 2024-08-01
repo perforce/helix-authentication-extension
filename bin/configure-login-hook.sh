@@ -214,6 +214,9 @@ Description:
     --service-url <service-url>
         HTTP/S address of the authentication service.
 
+    --service-down-url <service-down-url>
+        HTTP/S address to redirect users if the authentication service is down.
+
     --default-protocol <oidc|saml>
         The default authentication protocol, either 'oidc' or 'saml'.
 
@@ -410,7 +413,7 @@ function source_enviro() {
 
 function read_arguments() {
     # build up the list of arguments in pieces since there are so many
-    local ARGS=(p4port: super: superpassword: service-url: default-protocol: enable-logging)
+    local ARGS=(p4port: super: superpassword: service-url: service-down-url: default-protocol: enable-logging)
     ARGS+=(non-sso-users: non-sso-groups: sso-users: sso-groups: name-identifier: user-identifier:)
     ARGS+=(allow-non-sso yes debug skip-tests help)
     local TEMP=$(getopt -n 'configure-login-hook.sh' \
@@ -452,6 +455,10 @@ function read_arguments() {
                 ;;
             --service-url)
                 SERVICE_URL=$2
+                shift 2
+                ;;
+            --service-down-url)
+                SERVICE_DOWN_URL=$2
                 shift 2
                 ;;
             --default-protocol)
@@ -537,6 +544,7 @@ Summary of arguments passed:
 Helix server P4PORT            [${P4PORT:-(not specified)}]
 Helix super-user               [${P4USER:-(not specified)}]
 Service base URL               [${SERVICE_URL:-(not specified)}]
+Service down URL               [${SERVICE_DOWN_URL:-(not specified)}]
 Preferred auth protocol        [${DEFAULT_PROTOCOL:-(not specified)}]
 Debug logging enabled          [${ENABLE_LOGGING:-(not specified)}]
 List of non-SSO users          [${NON_SSO_USERS:-(not specified)}]
@@ -1109,6 +1117,9 @@ The operations involved are as follows:
 
 EOT
     echo "  * Set global Service-URL to ${SERVICE_URL}"
+    if [[ -n "${SERVICE_DOWN_URL}" ]]; then
+        echo "  * Set global Service-Down-URL to ${SERVICE_DOWN_URL}"
+    fi
     if [[ -n "${DEFAULT_PROTOCOL}" ]] && [[ ! "${DEFAULT_PROTOCOL}" =~ '...' ]]; then
         echo "  * Set global Auth-Protocol to '${DEFAULT_PROTOCOL}'"
     fi
