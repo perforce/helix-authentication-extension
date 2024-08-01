@@ -1,10 +1,10 @@
 {
   "name": "helix-auth-extension",
-  "version": "2024.1.0",
+  "version": "2024.2.0",
   "description": "Helix Authentication Extension",
   "type": "module",
   "engines": {
-    "node": "^14.13.1 || >=16.0.0"
+    "node": "^18.0.0 || >=20.0.0"
   },
   "repository": {
     "type": "git",

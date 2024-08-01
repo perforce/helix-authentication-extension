@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Extension
-                            Version 2024.1
+                            Version 2024.2
 
 
 Introduction
@@ -93,6 +93,11 @@ Known Limitations
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    No new features in this release.
 
 ----------------------------------------------------------------------
 Bugs fixed in 2024.1 (2024.1/2571580) (2024/03/13)
