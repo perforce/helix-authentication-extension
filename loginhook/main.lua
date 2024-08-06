@@ -40,7 +40,8 @@ function InstanceConfigFields()
     [ "client-name-identifier" ] = "... Field within JSON web token containing unique user identifier.",
     [ "user-identifier" ] = "... Trigger variable used as unique user identifier.",
     [ "name-identifier" ] = "... Field within IdP response containing unique user identifier.",
-    [ "enable-logging" ] = "... Extension will write debug messages to a log if 'true'."
+    [ "enable-logging" ] = "... Extension will write debug messages to a log if 'true'.",
+    [ "allow-user-client-p4v" ] = "... Extension will allow validation of JWT with user identifier."
   }
 end
 
@@ -182,6 +183,56 @@ local function validateOAuthResponse( token )
   return false, code, err
 end
 
+local function webFlow()
+  -- Get a request id from the service, save it in requestId; do this every time
+  -- for every user, in case the same user logs in from multiple systems. We
+  -- will use this request identifier to get the status of the user later.
+  local userid = utils.userIdentifier( false )
+  local easy = curl.easy()
+  local safe_id = easy:escape( userid )
+  local ok, url, sdata = getData( utils.requestUrl( safe_id ) )
+  if ok then
+    requestId = sdata[ "request" ]
+    -- Save the instanceId used in rule-based routing so that all subsequent
+    -- requests are routed to the appropriate instance of the service.
+    instanceId = sdata[ "instanceId" ]
+  else
+    utils.debug( {
+      [ "AuthPreSSO" ] = "error: failed to get request identifier",
+      [ "http-code" ] = url,
+      [ "http-error" ] = tostring( sdata )
+    } )
+    utils.debug( {
+      [ "AuthPreSSO" ] = "info: ensure Service-URL is valid",
+      [ "Service-URL" ] = utils.gCfgData[ "Service-URL" ]
+    } )
+    -- At this point we know this user should be using SSO but there was a
+    -- problem, so try to inform them of what went wrong.
+    errorMessage = "error connecting to service, check extension logs"
+    return true, "unused", utils.serviceDownUrl(), false
+  end
+  local url = utils.loginUrl( sdata )
+  -- Return the login URL as a property named `data` for P4PHP clients.
+  --
+  -- N.B. Swarm uses a clientprog value of "P4PHP" when performing user login,
+  -- but the login will be handled differently in that case regardless.
+  local clientprog = Helix.Core.Server.GetVar( "clientprog" )
+  if string.find( clientprog, "P4PHP" ) then
+    utils.debug( { [ "AuthPreSSO" ] = "info: loginURL via 'data' for P4PHP client" } )
+    return true, url
+  end
+  -- Return the login URL as a property named `data` for Helix TeamHub.
+  if string.find( clientprog, "PilsnerHTHAdapter" ) then
+    utils.debug( { [ "AuthPreSSO" ] = "info: loginURL via 'data' for PilsnerHTHAdapter" } )
+    return true, url
+  end
+  utils.debug( {
+    [ "AuthPreSSO" ] = "info: invoking URL " .. url,
+    [ "user" ] = user
+  } )
+  return true, "unused", url, false
+end
+
 -- return -> (ret: bool, data: str, invokeURL: str, skipSSO: bool)
 -- required: 'ret' if false indicates error
 -- optional: 'data' has multiple meanings that depend on the use case
@@ -209,6 +260,14 @@ function AuthPreSSO()
     return false
   end
   if hasClientUsers and isClientUser then
+    local currentClientProg = Helix.Core.Server.GetVar( "clientprog" )
+    if currentClientProg:match( "^Helix P4V" ) ~= nil then
+      utils.debug( {
+        [ "AuthPreSSO" ] = "jump to ForceInteractiveSSO",
+        [ "user" ] = user
+      } )
+      return webFlow()
+    end
     -- This user must authenticate via a P4LOGINSSO program that returns
     -- some form of "access token" (JWT) that the service will validate.
     utils.debug( {
@@ -266,53 +325,7 @@ function AuthPreSSO()
       return true, "unused", "skipping", true
     end
   end
-  -- Get a request id from the service, save it in requestId; do this every time
-  -- for every user, in case the same user logs in from multiple systems. We
-  -- will use this request identifier to get the status of the user later.
-  local userid = utils.userIdentifier( false )
-  local easy = curl.easy()
-  local safe_id = easy:escape( userid )
-  local ok, url, sdata = getData( utils.requestUrl( safe_id ) )
-  if ok then
-    requestId = sdata[ "request" ]
-    -- Save the instanceId used in rule-based routing so that all subsequent
-    -- requests are routed to the appropriate instance of the service.
-    instanceId = sdata[ "instanceId" ]
-  else
-    utils.debug( {
-      [ "AuthPreSSO" ] = "error: failed to get request identifier",
-      [ "http-code" ] = url,
-      [ "http-error" ] = tostring( sdata )
-    } )
-    utils.debug( {
-      [ "AuthPreSSO" ] = "info: ensure Service-URL is valid",
-      [ "Service-URL" ] = utils.gCfgData[ "Service-URL" ]
-    } )
-    -- At this point we know this user should be using SSO but there was a
-    -- problem, so try to inform them of what went wrong.
-    errorMessage = "error connecting to service, check extension logs"
-    return true, "unused", utils.serviceDownUrl(), false
-  end
-  local url = utils.loginUrl( sdata )
-  -- Return the login URL as a property named `data` for P4PHP clients.
-  --
-  -- N.B. Swarm uses a clientprog value of "P4PHP" when performing user login,
-  -- but the login will be handled differently in that case regardless.
-  local clientprog = Helix.Core.Server.GetVar( "clientprog" )
-  if string.find( clientprog, "P4PHP" ) then
-    utils.debug( { [ "AuthPreSSO" ] = "info: loginURL via 'data' for P4PHP client" } )
-    return true, url
-  end
-  -- Return the login URL as a property named `data` for Helix TeamHub.
-  if string.find( clientprog, "PilsnerHTHAdapter" ) then
-    utils.debug( { [ "AuthPreSSO" ] = "info: loginURL via 'data' for PilsnerHTHAdapter" } )
-    return true, url
-  end
-  utils.debug( {
-    [ "AuthPreSSO" ] = "info: invoking URL " .. url,
-    [ "user" ] = user
-  } )
-  return true, "unused", url, false
+  return webFlow()
 end
 
 local function validateResponse( response )

@@ -208,6 +208,11 @@ function ExtUtils.verifyHost()
   return verify_host == "true"
 end
 
+function ExtUtils.allowUserClientP4V()
+  local allow_user_client_p4v = ExtUtils.iCfgData[ "allow-user-client-p4v" ]
+  return allow_user_client_p4v == "true"
+end
+
 function ExtUtils.isClientUser( user )
   -- users in the client-sso-users list are required to use P4LOGINSSO
   local required = ExtUtils.iCfgData[ "client-sso-users" ]
