@@ -95,7 +95,7 @@ Known Limitations
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+New functionality in 2024.2 (2024.2/2634404) (2024/08/05)
 
     No new features in this release.
 
