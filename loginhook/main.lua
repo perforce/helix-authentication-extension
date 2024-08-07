@@ -41,7 +41,7 @@ function InstanceConfigFields()
     [ "user-identifier" ] = "... Trigger variable used as unique user identifier.",
     [ "name-identifier" ] = "... Field within IdP response containing unique user identifier.",
     [ "enable-logging" ] = "... Extension will write debug messages to a log if 'true'.",
-    [ "allow-user-client-p4v" ] = "... Extension will allow validation of JWT with user identifier."
+    [ "allow-user-client-p4v" ] = "... Extension will allow P4V falling back to use SSO rather than using P4LOGINSSO."
   }
 end
 
@@ -261,9 +261,9 @@ function AuthPreSSO()
   end
   if hasClientUsers and isClientUser then
     local currentClientProg = Helix.Core.Server.GetVar( "clientprog" )
-    if currentClientProg:match( "^Helix P4V" ) ~= nil then
+    if utils.allowUserClientP4V() and currentClientProg:match( "^Helix P4V" ) ~= nil then
       utils.debug( {
-        [ "AuthPreSSO" ] = "jump to ForceInteractiveSSO",
+        [ "AuthPreSSO" ] = "info: P4V detected, will fallback to SSO",
         [ "user" ] = user
       } )
       return webFlow()
