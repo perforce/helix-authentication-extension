@@ -209,7 +209,7 @@ function ExtUtils.verifyHost()
 end
 
 function ExtUtils.allowUserClientP4V()
-  local allow_user_client_p4v = ExtUtils.iCfgData[ "allow-user-client-p4v" ]
+  local allow_user_client_p4v = ExtUtils.iCfgData[ "allow-user-client-p4v-to-sso" ]
   return allow_user_client_p4v == "true"
 end
 

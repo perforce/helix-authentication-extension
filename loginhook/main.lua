@@ -41,7 +41,7 @@ function InstanceConfigFields()
     [ "user-identifier" ] = "... Trigger variable used as unique user identifier.",
     [ "name-identifier" ] = "... Field within IdP response containing unique user identifier.",
     [ "enable-logging" ] = "... Extension will write debug messages to a log if 'true'.",
-    [ "allow-user-client-p4v" ] = "... Extension will allow P4V falling back to use SSO rather than using P4LOGINSSO."
+    [ "allow-user-client-p4v-to-sso" ] = "... Extension will fall back to SSO for P4V client rather than P4LOGINSSO if 'true'."
   }
 end
 
