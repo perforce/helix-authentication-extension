@@ -1,7 +1,7 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 #
-# $ docker build -f test/install/Ubuntu22.dockerfile -t has-ubuntu22-install .
-# $ docker image ls | grep has-ubuntu22-install
+# $ docker build -f test/install/Ubuntu24.dockerfile -t has-ubuntu24-install .
+# $ docker image ls | grep has-ubuntu24-install
 #
 ARG APT_URL="http://package.perforce.com/apt/ubuntu"
 ARG PUB_KEY="http://package.perforce.com/perforce.pubkey"
