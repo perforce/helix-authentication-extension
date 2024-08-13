@@ -70,6 +70,12 @@ function error_prompt() {
     fi
 }
 
+# Print the first argument in yellow text on STDERR.
+function warning() {
+    $MONOCHROME || echo -e "\033[1;33m$1\033[0m" >&2
+    $MONOCHROME && echo -e "$1" >&2 || true
+}
+
 # Print the first argument in red text on STDERR.
 function error() {
     $MONOCHROME || echo -e "\033[31m$1\033[0m" >&2
@@ -817,6 +823,16 @@ function check_perforce_super_user() {
             error "Unable to login to the Helix server '$P4PORT' as '$P4USER' with supplied password"
             return 1
         fi
+    fi
+
+    EXPIRES=$(p4 -ztag login -s | awk '/TicketExpiration/ { print $3 }')
+    if [ $EXPIRES -lt 2592000 ]; then
+        echo
+        echo
+        warning 'The ticket for the super user expires in less than 30 days.'
+        warning 'An expired ticket will result in the extension behaving incorrectly.'
+        warning 'Please ensure that the ExtP4USER field in the extension configuration'
+        warning 'names a user whose ticket does not expire for a very long time.'
     fi
 
     if ! p4 -p "$P4PORT" -u "$P4USER" protects -m 2>&1 | grep -q 'super'; then
