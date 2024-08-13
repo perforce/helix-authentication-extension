@@ -156,13 +156,9 @@ grep -q 'non-sso-users: ... (none)' output
 grep -q 'user-identifier: fullname' output
 # ensure that the unconfigured settings are copied to the new installation
 cat output
-echo '1'
 grep -q 'client-sso-groups: client-group' output
-echo '2'
 grep -q 'client-sso-users: chris susan harry' output
-echo '3'
 grep -q 'client-user-identifier: cluserid' output
-echo '4'
 grep -q 'client-name-identifier: clnameid' output
 
 #
@@ -233,21 +229,28 @@ grep -Eq '[^-]sso-users: ... \(none\)' output
 grep -Eq '[^-]sso-groups: ... \(none\)' output
 grep -q 'user-identifier: user' output
 
+echo -e "\nRunning negative test cases...\n"
+
 #
 # Switch to the negative cases in which we expect the configure script to return
 # a non-zero exit code.
 #
+echo '>> need a valid service URL'
 set +e
 ./helix-auth-ext/bin/configure-login-hook.sh -m -n > output 2>&1 2>&1
 set -e
 grep -q 'valid base URL' output
 
+echo '>> need a valid p4 port'
+unset P4PORT
 set +e
 ./helix-auth-ext/bin/configure-login-hook.sh -m -n \
     --service-url http://has > output 2>&1
 set -e
 grep -q 'Port number out of range' output
 
+echo '>> need a valid p4 user'
+unset P4USER
 set +e
 ./helix-auth-ext/bin/configure-login-hook.sh -m -n \
     --service-url http://has \
@@ -255,6 +258,7 @@ set +e
 set -e
 grep -q 'Username must start with a letter' output
 
+echo '>> need a valid name-identifier value'
 set +e
 ./helix-auth-ext/bin/configure-login-hook.sh -m -n \
     --service-url http://has \
@@ -264,6 +268,7 @@ set +e
 set -e
 grep -q 'value is required for the name identifier' output
 
+echo '>> need a valid user-identifier value'
 set +e
 ./helix-auth-ext/bin/configure-login-hook.sh -m -n \
     --service-url http://has \
@@ -277,6 +282,7 @@ grep -q 'Enter either "user", "email", or "fullname" for user identifier' output
 #
 # finally everything is okay once again
 #
+echo '>> positive case, everything is okay once more'
 ./helix-auth-ext/bin/configure-login-hook.sh -m -n \
     --service-url http://has \
     --p4port :1666 \

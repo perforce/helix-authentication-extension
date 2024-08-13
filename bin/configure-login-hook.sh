@@ -7,8 +7,7 @@
 INTERACTIVE=true
 MONOCHROME=false
 DEBUG=false
-P4PORT=''
-P4USER=''
+# do not set P4PORT and P4USER, source_enviro will do that
 P4PASSWD=''
 RESTART_OK=false
 SERVICE_URL=''
@@ -825,8 +824,8 @@ function check_perforce_super_user() {
         fi
     fi
 
-    EXPIRES=$(p4 -ztag login -s | awk '/TicketExpiration/ { print $3 }')
-    if [ $EXPIRES -lt 2592000 ]; then
+    EXPIRES=$(p4 -ztag -p "$P4PORT" -u "$P4USER" login -s | awk '/TicketExpiration/ { print $3 }')
+    if [ -n "$EXPIRES" -a "$EXPIRES" -lt 2592000 ]; then
         echo
         echo
         warning 'The ticket for the super user expires in less than 30 days.'
