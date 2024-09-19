@@ -470,6 +470,12 @@ function ExtUtils.userIdentifier( usingClient )
   else
     field = ExtUtils.iCfgData[ "user-identifier" ]
   end
+  if field ~= "email" and field ~= "fullname" and field ~= "user" then
+    ExtUtils.debug( {
+      [ "userIdentifier" ] = "warning: user-identifier should be one of 'email', 'fullname', or 'user'",
+      [ "value" ] = field
+    } )
+  end
   local userid = Helix.Core.Server.GetVar( field:lower() )
   if userid then
     return userid
