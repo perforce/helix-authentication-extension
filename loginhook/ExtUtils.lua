@@ -1,5 +1,5 @@
 --[[
-  Copyright 2023 Perforce Software
+  Copyright 2024 Perforce Software
 ]]--
 local ExtUtils = {}
 local cjson = require "cjson"
@@ -282,55 +282,21 @@ function ExtUtils.isSkipUser( user )
 end
 
 function ExtUtils.getAuthMethodAndType( user )
-  -- get ClientApi configured for login-less access to the current server
-  local ca, err = Helix.Core.Server.GetAutoClientApi()
-  if err ~= nil then
-    ExtUtils.debug( {
-      [ "getAuthMethodAndType" ] = "error: failed getting auto-client",
-      [ "user" ] = user,
-      [ "cause" ] = tostring( err )
-    } )
-    return false, nil, nil
-  end
-  local e = Helix.Core.P4API.Error.new()
-  local cu = Helix.Core.P4API.ClientUser.new()
-  ca:SetProtocol( "tag", "" )
-  ca:SetProg( "P4-Lua" )
-  ca:SetVersion( ExtUtils.getID() )
-  ca:Init( e )
+  local p4 = P4.P4:new()
+  p4.prog = "loginhook"
+  p4.version = ExtUtils.getID()
+  p4:autoconnect()
+  p4:connect()
 
-  if e:Test() then
-    ca:Final()
-    ExtUtils.debug( {
-      [ "getAuthMethodAndType" ] = "error: failed getting user spec",
-      [ "user" ] = user,
-      [ "cause" ] = e:Fmt()
-    } )
-    return false, nil, nil
-  end
+  -- before invoking run(), force the use of the auto-generated ticket to avoid
+  -- using a stale ticket from the file system
+  p4.ticket_file = "FileDoesNotExist"
 
   local method = "perforce"
   local type = "standard"
-  local ticket = false
-  cu.Message = function( self, m )
-    local msg = m:Fmt()
-    if msg:match( "Perforce password %(P4PASSWD%) invalid" ) ~= nil then
-      ticket = true
-    else
-      ExtUtils.debug( {
-        [ "getAuthMethodAndType" ] = "info: " .. msg,
-        [ "user" ] = user
-      } )
-    end
-  end
-  cu.HandleError = function( self, m )
-    ExtUtils.debug( {
-      [ "getAuthMethodAndType" ] = "error: " .. m:Fmt(),
-      [ "user" ] = user
-    } )
-  end
-  cu.OutputStat = function ( self, dict )
-    for k, v in dict:pairs() do
+  local userData = p4:run( "user", "-o", user )
+  for i, dict in ipairs( userData ) do
+    for k, v in pairs( dict ) do
       if k == "AuthMethod" then
         method = v
       elseif k == "Type" then
@@ -339,84 +305,32 @@ function ExtUtils.getAuthMethodAndType( user )
     end
   end
 
-  ca:SetVar( ca:Null(), "-o" )
-  ca:SetVar( ca:Null(), user )
-  ca:Run( "user", cu )
-  ca:Final()
-
-  if ticket then
-    ExtUtils.debug( {
-      [ "getAuthMethodAndType" ] = "error: ExtP4USER has invalid ticket"
-    } )
-    return false, nil, nil
-  end
   return true, method, type
 end
 
 function isUserInGroups( user, groups )
-  -- get ClientApi configured for login-less access to the current server
-  local ca, err = Helix.Core.Server.GetAutoClientApi()
-  if err ~= nil then
-    ExtUtils.debug( {
-      [ "isUserInGroups" ] = "error: failed getting auto-client",
-      [ "user" ] = user,
-      [ "cause" ] = tostring( err )
-    } )
-    return false, nil
-  end
-  local e = Helix.Core.P4API.Error.new()
-  local cu = Helix.Core.P4API.ClientUser.new()
-  ca:SetProtocol( "tag", "" )
-  ca:SetProg( "P4-Lua" )
-  ca:SetVersion( ExtUtils.getID() )
-  ca:Init( e )
+  local p4 = P4.P4:new()
+  p4.prog = "loginhook"
+  p4.version = ExtUtils.getID()
+  p4:autoconnect()
+  p4:connect()
 
-  if e:Test() then
-    ca:Final()
-    ExtUtils.debug( {
-      [ "isUserInGroups" ] = "error: failed checking group membership",
-      [ "user" ] = user,
-      [ "cause" ] = e:Fmt()
-    } )
-    return false, nil
-  end
+  -- before invoking run(), force the use of the auto-generated ticket to avoid
+  -- using a stale ticket from the file system
+  p4.ticket_file = "FileDoesNotExist"
 
+  local groupData = p4:run( "groups", "-u", "-i", user )
   local gs = {}
-  cu.Message = function( self, m )
-    local msg = m:Fmt()
-    if msg:match( "Perforce password %(P4PASSWD%) invalid" ) ~= nil then
-      ExtUtils.debug( {
-        [ "isUserInGroups" ] = "error: ExtP4USER has invalid ticket"
-      } )
-      return false, nil, nil
-    end
-    ExtUtils.debug( {
-      [ "isUserInGroups" ] = "info: " .. msg,
-      [ "user" ] = user
-    } )
-  end
-  cu.HandleError = function( self, m )
-    ExtUtils.debug( {
-      [ "isUserInGroups" ] = "error: " .. m:Fmt(),
-      [ "user" ] = user
-    } )
-  end
-  cu.OutputStat = function( self, dict )
+
+  for i, dict in ipairs( groupData ) do
     gs[ dict[ "group" ] ] = 1
   end
 
-  ca:SetVar( ca:Null(), "-u" )
-  ca:SetVar( ca:Null(), "-i" )
-  ca:SetVar( ca:Null(), user )
-  ca:Run( "groups", cu )
-  ca:Final()
-
-  for k, v in rawpairs( groups ) do
+  for k, v in pairs( groups ) do
     if gs[ k ] ~= nil then
       return true, true
     end
   end
-
   return true, false
 end
 
