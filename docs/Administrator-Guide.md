@@ -211,7 +211,7 @@ All of these settings have sensible defaults. However, for the extension to be e
 | `client-sso-groups` | Those groups whose members must authenticate using P4LOGINSSO. | _none_ |
 | `client-sso-users` | Those users who must authenticate using P4LOGINSSO. | _none_ |
 | `client-user-identifier` | Trigger variable used as unique P4LOGINSSO user identifier. | _none_ |
-| `enable-logging` | Extension will write debug messages to a log if `true` | `false` |
+| `enable-logging` | Extension will write debug messages to a log if `true`. See the [Debug logging](#debug-logging) section for details. | `false` |
 | `non-sso-groups` | Those groups who will not be using SSO. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
 | `non-sso-users` | Those users who will not be using SSO. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
 | `sso-groups` | Those groups whose members must authenticate using SSO. If this field is set to the name one or more groups, then the `non-sso-groups` and `non-sso-users` fields will be ignored. See the [Testing](#testing) section below. _This is a multi-value field, with each value starting on a new line and prefixed by two tab characters._ | _none_ |
@@ -335,15 +335,11 @@ That command will remove the named instance configuration, leaving the other con
 
 ### Applying the Changes
 
-After installing and configuring the authentication extension, the Helix Core server must be restarted for the changes to take effect. The `restart` is necessary because Helix Core prepares the authentication mechanisms during startup. This is true when adding or removing `auth-` related triggers, as well as when installing or removing the loginhook extension.
+After installing and configuring the authentication extension, the Helix Core server must be restarted for the changes to take effect. The `restart` is necessary because Helix Core prepares the authentication mechanisms during startup. This is true when adding or removing **any** `auth-` related triggers or extension, and this includes this loginhook extension.
 
 It is **recommended** to have at least one administrative user that will *not* authenticate using the web-based SSO; this provides a means of authenticating in the event that the service becomes unavailable for any reason. Typically the _super_ and/or _admin_ users would be named in one of these two settings.
 
-When you are ready to restart the server, you can use the following command:
-
-```shell
-$ p4 admin restart
-```
+When you are ready to restart the server, you can use the command `p4 admin restart` to restart. Note that your deployment of Helix Core Server might be managed using systemd, in which case the command to restart might be `sudo systemctl restart p4d_1` or similar. This is highly dependent on the deployment method and is outside of the scope of this document.
 
 ## Next Steps
 
@@ -379,7 +375,7 @@ Similar to the `sso-users` field is the `sso-groups` field, in which names of Pe
 
 ### Debug logging
 
-When enabled, the extension writes debugging logs to a JSON formatted file that will appear in the directory identified by the `data-dir` extension attribute. You can find the value for `data-dir` by searching the installed extensions using p4 extension as a privileged user.
+When enabled, the extension writes debugging logs to a JSON formatted file named `log.json` that will appear in the directory identified by the `data-dir` extension attribute. You can find the value for `data-dir` by searching the installed extensions using the `p4 extension` command as a privileged user.
 
 ```shell
 $ p4 extension --list --type=extensions
@@ -388,7 +384,7 @@ $ p4 extension --list --type=extensions
 ... data-dir server.extensions.dir/117E9283-732B-45A6-9993-AE64C354F1C5/1-data
 ```
 
-where `[snip]` means some information has been omitted.
+The location of the `server.extensions.dir` will depend on the configuration of the server. By default it will be located under the P4 _root_ directory. See the Helix Core Server [documentation](https://www.perforce.com/manuals/cmdref/Content/CmdRef/configurables.alphabetical.html) for details on this setting.
 
 ### Mapping User Profiles to Perforce Users
 
@@ -400,7 +396,7 @@ Generally, with **SAML**, the `name-identifier` extension setting should be give
 
 For **OIDC**, the user profile often includes an `email` field. The server extension looks for this by default because `name-identifier` defaults to `email`. Hopefully this value matches the `Email` field of the Perforce user spec because the server extension uses email for the `user-identifier` by default.
 
-If you are unsure of the contents of the user profile returned from the identity provider, enable the debug logging in either the authentication service or the server extension, and then examine the logs after attempting a login. With the server extension, set the `enable-logging` *instance* configuration setting to `true`, attempt a login, and look for the `log.json` file under the `server.extensions.dir` directory of the Helix depot. For the authentication service, set the `DEBUG` environment variable to `auth:*`, restart the service, attempt the login, and look at the output from the service (either in the console or in a pm2 log file, if you are using pm2).
+If you are unsure of the contents of the user profile returned from the identity provider, enable the debug logging in the server extension, and then examine the logs after attempting a login. See the [Debug logging](#debug-logging) section for instructions on how to enable debug logging in the extnsion.
 
 ### Allowing for non-SSO Users
 
@@ -553,11 +549,7 @@ Extension 'Auth::loginhook and its configurations' successfully deleted.
 
 ### Step 3: Restart the server
 
-```shell
-$ p4 admin restart
-```
-
-Without the `restart`, the server will report an error about a missing hook:
+See the [Applying the Changes](#applying-the-changes) section for details on restarting Helix Core Server. Without restarting the server, it may report an error about a missing hook whenever someone attempts to login:
 
 ```
 Command unavailable: external authentication 'auth-check-sso' trigger not found.
