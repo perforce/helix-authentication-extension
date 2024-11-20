@@ -2,7 +2,7 @@
 
 ## Overview
 
-Helix Core Server has long supported LDAP for user authentication, and that does not change when used in concert with the authentication extension. The server can support users that authenticate with a database password (default `perforce` authentication) or an LDAP-based password (as defined with `p4 ldap`), or via SSO authentication by means of the `auth-check-sso` trigger. In fact, a user can be authenticated by both a classic `auth-check-sso` trigger _and_ LDAP.
+Helix Core Server has long supported LDAP for user authentication, and that does not change when used in concert with this authentication extension. The server can support users that authenticate with a database password (default `perforce` authentication), or an LDAP-based password (as defined with `p4 ldap`), or via SSO authentication by means of the `auth-check-sso` trigger. In fact, a user can be authenticated by both a classic `auth-check-sso` trigger _and_ LDAP.
 
 However, the authentication extension differs from an `auth-check-sso` trigger in that it uses the _invoke URL_ feature to open a web browser to delegate user authentication to an external web site (the identity provider). As a result, the Perforce client and server never receive the user's credentials, and thus the server cannot pass the credentials to an LDAP directory. In this scenario, a user can either authenticate with web-based SSO, or they can authenticate by some other means, but not both.
 
@@ -18,7 +18,7 @@ Changing a user's `AuthMethod` can be achieved from the command line, like so:
 p4 --field AuthMethod=perforce user -o <username> | p4 user -f -i
 ```
 
-Note that when the `security` server configurable is set to `3` or higher, every user whose `AuthMethod` is `perforce` will be required to have a database password. This is true regardless of how the user with authenticate with the server. An easy way to set the password to a long random string (on Unix) might look like this:
+Note that when the `security` server configurable is set to `3` or higher, every user whose `AuthMethod` is `perforce` will be required to have a database password. This is true regardless of how the user will authenticate with the server. An easy method for setting the password to a long random string (on Unix) looks like this:
 
 ```shell
 yes $(uuidgen) | p4 passwd <username>

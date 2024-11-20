@@ -103,7 +103,8 @@ describe('Non-SSL', function () {
       it('should login required SSO groups successfully', function () {
         const p4 = new P4({
           P4PORT: p4config.port,
-          P4USER: 'repoman'
+          P4USER: 'repoman',
+          P4USEBROWSER: false
         })
         const loginCmd = p4.cmdSync('login', 'secret123')
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
@@ -134,7 +135,8 @@ describe('Non-SSL', function () {
       it('should login required SSO users successfully', function () {
         const p4 = new P4({
           P4PORT: p4config.port,
-          P4USER: 'repoman'
+          P4USER: 'repoman',
+          P4USEBROWSER: false
         })
         const loginCmd = p4.cmdSync('login', 'secret123')
         assert.equal(loginCmd.stat[0].TicketExpiration, '43200')

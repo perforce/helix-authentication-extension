@@ -1,7 +1,7 @@
 --[[
   Authentication extensions for OpenID Connect and SAML 2.0
 
-  Copyright 2023 Perforce Software
+  Copyright 2024 Perforce Software
 ]]--
 local cjson = require "cjson"
 local curl = require "cURL.safe"
@@ -203,6 +203,28 @@ function AuthPreSSO()
   -- Helix.Core.Server.SetClientMsg() does nothing.
   utils.init()
   local user = Helix.Core.Server.GetVar( "user" )
+  -- unconditionally exclude LDAP and non-standard users from web-based SSO
+  local ok, authMethod, userType = utils.getAuthMethodAndType( user )
+  if not ok then
+    -- cannot fail through to AuthCheckSSO without locking out all users
+    return false
+  end
+  -- non-'standard' users typically cannot use browser-based auth
+  if userType ~= "standard" then
+    utils.debug( {
+      [ "AuthPreSSO" ] = "info: skipping non-standard user",
+      [ "user" ] = user
+    } )
+    return true, "unused", "skipping", true
+  end
+  -- LDAP users are expected to authenticate using LDAP
+  if authMethod:match( "^ldap" ) ~= nil then
+    utils.debug( {
+      [ "AuthPreSSO" ] = "info: skipping LDAP user",
+      [ "user" ] = user
+    } )
+    return true, "unused", "skipping", true
+  end
   local ok, isClientUser, hasClientUsers = utils.isClientUser( user )
   if not ok then
     -- cannot fail through to AuthCheckSSO without locking out all users
@@ -240,27 +262,6 @@ function AuthPreSSO()
     if isSkipped then
       utils.debug( {
         [ "AuthPreSSO" ] = "info: skipping SSO for user",
-        [ "user" ] = user
-      } )
-      return true, "unused", "skipping", true
-    end
-    local ok, authMethod, userType = utils.getAuthMethodAndType( user )
-    if not ok then
-      -- cannot fail through to AuthCheckSSO without locking out all users
-      return false
-    end
-    -- non-'standard' users typically cannot use browser-based auth
-    if userType ~= "standard" then
-      utils.debug( {
-        [ "AuthPreSSO" ] = "info: skipping non-standard user ",
-        [ "user" ] = user
-      } )
-      return true, "unused", "skipping", true
-    end
-    -- LDAP users are expected to authenticate using LDAP
-    if authMethod:match( "^ldap" ) ~= nil then
-      utils.debug( {
-        [ "AuthPreSSO" ] = "info: skipping LDAP user ",
         [ "user" ] = user
       } )
       return true, "unused", "skipping", true
