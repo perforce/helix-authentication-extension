@@ -48,6 +48,7 @@ describe('Not SSO users', function () {
 
   describe('LDAP users should ignore SSO configuration', function () {
     before(async function () {
+      this.timeout(30000)
       helpers.installExtension(p4config)
       helpers.configureSsoUsers(p4config, 'oidc', `http://localhost:${port}/pass/oidc`)
       await helpers.restartServer(p4config)
@@ -83,6 +84,7 @@ describe('Not SSO users', function () {
 
   describe('Service users should ignore SSO configuration', function () {
     before(async function () {
+      this.timeout(30000)
       helpers.installExtension(p4config)
       helpers.configureSsoUsers(p4config, 'oidc', `http://localhost:${port}/pass/oidc`)
       await helpers.restartServer(p4config)
