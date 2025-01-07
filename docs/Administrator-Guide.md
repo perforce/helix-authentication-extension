@@ -119,7 +119,7 @@ ExtConfig:
 
 where `[snip]` means some information has been omitted.
 
-The first field to change is `ExtP4USER` which should be the Perforce user that will own this extension, typically a "super" or administrative user.
+The first field to change is `ExtP4USER` which should be the Perforce user that will own this extension, typically a _super_ or _admin_ user. **Note:** This user must have a _long-lived_ ticket that does not expire; if the ticket for this user expires, the extension will not be able to function correctly. The user that will be specified in the `ExtP4USER` field should be a member of a group with a `Timeout` setting of `unlimited`, meaning that their ticket will never expire. Once the user has been added to this group, make sure to log in again to issue a long-lived ticket.
 
 Of the settings in `ExtConfig`, only the `Service-URL` setting is required. The other settings have default values as described below.
 
@@ -662,7 +662,7 @@ If users are members of groups that are named in the `non-sso-groups` or `sso-gr
 {"data":{"isUserInGroups":"error: ExtP4USER has invalid ticket","user":"jdoe"},"nanos":194320152,"pid":30482,"recType":0,"seconds":1591982194}
 ```
 
-This log entry indicates that the extension user itself does not have a valid ticket. There are several causes for this situation. It may be that the `P4TICKETS` setting for the system user that is running the `p4d` instance refers to a file that does not have the appropriate ticket entry. It may be that the user named in the `ExtP4USER` field of the extension configuration has a short-lived ticket rather than a long-lived ticket. Typically a **super** user will be the `ExtP4USER` user for the extension and this user will be a member of a group with a `Timeout` setting of `unlimited`, meaning that their ticket will never expire. The extension `ExtP4USER` user should likewise have a long-lived ticket, otherwise this problem will occur again when the ticket expires.
+This log entry indicates that the extension user itself does not have a valid ticket. There are several causes for this situation. It may be that the `P4TICKETS` setting for the system user that is running the `p4d` instance refers to a file that does not have the appropriate ticket entry. It may be that the user named in the `ExtP4USER` field of the extension configuration has a short-lived ticket rather than a long-lived ticket. See the configuration section above regarding the `ExtP4User` setting.
 
 Another cause may be that the `ExtP4USER` has multiple ticket values, as shown in the output of `p4 tickets`, which are associated with different hosts and/or `auth.id` values. If this happens, it is best to remove the stale tickets by invoking `p4 logout -a` as the `ExtP4USER`, then login again. If there are multiple servers in the topology (such as commit and edge servers), then invoke `p4 login` as the `ExtP4USER` on each of these systems, ensuring that they each get a valid ticket.
 
