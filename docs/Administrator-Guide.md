@@ -593,11 +593,11 @@ so it may be easier to simply run the configure script as described above.
 
 When the extension is installed, the **default** behavior is for **all** users to authenticate with SSO, with the exception of two categories of users: a) those users whose `AuthMethod` is set to `ldap`, and b) those users whose `Type` is not `standard` (operators and service users). LDAP users are expected to authenticate against an LDAP directory, and non-standard users typically cannot authenticate via a web browser.
 
-If either the `client-sso-users` or `client-sso-groups` contains one or more entries (does not start with `...`), then any _matching_ users will require the use of the traditional SSO functionality in Helix Core Server. Specifically, the client must have a `P4LOGINSSO` that points to a program that emits a token. This is regardless of the `AuthMethod` or `Type` of the user.
+If either the `client-sso-users` or `client-sso-groups` contains one or more entries (does not start with `...`), then any _matching_ users will require the use of the traditional SSO functionality in Helix Core Server. Specifically, the client must have a `P4LOGINSSO` that points to a program that emits a token.
 
-If either the `sso-users` or `sso-groups` contains one or more entries (does not start with `...`), then any _matching_ users will **always** use SSO. This is regardless of the `AuthMethod` or `Type` of the user. Any users that do _not match_ will **not** authenticate with SSO. Note that LDAP users cannot use web-based SSO to authenticate with Helix Core Server. All such users **must** have their `AuthMethod` set to `perforce` to support web-based SSO. See [LDAP.md](./LDAP.md) for more information.
+If either the `sso-users` or `sso-groups` contains one or more entries (does not start with `...`), then any _matching_ users will authenticate with SSO. Any users that do _not match_ will **not** authenticate with SSO. Note that LDAP users cannot use web-based SSO to authenticate with Helix Core Server. All such users **must** have their `AuthMethod` set to `perforce` to support web-based SSO. See [LDAP.md](./LDAP.md) for more information.
 
-If `sso-users` and `sso-groups` are not defined (start with `...`), then the `non-sso-users` and `non-sso-groups` settings are taken into consideration. 
+If `sso-users` and `sso-groups` are not defined (start with `...`), then the `non-sso-users` and `non-sso-groups` settings are taken into consideration.
 
 ### When the authentication service is unreachable
 
