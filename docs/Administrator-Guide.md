@@ -788,3 +788,17 @@ When LDAP is configured in Helix Core Server, and an SSO trigger or extension is
 ```shell
 p4 configure set auth.sso.nonldap=1
 ```
+
+### Problem with SSL CA cert
+
+If the extension is giving an error about the SSL CA certificate, either in the log file or in the output of the `test-all` command as shown below, then check that the file specified by the `Authority-Cert` extension setting is readable by the system user that is running the p4d process.
+
+```shell
+$ p4 extension --run loginhook-a1 test-all
+Request start: OK
+
+Service error: 0: [curl] Problem with the SSL CA cert (path? access rights?)
+Service error: 0: [curl] Problem with the SSL CA cert (path? access rights?)
+
+Command invoke: OK
+```
