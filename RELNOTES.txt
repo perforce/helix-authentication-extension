@@ -1,6 +1,6 @@
                             Release Notes for
                         Helix Authentication Extension
-                            Version 2024.2
+                            Version 2025.1
 
 
 Introduction
@@ -36,6 +36,8 @@ Supported Platforms
     frequent basis. Errors or bugs discovered in these platforms are prioritized
     for correction. Any platform not listed above is not actively tested by
     Perforce.
+
+    Support for Ubuntu 20.04 will be removed in the next release.
 
 
 Requirements
@@ -93,6 +95,22 @@ Known Limitations
 
 
 Changes in every release: Bugs Fixed, New Functionality
+
+----------------------------------------------------------------------
+New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-584 (Change #2637409)
+        Configure script now supports Service-Down-URL configurable.
+
+----------------------------------------------------------------------
+Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-596 (Change #2656859)
+        Extension now works around the stale ticket issue permanently.
+
+    HAS-605 (Change #2684986)
+        LDAP and service users will now always be excluded regardless of the
+        extension configuration.
 
 ----------------------------------------------------------------------
 New functionality in 2024.2 (2024.2/2634404) (2024/08/05)
