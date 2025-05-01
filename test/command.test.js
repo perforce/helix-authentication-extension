@@ -46,7 +46,9 @@ describe('RunCommand', function () {
       const loginCmd = p4.cmdSync('login', 'p8ssword')
       assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
       const extCmd = p4.cmdSync('extension --run testing test-svc')
-      assert.isTrue(helpers.findData(extCmd, "Couldn't connect to server"))
+      // error message was "Couldn't connect" and later became "Could not
+      // connect" so just ignore the first couple of words
+      assert.isTrue(helpers.findData(extCmd, "connect to server"))
     })
   })
 
