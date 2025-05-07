@@ -97,13 +97,13 @@ Known Limitations
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+New functionality in 2025.1 (2025.1/2758427) (2025/05/05)
 
     HAS-584 (Change #2637409)
         Configure script now supports Service-Down-URL configurable.
 
 ----------------------------------------------------------------------
-Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Bugs fixed in 2025.1 (2025.1/2758427) (2025/05/05)
 
     HAS-596 (Change #2656859)
         Extension now works around the stale ticket issue permanently.
