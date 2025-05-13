@@ -1,5 +1,5 @@
 --[[
-  Copyright 2024 Perforce Software
+  Copyright 2019 Perforce Software
 ]]--
 local ExtUtils = {}
 local cjson = require "cjson"
@@ -12,16 +12,8 @@ function getManifest()
   return m
 end
 
-local function rawpairs( t )
-  return next, t, nil
-end
-
 function trim( s )
   return s:gsub( "^%s*(.-)%s*$", "%1" )
-end
-
-function ExtUtils.isempty( s )
-    return s == nil or s == ""
 end
 
 function getGCfg()
@@ -108,10 +100,6 @@ end
 function ExtUtils.getID()
   return ExtUtils.manifest[ "name" ] .. "/" .. ExtUtils.manifest[ "key" ] .. "/" ..
          ExtUtils.manifest[ "version_name" ]
-end
-
-function ExtUtils.msgHeader()
-  return ExtUtils.getID() .. ":  "
 end
 
 function ExtUtils.debug( data )
