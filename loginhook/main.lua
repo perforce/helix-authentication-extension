@@ -199,6 +199,10 @@ end
 -- case 5: return true, url
 --         P4API client will utilize the url returned as `data`
 function AuthPreSSO()
+  --
+  -- Uncomment the line below to temporarily disable the extension.
+  -- if true then return true, "unused", "skipping", true end
+  --
   -- N.B. auth-pre-sso does not emit messages to the client so calling
   -- Helix.Core.Server.SetClientMsg() does nothing.
   utils.init()
