@@ -269,20 +269,44 @@ function ExtUtils.isSkipUser( user )
   return true, false, hasSkipped
 end
 
-function ExtUtils.getAuthMethodAndType( user )
+-- Run the given command and its arguments, capturing any exceptions in order to
+-- log the errors and warnings for debugging purposes. Returns "true, results"
+-- if okay or "false" if error.
+function runP4command( arg ) -- would use ... but it fails
   local p4 = P4.P4:new()
   p4.prog = "loginhook"
   p4.version = ExtUtils.getID()
   p4:autoconnect()
   p4:connect()
-
-  -- before invoking run(), force the use of the auto-generated ticket to avoid
-  -- using a stale ticket from the file system
+  -- after autoconnect() and before run(), force the use of the generated ticket
+  -- to avoid using a stale ticket from the file system
   p4.ticket_file = "FileDoesNotExist"
 
+  local ok, result = pcall( function ()
+    local results = p4:run( table.unpack( arg ) )
+    return results
+  end )
+  if not ok then
+    -- ignore result, only care about p4 messages
+    for idx, err in pairs( p4.errors ) do
+      ExtUtils.debug( { [ "error" .. idx ] = tostring( err ) } )
+    end
+    for idx, err in pairs( p4.warnings ) do
+      ExtUtils.debug( { [ "warning" .. idx ] = tostring( err ) } )
+    end
+    return false, nil
+  end
+
+  return true, result
+end
+
+function ExtUtils.getAuthMethodAndType( user )
   local method = "perforce"
   local type = "standard"
-  local userData = p4:run( "user", "-o", user )
+  local ok, userData = runP4command( { "user", "-o", user } )
+  if not ok then
+    return false
+  end
   for i, dict in ipairs( userData ) do
     for k, v in pairs( dict ) do
       if k == "AuthMethod" then
@@ -292,28 +316,18 @@ function ExtUtils.getAuthMethodAndType( user )
       end
     end
   end
-
   return true, method, type
 end
 
 function isUserInGroups( user, groups )
-  local p4 = P4.P4:new()
-  p4.prog = "loginhook"
-  p4.version = ExtUtils.getID()
-  p4:autoconnect()
-  p4:connect()
-
-  -- before invoking run(), force the use of the auto-generated ticket to avoid
-  -- using a stale ticket from the file system
-  p4.ticket_file = "FileDoesNotExist"
-
-  local groupData = p4:run( "groups", "-u", "-i", user )
+  local ok, groupData = runP4command( { "groups", "-u", "-i", user } )
+  if not ok then
+    return false
+  end
   local gs = {}
-
   for i, dict in ipairs( groupData ) do
     gs[ dict[ "group" ] ] = 1
   end
-
   for k, v in pairs( groups ) do
     if gs[ k ] ~= nil then
       return true, true
