@@ -802,3 +802,7 @@ Service error: 0: [curl] Problem with the SSL CA cert (path? access rights?)
 
 Command invoke: OK
 ```
+
+### Login attempts go to example.com
+
+If the URL returned from `p4 login` is pointing to `example.com`, then the extension is unable to reach the authentication service. Check the `Service-URL` and ensure that address is reachable from the P4 Server system. When the service is not reachable, the extension will use the `Service-Down-URL` value instead, which defaults to `example.com`. This is the only way to surface problems to the user when there is trouble on the backend.
