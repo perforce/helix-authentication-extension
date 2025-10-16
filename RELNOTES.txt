@@ -30,14 +30,12 @@ Supported Platforms
     Linux (x86_64)
         RHEL 7, 8, 9
         CentOS 7, 8.0
-        Ubuntu 20.04, 22.04, 24.04
+        Ubuntu 22.04, 24.04
 
     The above platforms are tested and subject to regression testing on a
     frequent basis. Errors or bugs discovered in these platforms are prioritized
     for correction. Any platform not listed above is not actively tested by
     Perforce.
-
-    Support for Ubuntu 20.04 will be removed in the next release.
 
 
 Requirements
