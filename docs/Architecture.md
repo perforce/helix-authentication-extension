@@ -1,10 +1,10 @@
 # Architecture
 
-This document is intended for developers who are interested in the inner workings of the Helix Authentication Extension.
+This document is intended for developers who are interested in the inner workings of the P4 Authentication Extension.
 
 ## Overview
 
-The authentication extension is a Helix Core Server extension that hooks into the `auth-pre-sso` and `auth-check-sso` entry points. To facilitate web-based Single-Sign-On (SSO) functionality the extension connects to the Helix Authentication Service via HTTP/S. The extension has no dependencies aside from what Helix Core Server already provides, namely curl, JSON, and SSL support.
+The authentication extension is a Helix Core Server extension that hooks into the `auth-pre-sso` and `auth-check-sso` entry points. To facilitate web-based Single-Sign-On (SSO) functionality the extension connects to the P4 Authentication Service via HTTP/S. The extension has no dependencies aside from what Helix Core Server already provides, namely curl, JSON, and SSL support.
 
 The overall flow of the authentication process is shown in the image below.
 

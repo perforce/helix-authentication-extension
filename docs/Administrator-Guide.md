@@ -1,8 +1,8 @@
-# Administrator's Guide for Helix Authentication Extension
+# Administrator's Guide for P4 Authentication Extension
 
 ## Overview
 
-Helix Authentication Service support for Helix Core server and Helix Core clients, such as P4V, requires a Helix Core Server Extension. This extension, like the the Node.js authentication service, can run on Linux systems with Security-Enhanced Linux (SELinux) enabled and in enforcing mode. If you chose to enable [Security-Enhanced Linux (SELinux)](https://en.wikipedia.org/wiki/Security-Enhanced_Linux), the extension runs in enforcing mode.
+P4 Authentication Service support for Helix Core server and Helix Core clients, such as P4V, requires a Helix Core Server Extension. This extension, like the the Node.js authentication service, can run on Linux systems with Security-Enhanced Linux (SELinux) enabled and in enforcing mode. If you chose to enable [Security-Enhanced Linux (SELinux)](https://en.wikipedia.org/wiki/Security-Enhanced_Linux), the extension runs in enforcing mode.
 
 For information about Helix Core Server Extensions, see the [Helix Core Extensions Developer Guide](https://www.perforce.com/manuals/extensions/Content/Extensions/Home-extensions.html).
 
@@ -12,12 +12,12 @@ The overall flow of the authentication process is shown in the image below.
 
 ### Prerequisites
 
-* This document assumes that you have read "Administrator's Guide for Helix Authentication Service", which is available on the Perforce web site at https://www.perforce.com/manuals/helix-auth-svc/.
+* This document assumes that you have read "Administrator's Guide for P4 Authentication Service", which is available on the Perforce web site at https://www.perforce.com/manuals/helix-auth-svc/.
 * Helix Core Server, version 2019.1 or later.
 
 ### Support
 
-The configuration of the Helix Authentication Service to work with both the Identity Provider (IdP) and the Perforce server product requires an experienced security administrator. This effort might require assistance from Perforce Support.
+The configuration of the P4 Authentication Service to work with both the Identity Provider (IdP) and the Perforce server product requires an experienced security administrator. This effort might require assistance from Perforce Support.
 
 ## Preparing for Installation
 
@@ -400,7 +400,7 @@ If you are unsure of the contents of the user profile returned from the identity
 
 ### Allowing for non-SSO Users
 
-Configuring the extension to allow for non-SSO users is not required, however, it is recommended to have at least the administrative user named, either individually, or as part of a group of admin users. If either the Helix Authentication Service or the identity provider were to be unavailable, admin users would still be able to authenticate with Helix Core using another method, such as a database password or LDAP authentication.
+Configuring the extension to allow for non-SSO users is not required, however, it is recommended to have at least the administrative user named, either individually, or as part of a group of admin users. If either the P4 Authentication Service or the identity provider were to be unavailable, admin users would still be able to authenticate with Helix Core using another method, such as a database password or LDAP authentication.
 
 The process for enabling non-SSO users consists of three steps:
 
@@ -460,7 +460,7 @@ SSL server CA : No
 
 #### Testing the Certificates
 
-To test the client certificates used by the extension, you can start by initiating a login request using the `curl` command against a running HAS instance, to retrieve a request identifier. Note that we are using the certificates in the `loginhook` directory as an example, be sure to use the actual client certificate files in your installation when testing.
+To test the client certificates used by the extension, you can start by initiating a login request using the `curl` command against a running P4AS instance, to retrieve a request identifier. Note that we are using the certificates in the `loginhook` directory as an example, be sure to use the actual client certificate files in your installation when testing.
 
 ```shell
 $ curl --cacert loginhook/ca.crt https://has.example.com/requests/new/foobar
@@ -479,11 +479,11 @@ If successful, this request will pause for 1 minute before timing out with a '40
 certificates for <Nnn> from <Mmm> are not permitted
 ```
 
-If that is the case, then verify that the HAS configuration specifies a certificate for CA that vouches for the validity of the client certificate.
+If that is the case, then verify that the P4AS configuration specifies a certificate for CA that vouches for the validity of the client certificate.
 
 ### Authentication using JSON Web Tokens
 
-Perforce users can be authenticated using JSON Web Tokens (JWT) rather than traditional credentials. This requires configuring the Helix Authentication Service to validate the token, and configuring the extension to extract the appropriate field from the payload of the token. To use this feature, the extension must have either `client-sso-groups` or `client-sso-users` or both configured with the set of users that will be authenticating using JWT. On the client system, the `P4LOGINSSO` setting must reference a program that will print the JWT. When a user in the "client-sso" set invokes `p4 login`, the `P4LOGINSSO` program will print the JWT, which the extension will then verifiy via the Helix Authentication Service. The service will return the JSON payload of the JWT, from which the extension will extract the field with the name given by the `client-name-identifier` extension setting. This value is then compared to the value retrieved via the `client-user-identifier`, in the same manner as with `user-identifier` and `name-identifier` for users that authenticate using web-based SSO.
+Perforce users can be authenticated using JSON Web Tokens (JWT) rather than traditional credentials. This requires configuring the P4 Authentication Service to validate the token, and configuring the extension to extract the appropriate field from the payload of the token. To use this feature, the extension must have either `client-sso-groups` or `client-sso-users` or both configured with the set of users that will be authenticating using JWT. On the client system, the `P4LOGINSSO` setting must reference a program that will print the JWT. When a user in the "client-sso" set invokes `p4 login`, the `P4LOGINSSO` program will print the JWT, which the extension will then verifiy via the P4 Authentication Service. The service will return the JSON payload of the JWT, from which the extension will extract the field with the name given by the `client-name-identifier` extension setting. This value is then compared to the value retrieved via the `client-user-identifier`, in the same manner as with `user-identifier` and `name-identifier` for users that authenticate using web-based SSO.
 
 An example program for retreiving a JWT from Azure AD in a managed VM is found in `cloud/azure/get-token.py` in this repository. This Python script will use the special Azure API to retrieve a JWT for the managed VM.
 
@@ -615,7 +615,7 @@ If a superuser performs a `login` for another user, as with the command `p4 logi
 
 ### Client login reverts to password prompt (1)
 
-In the event that the Perforce client begins prompting for a password, rather than directing the user's browser to the identity provider, check that the Helix Authentication Service is running at the address referenced in the extension configuration (`Service-URL`). If the extension is not able to connect to the service, it will defer back to the server to handle the user authentication.
+In the event that the Perforce client begins prompting for a password, rather than directing the user's browser to the identity provider, check that the P4 Authentication Service is running at the address referenced in the extension configuration (`Service-URL`). If the extension is not able to connect to the service, it will defer back to the server to handle the user authentication.
 
 Ensure the debug logging is enabled in the extension, try the login again, and check the logs for any error messages. Based on the message in the log, check for a matching error in the issues described below.
 

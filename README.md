@@ -1,7 +1,7 @@
-# Helix Authentication Extension
+# P4 Authentication Extension
 
 This Helix Server extension facilitates Single-Sign-On (SSO) authentication,
-directing end users to the Helix Authentication Service to authenticate using an
+directing end users to the P4 Authentication Service to authenticate using an
 identity provider that supports either the OpenID Connect or SAML 2.0
 authentication protocols.
 
@@ -21,9 +21,9 @@ documentation, and these versions are limited to Community Support.
 
 ## Overview
 
-The Helix Authentication Extension is installed on the Helix Server, and hooks
+The P4 Authentication Extension is installed on the Helix Server, and hooks
 into the authentication facility of the server. Whenever a user attempts to
-authenticate with the server, they will be directed to the Helix Authentication
+authenticate with the server, they will be directed to the P4 Authentication
 Service via their default web browser, which in turn redirects the user to the
 configured identity provider (IdP). Once the user has successfully authenticated
 with the IdP, a ticket will be issued by the Helix Server, at which point the
@@ -35,9 +35,9 @@ The extension requires a Helix Server version that supports extensions. This is
 **2019.1** or later for **Linux** systems, and **2021.2** or later for
 **Windows** systems.
 
-### Helix Authentication Service
+### P4 Authentication Service
 
-The extension integrates with the Helix Authentication Service
+The extension integrates with the P4 Authentication Service
 (available on [GitHub](https://github.com/perforce/helix-authentication-service))
 in order to direct the user to the identity provider during the login process.
 As such, the authentication service must be running and accessible to the

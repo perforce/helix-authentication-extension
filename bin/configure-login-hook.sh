@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Configuration script for Helix Authentication Extension.
+# Configuration script for P4 Authentication Extension.
 #
 # Copyright 2024, Perforce Software Inc. All rights reserved.
 #
@@ -196,10 +196,10 @@ Usage:
 
 Description:
 
-    Configuration script for Helix Authentication Extension.
+    Configuration script for P4 Authentication Extension.
 
     This script will package, install, and configure the Helix Core
-    extension for integrating with the Helix Authentication Service.
+    extension for integrating with the P4 Authentication Service.
 
     -m
         Monochrome; no colored text.
@@ -277,7 +277,7 @@ Description:
     -h / --help
         Display this help message.
 
-See the Helix Authentication Extension documentation for additional
+See the P4 Authentication Extension documentation for additional
 information pertaining to configuring and managing the extension.
 
 EOS

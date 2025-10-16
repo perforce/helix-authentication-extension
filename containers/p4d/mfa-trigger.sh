@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Configuration script for Helix Authentication Service.
+# Configuration script for P4 Authentication Service.
 #
 # Copyright 2020, Perforce Software Inc. All rights reserved.
 #
@@ -43,7 +43,7 @@ Usage:
 
 Description:
 
-    Test trigger playing with MFA and HAS on the same instance.
+    Test trigger playing with MFA and P4AS on the same instance.
 
     Most of these options are not implemented (yet).
 

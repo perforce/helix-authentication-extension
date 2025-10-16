@@ -1,7 +1,7 @@
 # Development
 
 This document is intended for developers who are interested in learning how
-to modify and test the Helix Authentication Extension.
+to modify and test the P4 Authentication Extension.
 
 ## Automated Testing
 

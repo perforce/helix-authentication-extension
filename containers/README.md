@@ -62,7 +62,7 @@ $ docker compose exec chicago.doc /setup/login.sh
 
 The last `exec` command is to perform the commit service user login to the edge server instance, which cannot be done until both containers have been started, hence it cannot be done during the build.
 
-To test authentication, you will need to build and start the Docker containers defined in the https://github.com/perforce/helix-authentication-service project. These containers directly or indirectly defer to the Helix Authentication Service at some point in the process.
+To test authentication, you will need to build and start the Docker containers defined in the https://github.com/perforce/helix-authentication-service project. These containers directly or indirectly defer to the P4 Authentication Service at some point in the process.
 
 The **p4d** Helix Core Server instance has been configured with the full suite of test accounts defined in the authentication service containers. By default, the SAML/Shibboleth accounts will be in effect. To change this, configure the extension to specify `oidc` as the protocol in the `Auth-Protocol` global setting.
 

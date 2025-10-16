@@ -63,7 +63,7 @@ Usage:
 
 Description:
 
-    Support script for Helix Authentication Extension.
+    Support script for P4 Authentication Extension.
 
     This script will collect information regarding the extension installation
     in a format suitable for sending to Perforce Support.
@@ -80,7 +80,7 @@ Description:
     -h / --help
         Display this help message.
 
-See the Helix Authentication Extension documentation for additional
+See the P4 Authentication Extension documentation for additional
 information pertaining to configuring and managing the extension.
 
 EOS

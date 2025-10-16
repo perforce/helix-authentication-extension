@@ -1,7 +1,7 @@
 {
   "name": "helix-auth-extension",
   "version": "2025.1.0",
-  "description": "Helix Authentication Extension",
+  "description": "P4 Authentication Extension",
   "type": "module",
   "engines": {
     "node": "^18.0.0 || >=20.0.0"
