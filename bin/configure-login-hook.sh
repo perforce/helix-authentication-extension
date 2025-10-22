@@ -817,6 +817,8 @@ function check_perforce_super_user() {
 
     if [[ -z "$P4PASSWD" || "$P4PASSWD" =~ ^[[:blank:]]*$ ]]; then
         echo "P4PASSWD is empty or is whitespace. Skipping Helix server login."
+    elif [[ $P4PASSWD =~ ^[A-Z0-9]{32}$ ]]; then
+        echo "P4PASSWD appears to be a ticket, will check login status..."
     else
         if ! echo "$P4PASSWD" | p4 -p "$P4PORT" -u "$P4USER" login >/dev/null 2>&1; then
             error "Unable to login to the Helix server '$P4PORT' as '$P4USER' with supplied password"
