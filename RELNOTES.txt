@@ -1,6 +1,6 @@
                             Release Notes for
                         P4 Authentication Extension
-                            Version 2025.1
+                            Version 2025.2
 
 
 Introduction
@@ -95,6 +95,31 @@ Known Limitations
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
+New functionality in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-549 (Change #2842192)
+        Configure script now allows using the ticket value instead of password
+        when installing and configuring the extension.
+
+----------------------------------------------------------------------
+Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-638 (Change #2786738)
+        P4 command errors are now logged to the extension log again, after the
+        fix for the stale ticket issue had hidden these errors.
+
+----------------------------------------------------------------------
+Other changes in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-625 (Change #2840410)
+        The extension is now referred to as the P4 Authentication Extension.
+        The name of the extension within P4 Server remains the same for
+        backward compatibility.
+
+    HAS-620 (Change #2840399)
+        Remove support for Ubuntu 20.04.
+
+----------------------------------------------------------------------
 New functionality in 2025.1 (2025.1/2758427) (2025/05/05)
 
     HAS-584 (Change #2637409)
@@ -173,7 +198,7 @@ Bugs fixed in 2021.1 (2021.1/2130312) (2021/05/27)
         Configure script now reads extension configuration correctly.
 
     HAS-189 (Change #2084411)
-        Extension correctly distinquishes P4V from P4VS during login.
+        Extension correctly distinguishes P4V from P4VS during login.
 
 ----------------------------------------------------------------------
 Other changes in 2021.1 (2021.1/2130312) (2021/05/27)

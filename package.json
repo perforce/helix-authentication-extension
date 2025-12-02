@@ -1,10 +1,10 @@
 {
   "name": "helix-auth-extension",
-  "version": "2025.1.0",
+  "version": "2025.2.0",
   "description": "P4 Authentication Extension",
   "type": "module",
   "engines": {
-    "node": "^18.0.0 || >=20.0.0"
+    "node": ">=20.0.0"
   },
   "repository": {
     "type": "git",
