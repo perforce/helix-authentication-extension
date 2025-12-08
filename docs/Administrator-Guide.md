@@ -2,9 +2,9 @@
 
 ## Overview
 
-P4 Authentication Service support for Helix Core server and Helix Core clients, such as P4V, requires a Helix Core Server Extension. This extension, like the the Node.js authentication service, can run on Linux systems with Security-Enhanced Linux (SELinux) enabled and in enforcing mode. If you chose to enable [Security-Enhanced Linux (SELinux)](https://en.wikipedia.org/wiki/Security-Enhanced_Linux), the extension runs in enforcing mode.
+P4 Authentication Service support for P4 Server and P4 clients, such as P4V, requires this P4 Server Extension. This extension, like the the Node.js authentication service, can run on Linux systems with Security-Enhanced Linux (SELinux) enabled and in enforcing mode. If you chose to enable [Security-Enhanced Linux (SELinux)](https://en.wikipedia.org/wiki/Security-Enhanced_Linux), the extension runs in enforcing mode.
 
-For information about Helix Core Server Extensions, see the [Helix Core Extensions Developer Guide](https://www.perforce.com/manuals/extensions/Content/Extensions/Home-extensions.html).
+For information about P4 Server extensions, see the [Extensions chapter](https://help.perforce.com/helix-core/server-apps/p4sag/current/Content/Extensions/extension-overview.html) of the P4 Server Administration Documentation. 
 
 The overall flow of the authentication process is shown in the image below.
 
@@ -13,7 +13,7 @@ The overall flow of the authentication process is shown in the image below.
 ### Prerequisites
 
 * This document assumes that you have read "Administrator's Guide for P4 Authentication Service", which is available on the Perforce web site at https://www.perforce.com/manuals/helix-auth-svc/.
-* Helix Core Server, version 2019.1 or later.
+* P4 Server, version 2019.1 or later.
 
 ### Support
 
@@ -25,7 +25,7 @@ Before installing the authentication extension there are a few steps to be taken
 
 ### Upgrade the Clients
 
-It is helpful for the end users to have updated Helix Core clients. The updated clients will direct the user to the web browser during the login progress. Older clients may only print the URL on the screen and not open the browser automatically. See the `README.md` file for the list of supported client versions.
+It is helpful for the end users to have updated P4 clients. The updated clients will direct the user to the web browser during the login progress. Older clients may only print the URL on the screen and not open the browser automatically. See the `README.md` file for the list of supported client versions.
 
 ### Testing the Extension
 
@@ -45,11 +45,11 @@ If you are planning to change some or all users from authenticating via LDAP to 
 
 The extension can be installed using the provided configuration script, or manually for systems not supported by the script. This section will describe how to use the configuration script, while the [Manual Installation](#manual-installation) section describes the detailed steps for building, installing, and configuring the extension.
 
-In both the assisted and manual installation procedures, the last step will involve restarting the Helix Core server.
+In both the assisted and manual installation procedures, the last step will involve restarting P4 server.
 
 ### Configuration Script
 
-The configuration script is a Linux-based bash script named `configure-login-hook.sh` in the `bin` directory. Since the script requires a Linux system, it does not support installation from a Windows system. The Helix Core server can be running on a Windows system, but the configure script must be run from a Linux system. The script can be run without prompting for input by providing all of the necessary command-line options, including `-n` to signal the script to run non-interactively. When run without options, the script will prompt for the required information. The script will use the provided information to build, install, and configure the extension. It will also restart the Helix Core server, if given permission to do so.
+The configuration script is a Linux-based bash script named `configure-login-hook.sh` in the `bin` directory. Since the script requires a Linux system, it does not support installation from a Windows system. The P4 Server can be running on a Windows system, but the configure script must be run from a Linux system. The script can be run without prompting for input by providing all of the necessary command-line options, including `-n` to signal the script to run non-interactively. When run without options, the script will prompt for the required information. The script will use the provided information to build, install, and configure the extension. It will also restart the P4 Server, if given permission to do so.
 
 Invoke the script with the `--help` option to learn the details of the options and usage of the script.
 
@@ -80,7 +80,7 @@ If this is not the first time you are installing the extension, remove the exist
 
 ## Configuring the Extension
 
-The extension is configured at both the _global_ and _instance_ level. To learn about these levels, see the "Server extension configuration (global and instance specs)" topic in the [Helix Core Extensions Developer Guide](https://www.perforce.com/manuals/extensions/Content/Extensions/extensionspec.html). The extension has settings that are specific to the global and instance configuration, as described below.
+The extension is configured at both the _global_ and _instance_ level. To learn about these levels, see the "Server extension configuration (global and instance specs)" topic in the [Extensions chapter](https://help.perforce.com/helix-core/server-apps/p4sag/current/Content/Extensions/extension-overview.html) of the P4 Server Administration Documentation. The extension has settings that are specific to the global and instance configuration, as described below.
 
 Both the global and instance configuration are defined using Perforce forms, in which fields consist of a label, a colon, a tab character, and a value. Within the `ExtConfig` section, all field values **must** start on a new line, with multiple values put on separate lines, and all lines are prefixed by a tab character. Field labels are prefixed by **one** tab character, and values start on a new line and are prefixed with **two** tab characters. If any **space** characters are present in the line _before_ the setting name or value, the extension configuration will not be parsed correctly.
 
@@ -133,7 +133,7 @@ Of the settings in `ExtConfig`, only the `Service-URL` setting is required. The 
 | `Client-Key` | Path to the private key of the extension client certificate. See the [Certificates](#certificates) section for more information. | Defaults to the `client.key` file in the extension directory. |
 | `Resolve-Host` | A host name, port number, and IP address, separated by colons (:), that act as a simple DNS lookup in cases where this might be necessary (e.g. Kubernetes). | _none_ |
 | `Service-Down-URL` | The URL to open in the browser when the extension cannot connect to the service at `Service-URL` | `example.com` |
-| `Service-URL` | The address of the authentication service by which the Helix Server can make a connection | `http://localhost:3000` |
+| `Service-URL` | The address of the authentication service by which the P4 Server can make a connection | `http://localhost:3000` |
 | `Verify-Peer` | If set to `true` then the extension will verify that the authentication service is using a valid SSL/TLS certficate. | _false_ |
 | `Verify-Host` | If set to `true` then the extension will verify that the hostname of the authentication service matches the SSL/TLS certificate returned by the service. | _false_ |
 
@@ -335,17 +335,17 @@ That command will remove the named instance configuration, leaving the other con
 
 ### Applying the Changes
 
-After installing and configuring the authentication extension, the Helix Core server must be restarted for the changes to take effect. The `restart` is necessary because Helix Core prepares the authentication mechanisms during startup. This is true when adding or removing **any** `auth-` related triggers or extension, and this includes this loginhook extension.
+After installing and configuring the authentication extension, the P4 Server must be restarted for the changes to take effect. The `restart` is necessary because P4 Server prepares the authentication mechanisms during startup. This is true when adding or removing **any** `auth-` related triggers or extension, and this includes this loginhook extension.
 
 It is **recommended** to have at least one administrative user that will *not* authenticate using the web-based SSO; this provides a means of authenticating in the event that the service becomes unavailable for any reason. Typically the _super_ and/or _admin_ users would be named in one of these two settings.
 
-When you are ready to restart the server, you can use the command `p4 admin restart` to restart. Note that your deployment of Helix Core Server might be managed using systemd, in which case the command to restart might be `sudo systemctl restart p4d_1` or similar. This is highly dependent on the deployment method and is outside of the scope of this document.
+When you are ready to restart the server, you can use the command `p4 admin restart` to restart. Note that your deployment of P4 Server might be managed using systemd, in which case the command to restart might be `sudo systemctl restart p4d_1` or similar. This is highly dependent on the deployment method and is outside of the scope of this document.
 
 ## Next Steps
 
 ### Testing
 
-Preliminary testing of the extension, after installation but before restarting Helix Core Server, is possible with the use of the `p4 extension --run` command. The extension supports several commands:
+Preliminary testing of the extension, after installation but before restarting P4 Server, is possible with the use of the `p4 extension --run` command. The extension supports several commands:
 
 | Command | Description |
 | ------- | ----------- |
@@ -384,13 +384,13 @@ $ p4 extension --list --type=extensions
 ... data-dir server.extensions.dir/117E9283-732B-45A6-9993-AE64C354F1C5/1-data
 ```
 
-The location of the `server.extensions.dir` will depend on the configuration of the server. By default it will be located under the P4 _root_ directory. See the Helix Core Server [documentation](https://www.perforce.com/manuals/cmdref/Content/CmdRef/configurables.alphabetical.html) for details on this setting.
+The location of the `server.extensions.dir` will depend on the configuration of the server. By default it will be located under the P4 _root_ directory. See the [P4 CLI Reference](https://help.perforce.com/helix-core/server-apps/cmdref/current/Content/CmdRef/configurables.alphabetical.html) for details on this setting.
 
 ### Mapping User Profiles to Perforce Users
 
-Helix user specs have several fields that can be used for matching with the profile information returned from the identity provider. The extension uses the trigger variables exposed by the server, namely `fullname`, `user`, and `email`, and the choice is configured in the extension by setting the `user-identifier` value (default is `email`) in the *instance* configuration.
+P4 user specs have several fields that can be used for matching with the profile information returned from the identity provider. The extension uses the trigger variables exposed by the server, namely `fullname`, `user`, and `email`, and the choice is configured in the extension by setting the `user-identifier` value (default is `email`) in the *instance* configuration.
 
-On the other side of the mapping is the user profile returned by the identity provider. Different protocols and providers return different fields, and there is no one field that works for all. Also, administrators are often free to adjust the output to suit their needs. As such, the extension has another *instance* configuration setting named `name-identifier`, which specifies the name of the field in the user profile that is to be used in matching with the Helix user. This defaults to `email` because that field is likely to be available and unique on both the IdP and Helix.
+On the other side of the mapping is the user profile returned by the identity provider. Different protocols and providers return different fields, and there is no one field that works for all. Also, administrators are often free to adjust the output to suit their needs. As such, the extension has another *instance* configuration setting named `name-identifier`, which specifies the name of the field in the user profile that is to be used in matching with the P4 user. This defaults to `email` because that field is likely to be available and unique on both the IdP and P4 Server.
 
 Generally, with **SAML**, the `name-identifier` extension setting should be given the value `nameID` because that field is always present in the user profile returned from the SAML IdP. Depending on the format of the name identifier, you will need to select an appropriate value for the `user-identifier`. If the IdP returns a "user name", and it matches the `User` field in the Perforce user spec, set `user-identifier` to `user` in the extension *instance* configuration. If the name identifier is an email address, use `email` instead of `user`. The value of `fullname` might also be appropriate, depending on the IdP configuration.
 
@@ -400,7 +400,7 @@ If you are unsure of the contents of the user profile returned from the identity
 
 ### Allowing for non-SSO Users
 
-Configuring the extension to allow for non-SSO users is not required, however, it is recommended to have at least the administrative user named, either individually, or as part of a group of admin users. If either the P4 Authentication Service or the identity provider were to be unavailable, admin users would still be able to authenticate with Helix Core using another method, such as a database password or LDAP authentication.
+Configuring the extension to allow for non-SSO users is not required, however, it is recommended to have at least the administrative user named, either individually, or as part of a group of admin users. If either the P4 Authentication Service or the identity provider were to be unavailable, admin users would still be able to authenticate with P4 Server using another method, such as a database password or LDAP authentication.
 
 The process for enabling non-SSO users consists of three steps:
 
@@ -498,7 +498,7 @@ In the sample scenario below, the host names and IP addresses are only examples.
 * An ingress controller is configured to map `auth-svc.cluster` to the k8s service that is managing the pod running the authentication service.
 * That ingress controller is configured to terminate the TLS connection and forward the client certificate to the authentication service via an HTTP header.
 * The authentication service is configured to expect the client certificate via said header.
-* Helix Core Server, and in turn, the extension are running in a separate pod on the cluster.
+* P4 Server, and in turn, the extension are running in a separate pod on the cluster.
 
 For whatever reason, the pod running `p4d` is either not configured to resolve the service's FQDN, or name resolution is not working as hoped. There may be different reasons for this, but the point is that it is happening and you need to do something about it. That something is to set the `Resolve-Host` global configuration value to provide a simple mapping of the service host name to the IP address of the load balancer. In our example above, `Resolve-Host` would be set to `auth-svc.cluster:443:192.168.1.21` -- the first part is the FQDN of the service, the second part between the colons (`:`) is the port number on which the load balancer is listening for HTTPS connections, the third part is the IP address of said load balancer.
 
@@ -507,18 +507,18 @@ Why is this necessary? Because with just an IP address for the `Service-URL`, th
 ## Disabling the Extension
 
 To disable the login extension, change the `ExtEnabled` setting to `false` in
-the instance configuration of the extension, then restart Helix Core Server for
+the instance configuration of the extension, then restart P4 Server for
 the change to take effect. Until the server is restarted, logins will be
 **broken** for all users.
 
-Versions of Helix Core Server that support disabling an authentication extension
+Versions of P4 Server that support disabling an authentication extension
 include 2020.2, 2020.1.3, 2019.2.10, and all versions thereafter, including the
 2021.N and 2022.N releases.
 
 ## Enabling the Extension
 
 To enable the login extension, change the `ExtEnabled` setting to `true` in the
-instance configuration of the extension, then restart Helix Core Server for the
+instance configuration of the extension, then restart P4 Server for the
 change to take effect.
 
 ## Removing the Extension
@@ -549,7 +549,7 @@ Extension 'Auth::loginhook and its configurations' successfully deleted.
 
 ### Step 3: Restart the server
 
-See the [Applying the Changes](#applying-the-changes) section for details on restarting Helix Core Server. Without restarting the server, it may report an error about a missing hook whenever someone attempts to login:
+See the [Applying the Changes](#applying-the-changes) section for details on restarting P4 Server. Without restarting the server, it may report an error about a missing hook whenever someone attempts to login:
 
 ```
 Command unavailable: external authentication 'auth-check-sso' trigger not found.
@@ -585,7 +585,7 @@ so it may be easier to simply run the configure script as described above.
 1. Merge the previous configuration with those of the new extension
     * `p4 extension --configure Auth::loginhook`
     * `p4 extension --configure Auth::loginhook --name loginhook-a1`
-1. Restart the Helix Server (`p4 admin restart`)
+1. Restart the P4 Server (`p4 admin restart`)
 
 ## Notes on Extension Behavior
 
@@ -593,19 +593,19 @@ so it may be easier to simply run the configure script as described above.
 
 When the extension is installed, the **default** behavior is for **all** users to authenticate with SSO, with the exception of two categories of users: a) those users whose `AuthMethod` is set to `ldap`, and b) those users whose `Type` is not `standard` (operators and service users). LDAP users are expected to authenticate against an LDAP directory, and non-standard users typically cannot authenticate via a web browser.
 
-If either the `client-sso-users` or `client-sso-groups` contains one or more entries (does not start with `...`), then any _matching_ users will require the use of the traditional SSO functionality in Helix Core Server. Specifically, the client must have a `P4LOGINSSO` that points to a program that emits a token.
+If either the `client-sso-users` or `client-sso-groups` contains one or more entries (does not start with `...`), then any _matching_ users will require the use of the traditional SSO functionality in P4 Server. Specifically, the client must have a `P4LOGINSSO` that points to a program that emits a token.
 
-If either the `sso-users` or `sso-groups` contains one or more entries (does not start with `...`), then any _matching_ users will authenticate with SSO. Any users that do _not match_ will **not** authenticate with SSO. Note that LDAP users cannot use web-based SSO to authenticate with Helix Core Server. All such users **must** have their `AuthMethod` set to `perforce` to support web-based SSO. See [LDAP.md](./LDAP.md) for more information.
+If either the `sso-users` or `sso-groups` contains one or more entries (does not start with `...`), then any _matching_ users will authenticate with SSO. Any users that do _not match_ will **not** authenticate with SSO. Note that LDAP users cannot use web-based SSO to authenticate with P4 Server. All such users **must** have their `AuthMethod` set to `perforce` to support web-based SSO. See [LDAP.md](./LDAP.md) for more information.
 
 If `sso-users` and `sso-groups` are not defined (start with `...`), then the `non-sso-users` and `non-sso-groups` settings are taken into consideration.
 
 ### When the authentication service is unreachable
 
-If a user attempts to authenticate with Helix Server while the authentication service is not accessible, the authentication extension will "error out" immediately, causing Helix Server to defer to another authentication mechanism (e.g. LDAP, database password). In this case the client will present a password prompt, as described in the [Troubleshooting](#troubleshooting) section.
+If a user attempts to authenticate with P4 Server while the authentication service is not accessible, the authentication extension will "error out" immediately, causing P4 Server to defer to another authentication mechanism (e.g. LDAP, database password). In this case the client will present a password prompt, as described in the [Troubleshooting](#troubleshooting) section.
 
 ### When user credentials are not accepted
 
-If the user attempts to authenticate with the identity provider and enters invalid credentials, the extension will reject the login attempt completely, and in turn Helix Server will reject the user authentication. There is **no fallback** of any kind _if_ the authentication service is accessible and functioning properly.
+If the user attempts to authenticate with the identity provider and enters invalid credentials, the extension will reject the login attempt completely, and in turn P4 Server will reject the user authentication. There is **no fallback** of any kind _if_ the authentication service is accessible and functioning properly.
 
 ### Login by superuser for another user
 
@@ -621,7 +621,7 @@ Ensure the debug logging is enabled in the extension, try the login again, and c
 
 ### Client login reverts to password prompt (2)
 
-If the Helix Core Server is not invoking the extension during login, but running the test (`p4 configure --run loginhook-a1 test-all`) is working, then it may be that there are LDAP configurations and that is preventing the extension from running. In this scenario, it is necessary to configure p4d to allow for SSO authentication for users that are not using LDAP `AuthMethod`.
+If the P4 Server is not invoking the extension during login, but running the test (`p4 configure --run loginhook-a1 test-all`) is working, then it may be that there are LDAP configurations and that is preventing the extension from running. In this scenario, it is necessary to configure p4d to allow for SSO authentication for users that are not using LDAP `AuthMethod`.
 
 ```shell
 p4 configure set auth.sso.nonldap=1
@@ -629,7 +629,7 @@ p4 configure set auth.sso.nonldap=1
 
 ### Login fails with 'P4LOGINSSO' not set
 
-If a Perforce client sees the `Single sign-on on client failed: 'P4LOGINSSO' not set` error when attempting to log in to a Helix Server with the authentication extension installed, then it is likely that the authentication service was not reachable from the extension. The nature of this error can be confirmed by enabling the logging in the extension, attempt the login again, and look for a log entry that resembles the following:
+If a Perforce client sees the `Single sign-on on client failed: 'P4LOGINSSO' not set` error when attempting to log in to a P4 Server with the authentication extension installed, then it is likely that the authentication service was not reachable from the extension. The nature of this error can be confirmed by enabling the logging in the extension, attempt the login again, and look for a log entry that resembles the following:
 
 ```json
 {"data":{"AuthPreSSO":"failed to get request identifier"},"nanos":927914375,
@@ -666,7 +666,7 @@ This log entry indicates that the extension user itself does not have a valid ti
 
 Another cause may be that the `ExtP4USER` has multiple ticket values, as shown in the output of `p4 tickets`, which are associated with different hosts and/or `auth.id` values. If this happens, it is best to remove the stale tickets by invoking `p4 logout -a` as the `ExtP4USER`, then login again. If there are multiple servers in the topology (such as commit and edge servers), then invoke `p4 login` as the `ExtP4USER` on each of these systems, ensuring that they each get a valid ticket.
 
-Yet another cause is that the client `P4PORT` value connects to the `p4d` instance on a network interface that is not associated with a ticket for the `ExtP4USER` user. This is rare, but one solution may be to use `p4 login -h` for the `ExtP4USER` user on all relevant addresses of the Helix Core Server instance.
+Yet another cause is that the client `P4PORT` value connects to the `p4d` instance on a network interface that is not associated with a ticket for the `ExtP4USER` user. This is rare, but one solution may be to use `p4 login -h` for the `ExtP4USER` user on all relevant addresses of the P4 Server instance.
 
 ### Login successful only after multiple attempts
 
@@ -768,7 +768,7 @@ Command unavailable: external authentication 'auth-set' trigger not found.
 
 ### Cannot install unsigned extension
 
-If when installing the extension you see a message from Helix Core Server like this:
+If when installing the extension you see a message from P4 Server like this:
 
 ```
 Installation failure: extension package must be signed but is missing required
@@ -783,7 +783,7 @@ p4 configure set server.extensions.allow.unsigned=1
 
 ### non-LDAP users are not authenticated with SSO
 
-When LDAP is configured in Helix Core Server, and an SSO trigger or extension is installed, non-LDAP users will not use the SSO mechanism. This is the default behavior of the Helix Core Server. However, LDAP authentication and web-based SSO do not work together, see [LDAP.md](./LDAP.md) for more information. To resolve this problem, set `auth.sso.nonldap` to `1` to instruct the server to allow for the use of SSO with non-LDAP users.
+When LDAP is configured in P4 Server, and an SSO trigger or extension is installed, non-LDAP users will not use the SSO mechanism. This is the default behavior of the P4 Server. However, LDAP authentication and web-based SSO do not work together, see [LDAP.md](./LDAP.md) for more information. To resolve this problem, set `auth.sso.nonldap` to `1` to instruct the server to allow for the use of SSO with non-LDAP users.
 
 ```shell
 p4 configure set auth.sso.nonldap=1
