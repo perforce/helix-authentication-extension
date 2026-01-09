@@ -53,5 +53,4 @@ RUN chown -R perforce:perforce /setup
 USER perforce
 COPY $BASE_PATH/run.sh .
 EXPOSE 2666
-HEALTHCHECK CMD p4 -p 0.0.0.0:2666 -u super info || exit 1
 ENTRYPOINT [ "./run.sh" ]

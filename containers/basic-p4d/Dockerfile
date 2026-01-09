@@ -40,9 +40,4 @@ COPY $BASE_PATH/docker-entrypoint.sh .
 
 VOLUME /p4
 EXPOSE 1666
-#
-# Cannot have a healthcheck using p4 since a ticket for super user was not
-# established at build time.
-#
-# HEALTHCHECK CMD p4 -p 0.0.0.0:1666 -u super info || exit 1
 ENTRYPOINT [ "./docker-entrypoint.sh" ]

@@ -44,5 +44,4 @@ RUN ./build.sh
 USER perforce
 COPY $BASE_PATH/run.sh .
 EXPOSE 1666
-HEALTHCHECK CMD p4 -p 0.0.0.0:1666 -u super info || exit 1
 ENTRYPOINT [ "./run.sh" ]
