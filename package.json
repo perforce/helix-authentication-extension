@@ -38,5 +38,9 @@
     "http-errors": "^2.0.0",
     "mocha": "^11.2.2",
     "p4api": "^3.4.0"
+  },
+  "overrides": {
+    "diff": "8.0.3",
+    "serialize-javascript": "7.0.5"
   }
 }
