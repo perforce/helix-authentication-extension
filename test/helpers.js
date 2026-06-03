@@ -54,16 +54,21 @@ export function establishTrust(config) {
 
 export function establishSuper(config) {
   const p4 = makeP4(config)
+  // On a secure-by-default server the database starts empty, so the first user
+  // to run 'passwd' is automatically added to the protections table with
+  // 'super' access. Set the password, then log in to get a valid ticket before
+  // running any other commands.
+  const passwdCmd = p4.cmdSync('passwd', 'p8ssword\np8ssword')
+  assert.equal(passwdCmd.info[0].data, 'Password updated.')
+  const loginCmd = p4.cmdSync('login', 'p8ssword')
+  assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
+  // now that we are authenticated, fill in the user spec details
   const userOut = p4.cmdSync('user -o')
   const userSpec = userOut.stat[0]
   userSpec.Email = 'bruno@example.com'
   userSpec.FullName = 'Bruno Venus'
   const userIn = p4.cmdSync('user -i', userSpec)
   assert.equal(userIn.info[0].data, 'User bruno saved.')
-  const passwdCmd = p4.cmdSync('passwd', 'p8ssword\np8ssword')
-  assert.equal(passwdCmd.info[0].data, 'Password updated.')
-  const loginCmd = p4.cmdSync('login', 'p8ssword')
-  assert.equal(loginCmd.stat[0].TicketExpiration, '43200')
   const seecurityCmd = p4.cmdSync('configure set security=3')
   assert.equal(seecurityCmd.stat[0].Action, 'set')
   const allowpasswdCmd = p4.cmdSync('configure set auth.sso.allow.passwd=1')
