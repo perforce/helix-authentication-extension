@@ -78,7 +78,7 @@ describe('Not SSO users', function () {
       // failure is expected because the LDAP server is not reachable
       assert.equal(loginCmd.error[0].data, 'Authentication failed.\n')
       const log = helpers.readExtensionLog(p4config)
-      assert.include(log, 'info: skipping LDAP user')
+      assert.include(log, 'info: skipping non-perforce auth method')
     })
   })
 

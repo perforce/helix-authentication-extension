@@ -221,10 +221,12 @@ function AuthPreSSO()
     } )
     return true, "unused", "skipping", true
   end
-  -- LDAP users are expected to authenticate using LDAP
-  if authMethod:match( "^ldap" ) ~= nil then
+  -- Only 'perforce' and 'perforce+...' auth methods can use web-based SSO;
+  -- anything else (e.g. LDAP) is expected to authenticate by other means.
+  if authMethod ~= "perforce" and authMethod:match( "^perforce%+" ) == nil then
     utils.debug( {
-      [ "AuthPreSSO" ] = "info: skipping LDAP user",
+      [ "AuthPreSSO" ] = "info: skipping non-perforce auth method",
+      [ "authMethod" ] = authMethod,
       [ "user" ] = user
     } )
     return true, "unused", "skipping", true
