@@ -387,10 +387,14 @@ function ExtUtils.userIdentifier( usingClient )
     field = ExtUtils.iCfgData[ "user-identifier" ]
   end
   if field ~= "email" and field ~= "fullname" and field ~= "user" then
+    -- The setting is missing (nil), still set to the documentation default
+    -- (a '...' wildcard), or has an unrecognized value. Report the problem and
+    -- fall back to 'email' rather than failing the entire login process.
     ExtUtils.debug( {
-      [ "userIdentifier" ] = "warning: user-identifier should be one of 'email', 'fullname', or 'user'",
-      [ "value" ] = field
+      [ "userIdentifier" ] = "warning: user-identifier must be one of 'email', 'fullname', or 'user'; defaulting to 'email'",
+      [ "value" ] = field or "nil"
     } )
+    return Helix.Core.Server.GetVar( "email" )
   end
   local userid = Helix.Core.Server.GetVar( field:lower() )
   if userid then
@@ -406,6 +410,15 @@ function ExtUtils.nameIdentifier( usingClient, profile )
     field = ExtUtils.iCfgData[ "client-name-identifier" ]
   else
     field = ExtUtils.iCfgData[ "name-identifier" ]
+  end
+  if field == nil or string.match( field, "^%.%.%." ) ~= nil then
+    -- The setting is missing (nil) or still set to the documentation default
+    -- (a '...' wildcard). Report the problem and fall back to 'email'.
+    ExtUtils.debug( {
+      [ "nameIdentifier" ] = "warning: name-identifier is not defined; defaulting to 'email'",
+      [ "value" ] = field or "nil"
+    } )
+    return profile[ "email" ]
   end
   local nameid = profile[ field ]
   if nameid then
