@@ -52,6 +52,23 @@ An alternative to using dnsmasq would be to hard-code the names in the `/etc/hos
 
 ## Usage
 
+These containers attach to a Docker network named `auth-service` that is shared
+with the Helix Authentication Service containers (see the
+[helix-authentication-service](https://github.com/perforce/helix-authentication-service)
+project). Because the network is shared between two separate compose projects,
+it is declared as `external` and must be created once before starting the
+containers:
+
+```shell
+$ docker network create auth-service
+```
+
+This only needs to be done once; the network persists across `docker compose
+down`. (If you skip this step, `docker compose up` fails with "network
+auth-service declared as external, but could not be found".) When you are
+completely finished, the network can be removed with `docker network rm
+auth-service`.
+
 Build and start the containers (from the parent directory) like so:
 
 ```shell

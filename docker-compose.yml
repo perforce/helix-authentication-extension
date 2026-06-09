@@ -77,3 +77,9 @@ services:
 networks:
   authen:
     name: auth-service
+    # Shared with the Helix Authentication Service containers for manual
+    # testing, so the network is managed outside of any single compose project
+    # (create it once with `docker network create auth-service`). This avoids
+    # the "network ... exists but was not created for project" warning that
+    # occurs when two projects both try to own a network of the same name.
+    external: true
