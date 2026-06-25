@@ -1,20 +1,19 @@
-FROM ubuntu:22.04
-
+#
+# build the swarm image
+#
+FROM ubuntu:24.04
 ARG BASE_PATH
 ARG PUB_KEY
 ARG APT_URL
 ARG P4PORT
-
-#
-# install p4 and swarm using packages
-#
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND="noninteractive"
 RUN apt-get update && \
     apt-get -q -y install apt-utils lsb-release gnupg curl
 ADD ${PUB_KEY} perforce.pubkey
-RUN apt-key add perforce.pubkey && \
+RUN gpg --output /usr/share/keyrings/perforce.gpg --dearmor perforce.pubkey && \
     rm -f perforce.pubkey
-RUN echo "deb ${APT_URL} $(lsb_release -sc) release" > /etc/apt/sources.list.d/perforce.sources.list
+RUN echo "deb [signed-by=/usr/share/keyrings/perforce.gpg] ${APT_URL} $(lsb_release -sc) release" > \
+    /etc/apt/sources.list.d/perforce.sources.list
 RUN apt-get update && \
     apt-get -q -y install helix-cli helix-swarm
 

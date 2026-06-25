@@ -17,11 +17,10 @@ RUN apt-get -q update --fix-missing && \
 RUN apt-get -q update --fix-missing && \
     apt-get -q -y install apt-utils lsb-release gnupg
 ADD ${PUB_KEY} perforce.pubkey
-RUN apt-key add perforce.pubkey && \
+RUN gpg --output /usr/share/keyrings/perforce.gpg --dearmor perforce.pubkey && \
     rm -f perforce.pubkey
-# temporary hack: no p4/p4d packages for jammy yet, so use focal
-# RUN echo "deb ${APT_URL} $(lsb_release -sc) release" > /etc/apt/sources.list.d/perforce.sources.list
-RUN echo "deb ${APT_URL} focal release" > /etc/apt/sources.list.d/perforce.sources.list
+RUN echo "deb [signed-by=/usr/share/keyrings/perforce.gpg] ${APT_URL} $(lsb_release -sc) release" > \
+    /etc/apt/sources.list.d/perforce.sources.list
 RUN apt-get -q update --fix-missing && \
     apt-get -q -y install helix-cli helix-p4d
 
