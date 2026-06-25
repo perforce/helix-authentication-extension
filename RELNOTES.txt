@@ -1,6 +1,6 @@
                             Release Notes for
                         P4 Authentication Extension
-                            Version 2025.2
+                            Version 2026.1
 
 
 Introduction
