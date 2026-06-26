@@ -95,6 +95,19 @@ Known Limitations
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
+Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-664 (Change #2967419)
+        Report missing identifier configuration instead of failing the login.
+
+----------------------------------------------------------------------
+Other changes in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+
+    HAS-662 (Change #2967402)
+        Exclude any user whose AuthMethod is not 'perforce' or 'perforce+...'
+        from web-based SSO, rather than only excluding LDAP users.
+
+----------------------------------------------------------------------
 New functionality in 2025.2 (2025.2/2867560) (2025/12/10)
 
     HAS-549 (Change #2842192)
