@@ -806,3 +806,31 @@ Command invoke: OK
 ### Login attempts go to example.com
 
 If the URL returned from `p4 login` is pointing to `example.com`, then the extension is unable to reach the authentication service. Check the `Service-URL` and ensure that address is reachable from the P4 Server system. When the service is not reachable, the extension will use the `Service-Down-URL` value instead, which defaults to `example.com`. This is the only way to surface problems to the user when there is trouble on the backend.
+
+### Extension configuration is indented with spaces instead of tabs
+
+The lines below `ExtConfig:` in the extension spec must be indented with tab characters: one tab for a setting name (which ends in a colon) and two tabs for its value. Some editors or copy/paste steps silently replace those tabs with spaces. When that happens, p4d ignores the affected settings and the extension behaves as if they were never configured, without reporting an error.
+
+To confirm, dump the configuration and look for spaces where tabs are expected (`cat -A` shows tabs as `^I`):
+
+```shell
+p4 extension --configure Auth::loginhook -o | cat -A
+```
+
+The `bin/fix-exttabs.py` script restores the tabs. It reads the spec on standard input and writes the corrected spec to standard output, so it drops directly into the configuration pipeline:
+
+```shell
+p4 extension --configure Auth::loginhook -o \
+  | python3 bin/fix-exttabs.py \
+  | p4 extension --configure Auth::loginhook -i
+```
+
+The same problem can affect the instance configuration (the user-routing lists), which is edited with the `--name` option. Run the script against whichever scope is affected:
+
+```shell
+p4 extension --configure Auth::loginhook --name loginhook-a1 -o \
+  | python3 bin/fix-exttabs.py \
+  | p4 extension --configure Auth::loginhook --name loginhook-a1 -i
+```
+
+The script classifies each line by its relative indentation rather than an exact number of spaces, so it works even when the indentation is inconsistent. It only touches lines within the `ExtConfig:` block and is a no-op on a spec that is already correctly indented, so it is safe to run against any configuration. Use `p4 extension --list --type configs` to see the configured instance names.

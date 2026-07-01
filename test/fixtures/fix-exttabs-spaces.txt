@@ -1,0 +1,70 @@
+# A Perforce Extension Specification.
+#
+#  ExtName:          The name of the Extension being configured.
+#  ExtDescription:   The description of the Extension being configured.
+#  ExtVersion:       The version of the Extension being configured.
+#  ExtUUID:          The UUID/key of the Extension being configured.
+#  ExtRev:           The revision of the Extension being configured.
+#  ExtMaxScriptTime: Maximum seconds the Extension may be run.
+#  ExtMaxScriptMem:  Maximum megabytes the Extension may use.
+#  ExtEnabled:       Enable/Disable this Extension.
+#  ExtDebug:         Enable Extension diagnostics.
+#  Name:             The name of this Extension config.
+#  Owner:            The user who created this Extension config.
+#  Update:           Update time for the Extension config spec.
+#  Description:      The description of this Extension config.
+#  ExtConfig:        Extension-supplied configuration fields.
+#
+# See 'p4 help extension' for detailed information.
+
+ExtName:	loginhook
+
+ExtDescription:
+	SSO auth integration
+
+ExtVersion:	2026.1
+
+ExtUUID:	117E9283-732B-45A6-9993-AE64C354F1C5
+
+ExtRev:	1
+
+ExtMaxScriptTime:	unset
+
+ExtMaxScriptMem:	unset
+
+ExtEnabled:	true
+
+ExtDebug:	none
+
+Name:	loginhook-all
+
+Owner:	super
+
+Update:	2026/07/01 17:29:11
+
+Description:
+	The description of your config.
+
+ExtConfig:
+         client-name-identifier:
+                 oid
+         client-sso-groups:
+                 ... Those groups whose members must authenticate using P4LOGINSSO.
+         client-sso-users:
+                 fa2067ca-9797-4c3a-95b8-c6c2e87f615a
+         client-user-identifier:
+                 user
+         enable-logging:
+                 true
+         name-identifier:
+                 nameID
+         non-sso-groups:
+                 no_timeout
+         non-sso-users:
+                 ... Those users who will not be using SSO.
+         sso-groups:
+                 ... Those groups whose members must authenticate using SSO.
+         sso-users:
+                 ... Those users who must authenticate using SSO.
+         user-identifier:
+                 email
