@@ -807,6 +807,16 @@ Command invoke: OK
 
 If the URL returned from `p4 login` is pointing to `example.com`, then the extension is unable to reach the authentication service. Check the `Service-URL` and ensure that address is reachable from the P4 Server system. When the service is not reachable, the extension will use the `Service-Down-URL` value instead, which defaults to `example.com`. This is the only way to surface problems to the user when there is trouble on the backend.
 
+### Cannot find the log.json file
+
+If the extension is installed and configured but the `log.json` file is seemingly missing, then try these steps.
+
+1. Ensure `enable-logging` is set to exactly the string `true` and nothing else -- not `True` or `TRUE` or `yes` -- only `true` will work.
+1. Confirm that the `server.extensions.dir/117E9283-732B-45A6-9993-AE64C354F1C5/1-data` directory exists and is writable by the p4d user.
+1. Check the p4d log for any signs of trouble with the extension.
+1. Verify that the extension configuration is using **tabs** and not **spaces** after the `ExtConfig:` line. Using `cat -A` can help shine a light on this subtle mistake. See the troubleshooting item concerning the `fix-exttabs.py` script for additional help.
+1. If all else fails, scan the entire file system: `find / -name log.json -print`
+
 ### Extension configuration is indented with spaces instead of tabs
 
 The lines below `ExtConfig:` in the extension spec must be indented with tab characters: one tab for a setting name (which ends in a colon) and two tabs for its value. Some editors or copy/paste steps silently replace those tabs with spaces. When that happens, p4d ignores the affected settings and the extension behaves as if they were never configured, without reporting an error.
