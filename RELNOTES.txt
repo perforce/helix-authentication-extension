@@ -95,13 +95,13 @@ Known Limitations
 Changes in every release: Bugs Fixed, New Functionality
 
 ----------------------------------------------------------------------
-Bugs fixed in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Bugs fixed in 2026.1 (2026.1/3003337) (2026/07/08)
 
     HAS-664 (Change #2967419)
         Report missing identifier configuration instead of failing the login.
 
 ----------------------------------------------------------------------
-Other changes in ${ID_REL_BASE} (${ID_REL_BASE}/${ID_PATCH}) (${DATE})
+Other changes in 2026.1 (2026.1/3003337) (2026/07/08)
 
     HAS-662 (Change #2967402)
         Exclude any user whose AuthMethod is not 'perforce' or 'perforce+...'
