@@ -186,6 +186,20 @@ function ExtUtils.authorityCertificate()
   return Helix.Core.Server.GetArchDirFileName( "ca.crt" )
 end
 
+-- Maximum number of seconds to wait for a response from the auth service on
+-- any single HTTP request, guarding against requests that never complete
+-- (e.g. when the service's own timeout response is never received).
+function ExtUtils.requestTimeout()
+  local timeout = ExtUtils.gCfgData[ "Request-Timeout" ]
+  if timeout ~= nil and string.match( timeout, "^%.%.%." ) == nil then
+    local seconds = tonumber( timeout )
+    if seconds ~= nil and seconds > 0 then
+      return seconds
+    end
+  end
+  return 300
+end
+
 function ExtUtils.verifyPeer()
   local verify_peer = ExtUtils.gCfgData[ "Verify-Peer" ]
   return verify_peer == "true"

@@ -51,6 +51,10 @@ router.get('/fail/404/requests/status/:requestId', fail404)
 router.get('/fail/408/requests/new/:userId', newRequest)
 router.get('/fail/408/requests/status/:requestId', fail408)
 
+// request status never responds, exercising the client-side request timeout
+router.get('/fail/hang/requests/new/:userId', newRequest)
+router.get('/fail/hang/requests/status/:requestId', hangRequest)
+
 // server error starting a new login request
 router.get('/fail/start/requests/new/:userId', serverError)
 router.get('/fail/start/requests/status/:requestId', serverError)
@@ -173,6 +177,11 @@ function fail403 (req, res, next) {
 
 function fail408 (req, res, next) {
   res.status(408).send('Request Timeout')
+}
+
+// deliberately never respond, simulating a service whose own timeout
+// response is lost in transit
+function hangRequest (req, res, next) {
 }
 
 function serverError (req, res, next) {

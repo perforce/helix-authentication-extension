@@ -375,6 +375,35 @@ describe('Non-SSL', function () {
       })
     })
 
+    describe('extension times out waiting for a hung service', function () {
+      before(async function () {
+        helpers.installExtension(p4config)
+        helpers.configureRequestTimeout(p4config, 'oidc', `http://localhost:${port}/fail/hang`, 2)
+        await helpers.restartServer(p4config)
+      })
+
+      it('should abort the request instead of hanging', function () {
+        this.timeout(20000)
+        const config = {
+          P4USER: 'repoman',
+          P4PORT: p4config.port,
+          P4USEBROWSER: false
+        }
+        const p4 = new P4(config)
+        const start = Date.now()
+        const loginCmd = p4.cmdSync('login')
+        const elapsed = Date.now() - start
+        // should prompt the user to open a URL
+        assert.isTrue(helpers.findData(loginCmd, 'Navigate to URL'))
+        // and it has already failed validation because the request timed out
+        assert.isTrue(helpers.findData(loginCmd, 'validation failed'))
+        // should abort well before the mocha test timeout, not hang indefinitely
+        assert.isBelow(elapsed, 15000)
+        const log = helpers.readExtensionLog(p4config)
+        assert.include(log, 'error: auth validation failed')
+      })
+    })
+
     describe('extension receives error in pre-sso', function () {
       before(async function () {
         helpers.installExtension(p4config)

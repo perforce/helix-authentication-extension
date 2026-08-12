@@ -1,7 +1,7 @@
 --[[
   Authentication extensions for OpenID Connect and SAML 2.0
 
-  Copyright 2024 Perforce Software
+  Copyright 2019 Perforce Software
 ]]--
 local cjson = require "cjson"
 local curl = require "cURL.safe"
@@ -15,6 +15,7 @@ function GlobalConfigFields()
     -- in Perforce and cannot be used for anything else.
     [ "Service-URL" ] = "... The authentication service base URL.",
     [ "Service-Down-URL" ] = "... URL to open when Service-URL fails, defaults to example.com",
+    [ "Request-Timeout" ] = "... Maximum seconds to wait for a request to the service, defaults to 300",
     [ "Resolve-Host" ] = "... host:port:ip mapping used to override DNS, if necessary.",
     [ "Auth-Protocol" ] = "... Authentication protocol, such as 'saml' or 'oidc'.",
     [ "Client-Cert" ] = "... Path to client public key, defaults to ./client.crt",
@@ -63,6 +64,13 @@ local instanceId = nil
 local usingClient = false
 local errorMessage = nil
 
+-- Bound how long a single request to the auth service may take, so that a
+-- connection that never completes (e.g. the service's own timeout response
+-- is lost in transit) does not leave the p4d command hanging indefinitely.
+local function curlTimeoutOption( c )
+  c:setopt( curl.OPT_TIMEOUT, utils.requestTimeout() )
+end
+
 -- Set the SSL related options on the curl instance.
 local function curlSecureOptions( c )
   c:setopt_useragent( utils.getID() )
@@ -102,6 +110,7 @@ local function getData( url )
   local c = curl.easy()
   local rsp = ""
   c:setopt( curl.OPT_URL, url )
+  curlTimeoutOption( c )
   -- Store all the data in memory in the 'rsp' variable.
   c:setopt_writefunction( function( chunk ) rsp = rsp .. chunk end )
   if utils.shouldUseSsl( url ) then
@@ -144,6 +153,7 @@ local function validateSamlResponse( response )
     postfields = "SAMLResponse=" .. encoded_response,
   }
   c:setopt_useragent( utils.getID() )
+  curlTimeoutOption( c )
   local rsp = ""
   c:setopt_writefunction( function( chunk ) rsp = rsp .. chunk end )
   if utils.shouldUseSsl( url ) then
@@ -160,7 +170,6 @@ end
 
 local function validateOAuthResponse( token )
   local url = utils.oauthValidateUrl()
-  local easy = curl.easy()
   local c = curl.easy{
     url        = url,
     httpheader = {
@@ -168,6 +177,7 @@ local function validateOAuthResponse( token )
     },
   }
   c:setopt_useragent( utils.getID() )
+  curlTimeoutOption( c )
   local rsp = ""
   c:setopt_writefunction( function( chunk ) rsp = rsp .. chunk end )
   if utils.shouldUseSsl( url ) then
