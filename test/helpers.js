@@ -54,6 +54,15 @@ export function establishTrust(config) {
 
 export function establishSuper(config) {
   const p4 = makeP4(config)
+  // Some p4d releases (e.g. 2025.2) require the user record to exist before
+  // 'passwd' will work, so create a bare one first; the protections table is
+  // still empty at this point, so anyone can do this. Other releases (e.g.
+  // 2026.1) reject 'user -o' without a password but let 'passwd' create the
+  // user, in which case skip this step.
+  const bareOut = p4.cmdSync('user -o')
+  if (bareOut.stat) {
+    p4.cmdSync('user -i', bareOut.stat[0])
+  }
   // On a secure-by-default server the database starts empty, so the first user
   // to run 'passwd' is automatically added to the protections table with
   // 'super' access. Set the password, then log in to get a valid ticket before

@@ -308,9 +308,15 @@ function runP4command( arg ) -- would use ... but it fails
     for idx, err in pairs( p4.warnings ) do
       ExtUtils.debug( { [ "warning" .. idx ] = tostring( err ) } )
     end
+  end
+  -- Without this, the connection stays open (idle) for as long as the client
+  -- connection that triggered the login, which for persistent clients such as
+  -- build systems means idle p4d processes accumulate over time.
+  p4:disconnect()
+
+  if not ok then
     return false, nil
   end
-
   return true, result
 end
 
