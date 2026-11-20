@@ -84,6 +84,11 @@ export function establishSuper(config) {
   assert.equal(allowpasswdCmd.stat[0].Action, 'set')
   const nonldapCmd = p4.cmdSync('configure set auth.sso.nonldap=1')
   assert.equal(nonldapCmd.stat[0].Action, 'set')
+  // Newer p4d releases (e.g. 2026.1) default dm.user.resetpassword to 1, which
+  // marks passwords set by a super user as expired, so test users would be
+  // told to change their password instead of logging in.
+  const resetpasswdCmd = p4.cmdSync('configure set dm.user.resetpassword=0')
+  assert.equal(resetpasswdCmd.stat[0].Action, 'set')
 }
 
 export function createUser(user, password, config) {
